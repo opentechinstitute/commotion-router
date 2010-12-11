@@ -1,0 +1,73 @@
+#!/bin/sh /etc/rc.common
+#DEBUG="echo"
+START=11
+EXTRA_COMMANDS="set_network"
+EXTRA_HELP="        set_network  Sets which set of network defaults to utilize."
+
+set_network() {
+  local network="$1"
+  local role="${2:-default}"
+  
+  
+  echo "Setting network and node defaults in /etc/config/mesh." 
+  config_load mesh
+  config_cb() {
+    local type="$1"  
+    local name="$2"
+    local defname=
+    local netname=
+    
+    case "$type" in
+      "defaults")   
+        defname=$(uci_get mesh "$name" name)
+        case "$defname" in
+          "$network")
+            option_cb() {
+              local name="$1"
+              local value="$2"
+
+              $DEBUG uci_set mesh "network" "$name" "$value" 
+            }
+          ;;
+          "$role")
+            netname=$(uci_get mesh "$name" network)
+            case "$netname" in
+              "$network")
+                option_cb() {
+                  local name="$1"
+                  local value="$2"
+
+                  $DEBUG uci_set mesh "node" "$name" "$value" 
+                }
+              ;;
+            esac
+          ;;
+        esac
+      ;;
+    esac
+  } 
+  config_load mesh
+  uci_commit mesh
+  
+  echo "WARNING: overwriting config files with defaults, check before rebooting."
+  
+  for f in $( ls /etc/meshconfig/$network/$role ); do
+    $DEBUG cp /etc/meshconfig/$network/$role/$f /etc/config/
+  done
+  
+  return 0
+} 
+
+start () {
+  
+  [[ -e /etc/MESH_NETWORK ]] && source /etc/MESH_NETWORK
+  
+  [[ -n "$MESH_NETWORK" ]] && [[ -n "$MESH_NODE" ]] && set_network "$MESH_NETWORK" "$MESH_NODE"
+  [[ -n "$MESH_NETWORK" ]] && [[ -z "$MESH_NODE" ]] && set_network "$MESH_NETWORK"
+  
+  [[ -e /etc/MESH_NETWORK ]] && rm /etc/MESH_NETWORK
+}
+
+stop() {
+  return 0
+}

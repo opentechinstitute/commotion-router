@@ -1,0 +1,139 @@
+#!/bin/sh /etc/rc.common
+
+#DEBUG="echo"
+START=91
+EXTRA_COMMANDS="set_network"
+EXTRA_HELP="        set_network  Sets which set of network defaults to utilize."
+
+NODE=
+HOST=
+CONFIG=
+IF=
+MAC=
+
+
+hex2dec() {
+  local mac=$1
+  local i=$2
+  let x=0x$(echo $mac | cut $i)
+  echo $x
+}
+
+guess_meshif() {
+  local name="$1"
+  local proto ifname
+
+  config_get proto "$name" proto
+  case "$proto" in
+    "meshif")
+      config_get ifname "$name" ifname
+      IF="$ifname"
+      ;;
+  esac
+}  
+
+set_mac() {
+  local iface="$1"
+  
+  MAC=`ifconfig "$iface" | grep 'Link encap:'| awk '{ print $5}'`;
+}
+
+set_network() {
+  local network="$1"
+  local role="${2:-default}"
+  
+  
+  echo "Setting network and node defaults in /etc/config/mesh." 
+  config_load mesh
+  config_cb() {
+    local type="$1"  
+    local name="$2"
+    local defname=
+    local netname=
+    
+    case "$type" in
+      "defaults")   
+        defname=$(uci_get mesh "$name" name)
+        case "$defname" in
+          "$network")
+            option_cb() {
+              local name="$1"
+              local value="$2"
+
+              $DEBUG uci_set mesh "network" "$name" "$value" 
+            }
+          ;;
+          "$role")
+            netname=$(uci_get mesh "$name" network)
+            case "$netname" in
+              "$network")
+                option_cb() {
+                  local name="$1"
+                  local value="$2"
+
+                  $DEBUG uci_set mesh "node" "$name" "$value" 
+                }
+              ;;
+            esac
+          ;;
+        esac
+      ;;
+    esac
+  } 
+  config_load mesh
+  uci_commit mesh
+  
+  echo "WARNING: overwriting config files with defaults, check before rebooting."
+  
+  for f in $( ls /etc/meshconfig/$network/$role ); do
+    $DEBUG cp /etc/meshconfig/$network/$role/$f /etc/config/
+  done
+  
+  return 0
+} 
+
+read_node() {
+  local name="$1"
+
+  config_get base "$name" base
+  [[ -z "$NODE" ]] && [[ -n "$base" ]] && NODE="$base"
+
+  config_get location "$name" location
+  [[ -z "$LOCATION" ]] && [[ -n "$location" ]] && LOCATION="$location"
+}
+
+read_system() {
+  local name="$1"
+
+  config_get hostname "$name" hostname
+  [[ -z "$HOST" ]] && [[ -n "$hostname" ]] && HOST="$hostname"
+  CONFIG="$name"
+}
+
+start () {
+  local newhost=
+  config_load mesh  
+  config_foreach read_node settings
+  config_load system
+  config_foreach read_system system
+  config_load network
+  config_foreach guess_meshif interface
+  $DEBUG set_mac $IF
+  
+  case $HOST in
+    "$NODE"*|"OpenWrt"|"commotion"*|"")
+    [[ -n "$LOCATION" ]] && [[ -n "$NODE" ]] && newhost="$NODE"_"$LOCATION" && break
+    [[ -z "$LOCATION" ]] && [[ -n "$NODE" ]] && newhost="$NODE"_"$(hex2dec $MAC -c10-11)_$(hex2dec $MAC -c13-14)_$(hex2dec $MAC -c16-17)" && break
+    [[ -n "$LOCATION" ]] && [[ -z "$NODE" ]] && newhost="commotion"_"$LOCATION" && break
+    [[ -z "$LOCATION" ]] && [[ -z "$NODE" ]] && newhost="commotion"_"$(hex2dec $MAC -c10-11)_$(hex2dec $MAC -c13-14)_$(hex2dec $MAC -c16-17)" && break
+    ;;
+  esac
+  $DEBUG config_set "$CONFIG" hostname "$newhost" && uci_set system "$CONFIG" hostname "$newhost" && uci_commit system
+  echo "$newhost" > /proc/sys/kernel/hostname
+  #[[ -n "$MESH_NETWORK" ]] && [[ -n "$MESH_NODE" ]] && set_network "$MESH_NETWORK" "$MESH_NODE"
+  #[[ -n "$MESH_NETWORK" ]] && [[ -z "$MESH_NODE" ]] && set_network "$MESH_NETWORK"
+}
+
+stop() {
+  return 0
+}
