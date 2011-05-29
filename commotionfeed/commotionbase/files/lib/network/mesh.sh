@@ -14,9 +14,9 @@
 #                 OLSRd and IPv4, additional options for batman-adv and IPv6 
 #                 forthcoming.
 # 
-#        AUTHOR:  Josh King
+#       AUTHOR:  Josh King
 #       CREATED:  11/19/2010 02:44:44 PM EST
-#      REVISION:  ---
+#       REVISION:  ---
 #       LICENSE:  GPLv3
 #
 # This program is free software; you can redistribute it and/or
@@ -37,97 +37,18 @@
 #DEBUG="echo"
 
 #===============================================================================
-# UTILITY FUNCTIONS
+# DEFAULTS
 #===============================================================================
 
-#===  FUNCTION  ================================================================
-#          NAME:  _hex2dec
-#   DESCRIPTION:  A utility function for turning MAC addresses into IPv4 stanzas
-#    PARAMETERS:  2, a MAC address and an argument to the 'cut' utility
-#       RETURNS:  IPv4 triad
-#===============================================================================
-
-_hex2dec() {
-  local mac=$1
-  local i=$2
-  let x=0x$(echo $mac | cut $i)
-  echo $x
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  _iface2ipv4_meshif
-#   DESCRIPTION:  
-#    PARAMETERS:  
-#       RETURNS:  
-#===============================================================================
-
-_iface2ipv4_meshif() {
-  local iface=$1
-  ifconfig "$iface" 2>/dev/null >/dev/null && {
-    local mac=`ifconfig "$iface" | grep 'Link encap:'| awk '{ print $5}'`;
-    local prefix=$(uci_get mesh network mesh_prefix "5")
-    echo ""$prefix"."$(_hex2dec $mac -c10-11)"."$(_hex2dec $mac -c13-14)"."$(_hex2dec $mac -c16-17)""
-    return 0
-  }
-  return 1
-}
-  
-#===  FUNCTION  ================================================================
-#          NAME:  _iface2ipv4_apif
-#   DESCRIPTION:  
-#    PARAMETERS:  
-#       RETURNS:  
-#===============================================================================
-_iface2ipv4_apif() {
-  local iface=$1
-  local offset=$2
-  ifconfig "$iface" 2>/dev/null >/dev/null && {
-    local mac=`ifconfig "$iface" | grep 'Link encap:'| awk '{ print $5}'`;
-    local prefix=$(uci_get mesh network ap_prefix "101")
-    echo ""$prefix"."$(_hex2dec $mac -c13-14)"."$(_hex2dec $mac -c16-17)".$((1 + ${offset:- 0}))"
-    return 0
-  }
-  return 1
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  _iface2ipv4_plugif
-#   DESCRIPTION:  
-#    PARAMETERS:  
-#       RETURNS:  
-#===============================================================================
-_iface2ipv4_plugif() {
-  local iface=$1
-  local offset=$2
-  ifconfig "$iface" 2>/dev/null >/dev/null && {
-    local mac=`ifconfig "$iface" | grep 'Link encap:'| awk '{ print $5}'`;
-    local prefix=$(uci_get mesh network ap_prefix "102")
-    echo ""$prefix"."$(_hex2dec $mac -c13-14)"."$(_hex2dec $mac -c16-17)".$((1 + ${offset:- 0}))"
-    return 0
-  }
-  return 1
-}
-
-
-#===  FUNCTION  ================================================================
-#          NAME:  _dhcp_calc
-#   DESCRIPTION:  Calculates IPv4 range values suitable for dnsmasq config.
-#    PARAMETERS:  DHCP server IPv4 address
-#       RETURNS:  Suitable 'limit' value for dnsmasq config
-#===============================================================================
-
-_dhcp_calc() {
-  local ip="$1"
-  local res=0
-
-  while [ -n "$ip" ]; do
-    part="${ip%%.*}"
-    res="$(($res * 256))"
-    res="$(($res + $part))"
-    [ "${ip%.*}" != "$ip" ] && ip="${ip#*.}" || ip=
-  done
-  echo "$res"
-} 
+DEFAULT_MESH_SSID="commotion-mesh"
+DEFAULT_MESH_BSSID="02:CA:FF:EE:BA:BE"
+DEFAULT_MESH_CHANNEL="5"
+DEFAULT_MESH_BASENAME="commotion"
+DEFAULT_MESH_PREFIX="5"
+DEFAULT_MESH_FWZONE="mesh"
+DEFAULT_AP_PREFIX="101"
+DEFAULT_AP_FWZONE="ap"
+DEFAULT_LAN_PREFIX="102"
 
 #===============================================================================
 # SETTING FUNCTIONS
@@ -142,8 +63,9 @@ _dhcp_calc() {
 
 set_meshif_wireless() {
   local config="$1"
-  local ssid=$(uci_get mesh network ssid "commotion-mesh") 
-  local channel=$(uci_get mesh network channel "5") 
+  local ssid=$(uci_get mesh network ssid "$DEFAULT_MESH_SSID") 
+  local ssid=$(uci_get mesh network bssid "$DEFAULT_MESH_BSSID") 
+  local channel=$(uci_get mesh network channel "$DEFAULT_MESH_CHANNEL") 
   local net dev
 
   config_cb() {
@@ -165,7 +87,9 @@ set_meshif_wireless() {
   }
   config_load wireless
 
-  [[ -n "$net" ]] && [[ -n "$dev" ]] && uci_set wireless "$net" ssid "$ssid" && uci_set wireless "$dev" channel "$channel" && uci_commit wireless && return 0
+  [[ -n "$net" ]] && [[ -n "$dev" ]] && \
+  uci_set wireless "$net" ssid "$ssid" && uci_set wireless "$dev" channel "$channel" && uci_commit wireless && return 0
+
   logger -t set_apif_wireless "Error! Wireless configuration for "$config" may not exist." && return 1
 }
 
@@ -180,7 +104,7 @@ set_apif_wireless() {
   local iface="$1"
   local config="$2"
   local wiconfig=
-  local base=$(uci_get mesh network base "commotion")
+  local basename=$(uci_get mesh network basename "$DEFAULT_MESH_BASENAME")
   local location=$(uci_get mesh node location)
   ifconfig "$iface" 2>/dev/null >/dev/null && {
     local mac=`ifconfig "$iface" | grep 'Link encap:'| awk '{ print $5}'`;
@@ -201,20 +125,25 @@ set_apif_wireless() {
     esac
   }
   config_load wireless
-  [[ -n "$wiconfig" ]] && [[ -n "$location" ]] && uci_set wireless "$wiconfig" ssid "$base"-ap_"$location" && uci_commit wireless && return 0
-  [[ -n "$wiconfig" ]] && [[ -z "$location" ]] && uci_set wireless "$wiconfig" ssid "$base"-ap_"$(_hex2dec $mac -c10-11)"_"$(_hex2dec $mac -c13-14)"_"$(_hex2dec $mac -c16-17)" && uci_commit wireless && return 0
+  [[ -n "$wiconfig" ]] && [[ -n "$location" ]] && 
+  uci_set wireless "$wiconfig" ssid "$basename"-ap_"$location" && uci_commit wireless && return 0
+
+  [[ -n "$wiconfig" ]] && [[ -z "$location" ]] && \
+  uci_set wireless "$wiconfig" ssid "$basename"-ap_$( cat /sys/class/net/$iface/address | \
+   awk -F ':' '{ printf("%d_%d_%d","0x"$4,"0x"$5,"0x"$6) }' ) && uci_commit wireless && return 0
+
   logger -t set_apif_wireless "Error! Wireless configuration for "$config" may not exist." && return 1
 }
 
 
 #===  FUNCTION  ================================================================
-#          NAME:  unset_meshif_fwzone
-#   DESCRIPTION:  Removes an interface from the mesh firewall zone.
+#          NAME:  unset_fwzone
+#   DESCRIPTION:  Removes an interface from the firewall zone.
 #    PARAMETERS:  1; config name of network
 #       RETURNS:  0 on success
 #===============================================================================
 
-unset_meshif_fwzone() {
+unset_fwzone() {
   local config="$1"
   
   config_load firewall
@@ -239,15 +168,15 @@ unset_meshif_fwzone() {
 }
   
 #===  FUNCTION  ================================================================
-#          NAME:  set_meshif_fwzone
+#          NAME:  set_fwzone
 #   DESCRIPTION:  Adds an interface to the mesh firewall zone.
-#    PARAMETERS:  1; config name of network
+#    PARAMETERS:  2; config name of network and firewall zone to set it to.
 #       RETURNS:  0 on success
 #===============================================================================
 
-set_meshif_fwzone() {
+set_fwzone() {
   local config="$1"
-  local zone=$(uci_get mesh network mesh_zone "mesh")
+  local zone="$2"
 
   reset_cb 
   config_load firewall
@@ -276,224 +205,12 @@ set_meshif_fwzone() {
 
   uci_commit firewall && return 0
 }
-
-#===  FUNCTION  ================================================================
-#          NAME:  unset_apif_fwzone
-#   DESCRIPTION:  Removes an interface from the ap firewall zone.
-#    PARAMETERS:  1; config name of network
-#       RETURNS:  0 on success
-#===============================================================================
-
-unset_apif_fwzone() {
-  local config="$1"
- 
-  config_load firewall
-  config_cb() {
-    local type="$1"
-    local name="$2"
-    local fwname=
-    case $type in
-      zone)
-        local oldnetworks=
-        config_get oldnetworks "$name" network  
-        local newnetworks=
-        for net in $(sort_list "$oldnetworks" "$config"); do
-          list_remove newnetworks "$net"
-        done
-        uci_set firewall "$name" network "$newnetworks"
-        ;;
-    esac
-  }
-  config_load firewall
-
-  uci_commit firewall && return 0
-}
-  
-#===  FUNCTION  ================================================================
-#          NAME:  set_apif_fwzone
-#   DESCRIPTION:  Adds an interface to the ap firewall zone.
-#    PARAMETERS:  1; config name of network
-#       RETURNS:  0 on success
-#===============================================================================
-
-set_apif_fwzone() {
-  local config="$1"
-  local zone=$(uci_get mesh network ap_zone "ap")
-
-  reset_cb 
-  config_load firewall
-  config_cb() {
-    local type="$1"
-    local name="$2"
-    local fwname=
-    case $type in
-      zone)
-        local fwname=$(uci_get firewall "$name" name)
-        case "$fwname" in
-          "$zone")
-            local oldnetworks=
-            config_get oldnetworks "$name" network  
-            local newnetworks=
-            for net in $(sort_list "$oldnetworks" "$config"); do
-              append newnetworks "$net"
-            done
-            uci_set firewall "$name" network "$newnetworks"
-            ;;
-        esac
-        ;;
-    esac
-  }
-  config_load firewall
-
-  uci_commit firewall && return 0
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  unset_plugif_fwzone
-#   DESCRIPTION:  Removes an interface from the plug firewall zone.
-#    PARAMETERS:  1; config name of network
-#       RETURNS:  0 on success
-#===============================================================================
-
-unset_plugif_fwzone() {
-  local config="$1"
-
-  config_load firewall
-  config_cb() {
-    local type="$1"
-    local name="$2"
-    local fwname=
-    case $type in
-      zone)
-        local oldnetworks=
-        config_get oldnetworks "$name" network  
-        local newnetworks=
-        for net in $(sort_list "$oldnetworks" "$config"); do
-          list_remove newnetworks "$net"
-        done
-        uci_set firewall "$name" network "$newnetworks"
-        ;;
-    esac
-  }
-  config_load firewall
-
-  uci_commit firewall && return 0
-}
-  
-#===  FUNCTION  ================================================================
-#          NAME:  set_plugif_fwzone_lan
-#   DESCRIPTION:  Adds a pluggable interface to the lan firewall zone.
-#    PARAMETERS:  1; config name of network
-#       RETURNS:  0 on success
-#===============================================================================
-
-set_plugif_fwzone_lan() {
-  local config="$1"
-  local zone="lan"
-  local zone=$(uci_get mesh network lan_zone "lan")
-
-  reset_cb 
-  config_load firewall
-  config_cb() {
-    local type="$1"
-    local name="$2"
-    local fwname=
-    case $type in
-      zone)
-        local fwname=$(uci_get firewall "$name" name)
-        case "$fwname" in
-          "$zone")
-            local oldnetworks=
-            config_get oldnetworks "$name" network  
-            local newnetworks=
-            for net in $(sort_list "$oldnetworks" "$config"); do
-              append newnetworks "$net"
-            done
-            uci_set firewall "$name" network "$newnetworks"
-            ;;
-        esac
-        ;;
-    esac
-  }
-  config_load firewall
-
-  uci_commit firewall && return 0
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  set_plugif_fwzone_wan
-#   DESCRIPTION:  Adds a pluggable interface to the wan firewall zone.
-#    PARAMETERS:  1; config name of network
-#       RETURNS:  0 on success
-#===============================================================================
-
-set_plugif_fwzone_wan() {
-  local config="$1"
-  local zone=$(uci_get mesh network wan_zone "wan")
-
-  reset_cb 
-  config_load firewall
-  config_cb() {
-    local type="$1"
-    local name="$2"
-    local fwname=
-    case $type in
-      zone)
-        local fwname=$(uci_get firewall "$name" name)
-        case "$fwname" in
-          "$zone")
-            local oldnetworks=
-            config_get oldnetworks "$name" network  
-            local newnetworks=
-            for net in $(sort_list "$oldnetworks" "$config"); do
-              append newnetworks "$net"
-            done
-            uci_set firewall "$name" network "$newnetworks"
-            ;;
-        esac
-        ;;
-    esac
-  }
-  config_load firewall
-
-  uci_commit firewall && return 0
-}
-#===  FUNCTION  ================================================================
-#          NAME:  set_olsrd_if
-#   DESCRIPTION:  Sets the interface stanza for the olsrd config
-#    PARAMETERS:  
-#       RETURNS:  
-#===============================================================================
-
-set_olsrd_if() {
-  local config="$1"
-  config_cb() {
-    local type="$1"
-    local name="$2"
-
-    case $type in
-      Interface)
-        local oldifaces=
-        config_get oldifaces "$name" interface  
-        local newifaces=
-        for dev in $(sort_list "$oldifaces" "$config"); do
-          append newifaces "$dev"
-        done
-        uci_set olsrd "$name" interface "$newifaces"
-        ;;
-    esac
-  }
-  config_load olsrd
-
-  uci_commit olsrd
-}
-
 
 #===  FUNCTION  ================================================================
 #          NAME:  unset_olsrd_if
 #   DESCRIPTION:  Unsets the interface stanza for the olsrd config
 #    PARAMETERS:  config name of the interface to remove
-#       RETURNS:  
+#       RETURNS:  0 on success
 #===============================================================================
 
 unset_olsrd_if() {
@@ -523,8 +240,8 @@ unset_olsrd_if() {
 #===  FUNCTION  ================================================================
 #          NAME:  set_olsrd_if
 #   DESCRIPTION:  Sets the interface stanza for the olsrd config
-#    PARAMETERS:  
-#       RETURNS:  
+#    PARAMETERS:  config name of the interface to add
+#       RETURNS:  0 on success
 #===============================================================================
 
 set_olsrd_if() {
@@ -546,7 +263,71 @@ set_olsrd_if() {
   }
   config_load olsrd
 
-  uci_commit olsrd
+  uci_commit olsrd && return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  unset_olsrd_p2pif
+#   DESCRIPTION:  Unsets the p2p plugin stanza for the olsrd config
+#    PARAMETERS:  config name of the interface to remove
+#       RETURNS:  0 on success
+#===============================================================================
+
+unset_olsrd_p2pif() {
+  local iface="$1"
+  
+  config_load olsrd
+  config_cb() {
+    local type="$1"
+    local name="$2"
+    local library=
+
+    case $type in
+      LoadPlugin)
+        config_get NonOlsrIf "$name" NonOlsrIf  
+        case $NonOlsrIf in
+          "$iface")
+            uci_remove olsrd "$name" NonOlsrIf
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load olsrd
+
+  uci_commit olsrd && return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_olsrd_p2pif
+#   DESCRIPTION:  Sets the interface stanza for the olsrd config
+#    PARAMETERS:  
+#       RETURNS:  
+#===============================================================================
+
+set_olsrd_p2pif() {
+  local iface="$1"
+  
+  config_load olsrd
+  config_cb() {
+    local type="$1"
+    local name="$2"
+    local library=
+
+    case $type in
+      LoadPlugin)
+        config_get library "$name" library  
+        case $library in
+          "olsrd_p2pd.so.0.1.0")
+            uci_set olsrd "$name" NonOlsrIf "$iface"
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load olsrd
+
+  uci_commit olsrd && return 0
 }
 
 #===  FUNCTION  ================================================================
@@ -674,16 +455,21 @@ set_dnsmasq_if() {
 setup_interface_meshif() {
   local iface="$1"
   local config="$2"
+
+  env -i ACTION="preup" INTERFACE="$config" DEVICE="$iface" PROTO=meshif /sbin/hotplug-call "services" &
   
   local ipaddr netmask reset
   config_get_bool reset "$config" reset 1
   case "$reset" in
     1)
-      local ipv4=$(_iface2ipv4_meshif "$iface")    
+      local prefix=$(uci_get mesh network mesh_prefix "$DEFAULT_MESH_PREFIX")
       $DEBUG set_olsrd_if "$config"
+      $DEBUG unset_dnsmasq_if "$config"
+      $DEBUG /etc/init.d/dnsmasq restart
       $DEBUG set_meshif_wireless "$config"
-      $DEBUG set_meshif_fwzone "$config"
-      $DEBUG uci_set network "$config" ipaddr "$ipv4"
+      $DEBUG set_fwzone "$config" $(uci_get mesh network mesh_zone "$DEFAULT_MESH_FWZONE")
+      $DEBUG uci_set network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
+      awk -F ':' '{ printf("$prefix.%d.%d.%d","0x"$4,"0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" netmask "255.0.0.0"
       $DEBUG uci_set network "$config" broadcast "255.255.255.255"
       $DEBUG uci_set network "$config" reset 0
@@ -705,6 +491,16 @@ setup_interface_meshif() {
   env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=meshif /sbin/hotplug-call "iface" &
 }
 
+coldplug_interface_meshif() {
+  local config="$1"
+  local reset=0
+
+  [ -z $(config_get_bool reset "$config" 1) ] && return 0
+  $DEBUG set_meshif_wireless "$config"
+  $DEBUG config_get iface "$config" iface
+  $DEBUG setup_interface_meshif "$iface" "$config"
+}
+
 #===  FUNCTION  ================================================================
 #          NAME:  setup_interface_apif
 #   DESCRIPTION:  The function called by OpenWRT for proto 'apif' interfaces.
@@ -716,19 +512,21 @@ setup_interface_apif() {
   local iface="$1"
   local config="$2"
   
+  env -i ACTION="preup" INTERFACE="$config" DEVICE="$iface" PROTO=apif /sbin/hotplug-call "services" &
+
   local ipaddr netmask reset
   config_get_bool reset "$config" reset 1
   case "$reset" in
     1)
-      local ipv4=$(_iface2ipv4_apif "$iface")    
-      $DEBUG unset_olsrd_hna4 "$config"
-      $DEBUG set_olsrd_hna4 "$(_iface2ipv4_apif "$iface" -1)" "255.255.255.0" "$config"
+      local prefix=$(uci_get mesh network ap_prefix "$DEFAULT_AP_PREFIX")
       $DEBUG set_apif_wireless "$iface" "$config"
-      $DEBUG set_dnsmasq_if "$config"
       $DEBUG set_apif_fwzone "$config"
-      $DEBUG uci_set network "$config" ipaddr "$ipv4"
+      $DEBUG set_fwzone "$config" $(uci_get mesh network ap_zone "$DEFAULT_AP_FWZONE")
+      $DEBUG uci_set network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
+      awk -F ':' '{ printf("$prefix.%d.%d.1","0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" netmask "255.255.255.0"
-      $DEBUG uci_set network "$config" broadcast "$(_iface2ipv4_apif "$iface" 254)"
+      $DEBUG uci_set network "$config" broadcast $( cat /sys/class/net/$iface/address | \
+      awk -F ':' '{ printf("$prefix.%d.%d.255","0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" reset 0
       uci_commit network
       scan_interfaces
@@ -748,6 +546,15 @@ setup_interface_apif() {
   env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=apif /sbin/hotplug-call "iface" &
 }
 
+coldplug_interface_apif() {
+  local config="$1"
+  local reset=0
+
+  [ -z $(config_get_bool reset "$config" 1) ] && return 0
+  $DEBUG set_apif_wireless "$config"
+  $DEBUG config_get iface "$config" iface
+  $DEBUG setup_interface_apif "$iface" "$config"
+}
 
 #===  FUNCTION  ================================================================
 #          NAME:  setup_interface_plugif
@@ -759,20 +566,48 @@ setup_interface_apif() {
 setup_interface_plugif() {
   local iface="$1"
   local config="$2"
+      
+  env -i ACTION="preup" INTERFACE="$config" DEVICE="$iface" PROTO=plugif /sbin/hotplug-call "services" &
 
   # kill running udhcpc instance                                                                            
   local pidfile="/var/run/dhcp-${iface}.pid"                                                                
+  [ -e "$pidfile" ] && \
   $DEBUG service_kill udhcpc "$pidfile"                                                                            
 
-  $DEBUG unset_dnsmasq_if "$config"
-  $DEBUG /etc/init.d/dnsmasq restart
-  
-  udhcpc -i eth1 -n -q -R
+  #Attempt to acquire address.
+  local ipaddr netmask hostname proto1 clientid vendorid broadcast                                          
+  config_get ipaddr "$config" ipaddr                                                                        
+  config_get netmask "$config" netmask                            
+  config_get hostname "$config" hostname                          
+  config_get proto1 "$config" proto                               
+  config_get clientid "$config" clientid                          
+  config_get vendorid "$config" vendorid                          
+  config_get_bool broadcast "$config" broadcast 0                 
+                                                                     
+  [ -z "$ipaddr" ] || $DEBUG ifconfig "$iface" "$ipaddr" ${netmask:+netmask "$netmask"}
+  set_plugif_fwzone_wan "$config"
+  $DEBUG set_fwzone "$config" $(uci_get mesh network wan_zone "wan")
+                                                                                                
+  # don't stay running in background.
+  local dhcpopts="-n -q"                                                         
+  [ "$broadcast" = 1 ] && broadcast="-O broadcast" || broadcast=                                          
+                                                                                                                               
+	$DEBUG eval udhcpc -i "$iface" \
+		${ipaddr:+-r $ipaddr} \
+		${hostname:+-H $hostname} \
+		${clientid:+-c $clientid} \
+		${vendorid:+-V $vendorid} \
+		-p "$pidfile" $broadcast \
+		${dhcpopts:- -O rootpath -R &}
+
   case "$?" in
     1)
-      $DEBUG uci_set_state network "$config" ipaddr "$(_iface2ipv4_plugif "$iface")"
+      local prefix=$(uci_get mesh network lan_prefix "$DEFAULT_LAN_PREFIX")
+      $DEBUG uci_set_state network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
+      awk -F ':' '{ printf("$prefix.%d.%d.1","0x"$5,"0x"$6) }' )
       $DEBUG uci_set_state network "$config" netmask "255.255.255.0"
-      $DEBUG uci_set_state network "$config" broadcast "$(_iface2ipv4_plugif "$iface" 254)"
+      $DEBUG uci_set_state network "$config" broadcast $( cat /sys/class/net/$iface/address | \
+      awk -F ':' '{ printf("$prefix.%d.%d.255","0x"$5,"0x"$6) }' )
       local ipaddr="$(uci_get_state network "$config" ipaddr)"
       local netmask="$(uci_get_state network "$config" netmask)"
       local broadcast="$(uci_get_state network "$config" broadcast)"
@@ -780,42 +615,10 @@ setup_interface_plugif() {
       [ -z "$ipaddr" ] || ifconfig "$iface" inet "$ipaddr" netmask "$netmask" broadcast "${broadcast:-+}"
       [ -z "$dns" ] || add_dns "$config" $dns
       
-      $DEBUG set_plugif_fwzone_lan "$config"
-      $DEBUG unset_olsrd_hna4 "$config"
-      $DEBUG set_olsrd_hna4 "$(_iface2ipv4_plugif "$iface" -1)" "$netmask" "$config"
-      $DEBUG /etc/init.d/olsrd restart
-      $DEBUG set_dnsmasq_if "$config"
-      $DEBUG /etc/init.d/dnsmasq restart
-      env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=plugif /sbin/hotplug-call "iface" &
-      ;;
-    0)
-      local ipaddr netmask hostname proto1 clientid vendorid broadcast                                          
-      config_get ipaddr "$config" ipaddr                                                                        
-      config_get netmask "$config" netmask                            
-      config_get hostname "$config" hostname                          
-      config_get proto1 "$config" proto                               
-      config_get clientid "$config" clientid                          
-      config_get vendorid "$config" vendorid                          
-      config_get_bool broadcast "$config" broadcast 0                 
-                                                                     
-      [ -z "$ipaddr" ] || \                                           
-      $DEBUG ifconfig "$iface" "$ipaddr" ${netmask:+netmask "$netmask"}
-
-      set_plugif_fwzone_wan "$config"
-                                                                                                
-      # don't stay running in background if dhcp is not the main proto on the interface (e.g. when using pptp)
-      local dhcpopts="-n -q"                                                         
-      [ "$broadcast" = 1 ] && broadcast="-O broadcast" || broadcast=                                          
-                                                                                                                               
-      eval udhcpc -t 0 -i "$iface" \                                                                   
-      ${ipaddr:+-r $ipaddr} \                                                                         
-      ${hostname:+-H $hostname} \                                                                     
-      ${clientid:+-c $clientid} \                                                                     
-      ${vendorid:+-V $vendorid} \                                                                     
-      -b -p "$pidfile" $broadcast \                                                                   
-      ${dhcpopts:- -O rootpath -R &}
+      $DEBUG set_fwzone "$config" $(uci_get mesh network lan_zone "lan")
       ;;
   esac
+  env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=plugif /sbin/hotplug-call "iface" &
 }
 
 
@@ -830,17 +633,10 @@ stop_interface_plugif() {
   local config="$1"
   local ifname=
   
-  #Remove from OLSRd config.
-  config_get ifname "$config" ifname
-  $DEBUG unset_olsrd_hna4 "$(_iface2ipv4_plugif "$ifname" -1)"
-  $DEBUG /etc/init.d/olsrd restart
+  env -i ACTION="predown" INTERFACE="$config" DEVICE="$iface" PROTO=plugif /sbin/hotplug-call "services" &
 
-  #Remove from dnsmasq config.
-  $DEBUG unset_dnsmasq_if "$config"
-  $DEBUG /etc/init.d/dnsmasq restart
-  
   #Remove from firewall config.
-  $DEBUG unset_plugif_fwzone "$config"
+  $DEBUG unset_fwzone "$config"
   $DEBUG /etc/init.d/firewall restart
 
   #Reset network and udhcpc state.
