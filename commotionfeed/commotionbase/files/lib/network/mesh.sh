@@ -93,7 +93,6 @@ set_meshif_wireless() {
   logger -t set_apif_wireless "Error! Wireless configuration for "$config" may not exist." && return 1
 }
 
-
 #===  FUNCTION  ================================================================
 #          NAME:  set_apif_wireless
 #   DESCRIPTION:  Wireless settings for the AP interface based on network config
@@ -134,7 +133,6 @@ set_apif_wireless() {
 
   logger -t set_apif_wireless "Error! Wireless configuration for "$config" may not exist." && return 1
 }
-
 
 #===  FUNCTION  ================================================================
 #          NAME:  unset_fwzone
@@ -206,241 +204,6 @@ set_fwzone() {
   uci_commit firewall && return 0
 }
 
-#===  FUNCTION  ================================================================
-#          NAME:  unset_olsrd_if
-#   DESCRIPTION:  Unsets the interface stanza for the olsrd config
-#    PARAMETERS:  config name of the interface to remove
-#       RETURNS:  0 on success
-#===============================================================================
-
-unset_olsrd_if() {
-  local config="$1"
-  
-  config_load olsrd
-  config_cb() {
-    local type="$1"
-    local name="$2"
-
-    case $type in
-      Interface)
-        config_get oldifaces "$name" interface  
-        local newifaces=
-        for dev in $(sort_list "$oldifaces" "$config"); do
-          list_remove newifaces "$dev"
-        done
-        uci_set olsrd "$name" interface "$newifaces"
-        ;;
-    esac
-  }
-  config_load olsrd
-
-  uci_commit olsrd && return 0
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  set_olsrd_if
-#   DESCRIPTION:  Sets the interface stanza for the olsrd config
-#    PARAMETERS:  config name of the interface to add
-#       RETURNS:  0 on success
-#===============================================================================
-
-set_olsrd_if() {
-  local config="$1"
-  config_cb() {
-    local type="$1"
-    local name="$2"
-
-    case $type in
-      Interface)
-        config_get oldifaces "$name" interface  
-        local newifaces=
-        for dev in $(sort_list "$oldifaces" "$config"); do
-          append newifaces "$dev"
-        done
-        uci_set olsrd "$name" interface "$newifaces"
-        ;;
-    esac
-  }
-  config_load olsrd
-
-  uci_commit olsrd && return 0
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  unset_olsrd_p2pif
-#   DESCRIPTION:  Unsets the p2p plugin stanza for the olsrd config
-#    PARAMETERS:  config name of the interface to remove
-#       RETURNS:  0 on success
-#===============================================================================
-
-unset_olsrd_p2pif() {
-  local iface="$1"
-  
-  config_load olsrd
-  config_cb() {
-    local type="$1"
-    local name="$2"
-    local library=
-
-    case $type in
-      LoadPlugin)
-        config_get NonOlsrIf "$name" NonOlsrIf  
-        case $NonOlsrIf in
-          "$iface")
-            uci_remove olsrd "$name" NonOlsrIf
-            ;;
-        esac
-      ;;
-    esac
-  }
-  config_load olsrd
-
-  uci_commit olsrd && return 0
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  set_olsrd_p2pif
-#   DESCRIPTION:  Sets the interface stanza for the olsrd config
-#    PARAMETERS:  
-#       RETURNS:  
-#===============================================================================
-
-set_olsrd_p2pif() {
-  local iface="$1"
-  
-  config_load olsrd
-  config_cb() {
-    local type="$1"
-    local name="$2"
-    local library=
-
-    case $type in
-      LoadPlugin)
-        config_get library "$name" library  
-        case $library in
-          "olsrd_p2pd.so.0.1.0")
-            uci_set olsrd "$name" NonOlsrIf "$iface"
-            ;;
-        esac
-      ;;
-    esac
-  }
-  config_load olsrd
-
-  uci_commit olsrd && return 0
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  unset_olsrd_hna4
-#   DESCRIPTION:  Unset HNA4 stanza in olsrd config
-#    PARAMETERS:  1; IPv4 address of network to unset
-#       RETURNS:  0 on success, 1 on failure
-#===============================================================================
-
-unset_olsrd_hna4() {
-  local config=$1
-  
-  uci_remove olsrd "$config"
-        
-  uci_commit olsrd && return 0
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  set_olsrd_hna4
-#   DESCRIPTION:  Set HNA4 stanza in olsrd config
-#    PARAMETERS:  2; IPv4 address and netmask to set
-#       RETURNS:  0 on success, 1 on failure
-#===============================================================================
-
-set_olsrd_hna4() {
-  local ipv4addr=$1
-  local netmask=$2
-  local config=$3
-
-  #Remove duplicates  
-  #unset_olsrd_hna4 ipv4addr
-
-  uci_add olsrd Hna4 "$config" 
-  uci_set olsrd @Hna4[-1] netaddr "$ipv4addr"
-  uci_set olsrd @Hna4[-1] netmask "$netmask"
-
-  uci_commit olsrd && return 0
-} 
-
-#===  FUNCTION  ================================================================
-#          NAME:  unset_dnsmasq_if
-#   DESCRIPTION:  Unset dnsmasq DHCP settings
-#    PARAMETERS:  
-#       RETURNS:  
-#===============================================================================
-
-unset_dnsmasq_if() {
-  local config="$1"
- 
-  #For some reason requires pre-load to parse options. 
-  config_load dhcp
-  config_cb() {
-    local type="$1"
-    local name="$2"
-    local interface=
-  
-    case "$type" in
-      dhcp) 
-        config_get interface "$name" interface 
-        case "$interface" in
-          "$config")
-            uci_remove dhcp "$name"
-            ;; 
-        esac
-        ;;
-    esac
-  }
-  config_load dhcp
-  
-  uci_add dhcp dhcp 
-  uci_set dhcp @dhcp[-1] interface "$config"
-  uci_set dhcp @dhcp[-1] ignore "1"
-  uci_commit dhcp && return 0
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  set_dnsmasq_if
-#   DESCRIPTION:  Set dnsmasq DHCP settings
-#    PARAMETERS:  
-#       RETURNS:  
-#===============================================================================
-
-set_dnsmasq_if() {
-  local config="$1"
-  #local ipv4addr="$2"
-  
-  #Possible race condition causes this check to create an erroneous interface.
-  #unset_dnsmasq_if
-  
-  config_cb() {
-    local type="$1"
-    local name="$2"
-    local interface=
-  
-    case "$type" in
-      dhcp) 
-        config_get interface "$name" interface 
-        case "$interface" in
-          "$config")
-            uci_set dhcp "$name" interface "$config"
-            uci_set dhcp "$name" start "2"
-            uci_set dhcp "$name" limit "252"
-            uci_set dhcp "$name" leasetime "12h"
-            uci_set dhcp "$name" ignore "0"
-            ;; 
-        esac
-    esac
-  }
-  config_load dhcp
-      
-  uci_commit dhcp && return 0
-}
-
 #===============================================================================
 # PROTOCOL HANDLERS
 #===============================================================================
@@ -463,10 +226,6 @@ setup_interface_meshif() {
   case "$reset" in
     1)
       local prefix=$(uci_get mesh network mesh_prefix "$DEFAULT_MESH_PREFIX")
-      $DEBUG set_olsrd_if "$config"
-      $DEBUG unset_dnsmasq_if "$config"
-      $DEBUG /etc/init.d/dnsmasq restart
-      $DEBUG set_meshif_wireless "$config"
       $DEBUG set_fwzone "$config" $(uci_get mesh network mesh_zone "$DEFAULT_MESH_FWZONE")
       $DEBUG uci_set network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
       awk -F ':' '{ printf("$prefix.%d.%d.%d","0x"$4,"0x"$5,"0x"$6) }' )
@@ -488,17 +247,32 @@ setup_interface_meshif() {
   config_get type "$config" TYPE
   [ "$type" = "alias" ] && return 0
 
-  env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=meshif /sbin/hotplug-call "iface" &
+  env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=meshif RESET="$reset" /sbin/hotplug-call "iface" &
 }
 
 coldplug_interface_meshif() {
   local config="$1"
   local reset=0
 
-  [ -z $(config_get_bool reset "$config" 1) ] && return 0
+  [ $(config_get_bool reset "$config" 1) = 0 ] && return 0
   $DEBUG set_meshif_wireless "$config"
   $DEBUG config_get iface "$config" iface
   $DEBUG setup_interface_meshif "$iface" "$config"
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  stop_interface_meshif
+#   DESCRIPTION:  
+#    PARAMETERS:  
+#       RETURNS:  
+#===============================================================================
+
+stop_interface_meshif() {
+  local config="$1"
+  local ifname=
+  
+  config_get ifname "$config" ifname
+  env -i ACTION="postdown" INTERFACE="$config" DEVICE="$iface" PROTO=meshif /sbin/hotplug-call "services" &
 }
 
 #===  FUNCTION  ================================================================
@@ -519,7 +293,6 @@ setup_interface_apif() {
   case "$reset" in
     1)
       local prefix=$(uci_get mesh network ap_prefix "$DEFAULT_AP_PREFIX")
-      $DEBUG set_apif_wireless "$iface" "$config"
       $DEBUG set_apif_fwzone "$config"
       $DEBUG set_fwzone "$config" $(uci_get mesh network ap_zone "$DEFAULT_AP_FWZONE")
       $DEBUG uci_set network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
@@ -543,17 +316,32 @@ setup_interface_apif() {
   config_get type "$config" TYPE
   [ "$type" = "alias" ] && return 0
 
-  env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=apif /sbin/hotplug-call "iface" &
+  env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=apif RESET="$reset" /sbin/hotplug-call "iface" &
 }
 
 coldplug_interface_apif() {
   local config="$1"
   local reset=0
 
-  [ -z $(config_get_bool reset "$config" 1) ] && return 0
+  [ $(config_get_bool reset "$config" 1) = 0 ] && return 0
   $DEBUG set_apif_wireless "$config"
   $DEBUG config_get iface "$config" iface
   $DEBUG setup_interface_apif "$iface" "$config"
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  stop_interface_apif
+#   DESCRIPTION:  
+#    PARAMETERS:  
+#       RETURNS:  
+#===============================================================================
+
+stop_interface_apif() {
+  local config="$1"
+  local ifname=
+  
+  config_get ifname "$config" ifname
+  env -i ACTION="postdown" INTERFACE="$config" DEVICE="$iface" PROTO=apif /sbin/hotplug-call "services" &
 }
 
 #===  FUNCTION  ================================================================
@@ -585,7 +373,6 @@ setup_interface_plugif() {
   config_get_bool broadcast "$config" broadcast 0                 
                                                                      
   [ -z "$ipaddr" ] || $DEBUG ifconfig "$iface" "$ipaddr" ${netmask:+netmask "$netmask"}
-  set_plugif_fwzone_wan "$config"
   $DEBUG set_fwzone "$config" $(uci_get mesh network wan_zone "wan")
                                                                                                 
   # don't stay running in background.
@@ -616,9 +403,13 @@ setup_interface_plugif() {
       [ -z "$dns" ] || add_dns "$config" $dns
       
       $DEBUG set_fwzone "$config" $(uci_get mesh network lan_zone "lan")
+      $DEBUG uci_set_state network "$config" plug "1"
+      ;;
+    0)
+      $DEBUG uci_set_state network "$config" plug "0"
       ;;
   esac
-  env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=plugif /sbin/hotplug-call "iface" &
+  env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=plugif RESET="$reset" /sbin/hotplug-call "iface" &
 }
 
 
@@ -633,14 +424,11 @@ stop_interface_plugif() {
   local config="$1"
   local ifname=
   
-  env -i ACTION="predown" INTERFACE="$config" DEVICE="$iface" PROTO=plugif /sbin/hotplug-call "services" &
-
   #Remove from firewall config.
   $DEBUG unset_fwzone "$config"
   $DEBUG /etc/init.d/firewall restart
 
   #Reset network and udhcpc state.
-  local ifname
   config_get ifname "$config" ifname
 
   local lock="/var/lock/dhcp-${ifname}"
@@ -658,5 +446,5 @@ stop_interface_plugif() {
 
   uci -P /var/state revert "network.$config"
   
-  env -i ACTION="ifdown" INTERFACE="$config" DEVICE="$iface" PROTO=plugif /sbin/hotplug-call "iface" &
+  env -i ACTION="postdown" INTERFACE="$config" DEVICE="$iface" PROTO=plugif /sbin/hotplug-call "services" &
 }

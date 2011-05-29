@@ -1,0 +1,198 @@
+#DEBUG="echo"
+
+#===  FUNCTION  ================================================================
+#          NAME:  unset_olsrd_if
+#   DESCRIPTION:  Unsets the interface stanza for the olsrd config
+#    PARAMETERS:  config name of the interface to remove
+#       RETURNS:  0 on success
+#===============================================================================
+
+unset_olsrd_if() {
+  local config="$1"
+  
+  config_load olsrd
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      Interface)
+        config_get oldifaces "$name" interface  
+        local newifaces=
+        for dev in $(sort_list "$oldifaces" "$config"); do
+          list_remove newifaces "$dev"
+        done
+        uci_set olsrd "$name" interface "$newifaces"
+        ;;
+    esac
+  }
+  config_load olsrd
+
+  uci_commit olsrd && return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_olsrd_if
+#   DESCRIPTION:  Sets the interface stanza for the olsrd config
+#    PARAMETERS:  config name of the interface to add
+#       RETURNS:  0 on success
+#===============================================================================
+
+set_olsrd_if() {
+  local config="$1"
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      Interface)
+        config_get oldifaces "$name" interface  
+        local newifaces=
+        for dev in $(sort_list "$oldifaces" "$config"); do
+          append newifaces "$dev"
+        done
+        uci_set olsrd "$name" interface "$newifaces"
+        ;;
+    esac
+  }
+  config_load olsrd
+
+  uci_commit olsrd && return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  unset_olsrd_p2pif
+#   DESCRIPTION:  Unsets the p2p plugin stanza for the olsrd config
+#    PARAMETERS:  config name of the interface to remove
+#       RETURNS:  0 on success
+#===============================================================================
+
+unset_olsrd_p2pif() {
+  local iface="$1"
+  
+  config_load olsrd
+  config_cb() {
+    local type="$1"
+    local name="$2"
+    local library=
+
+    case $type in
+      LoadPlugin)
+        config_get NonOlsrIf "$name" NonOlsrIf  
+        case $NonOlsrIf in
+          "$iface")
+            uci_remove olsrd "$name" NonOlsrIf
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load olsrd
+
+  uci_commit olsrd && return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_olsrd_p2pif
+#   DESCRIPTION:  Sets the interface stanza for the olsrd config
+#    PARAMETERS:  
+#       RETURNS:  
+#===============================================================================
+
+set_olsrd_p2pif() {
+  local iface="$1"
+  
+  config_load olsrd
+  config_cb() {
+    local type="$1"
+    local name="$2"
+    local library=
+
+    case $type in
+      LoadPlugin)
+        config_get library "$name" library  
+        case $library in
+          "olsrd_p2pd.so.0.1.0")
+            uci_set olsrd "$name" NonOlsrIf "$iface"
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load olsrd
+
+  uci_commit olsrd && return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  unset_olsrd_hna4
+#   DESCRIPTION:  Unset HNA4 stanza in olsrd config
+#    PARAMETERS:  1; IPv4 address of network to unset
+#       RETURNS:  0 on success, 1 on failure
+#===============================================================================
+
+unset_olsrd_hna4() {
+  local config=$1
+  
+  uci_remove olsrd "$config"
+        
+  uci_commit olsrd && return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_olsrd_hna4
+#   DESCRIPTION:  Set HNA4 stanza in olsrd config
+#    PARAMETERS:  2; IPv4 address and netmask to set
+#       RETURNS:  0 on success, 1 on failure
+#===============================================================================
+
+set_olsrd_hna4() {
+  local ipv4addr=$1
+  local netmask=$2
+  local config=$3
+
+  #Remove duplicates  
+  #unset_olsrd_hna4 ipv4addr
+
+  uci_add olsrd Hna4 "$config" 
+  uci_set olsrd @Hna4[-1] netaddr "$ipv4addr"
+  uci_set olsrd @Hna4[-1] netmask "$netmask"
+
+  uci_commit olsrd && return 0
+} 
+
+case $PROTO in
+  meshif)
+    [ "$RESET" = 1 ] && {
+      case $ACTION in
+        postup)
+          $DEBUG set_olsrd_if $INTERFACE
+        ;;
+      esac
+    }
+   ;;
+  apif)
+    [ "$RESET" = 1 ] && {
+      case $ACTION in
+        postup)
+          $DEBUG set_olsrd_hna4 $(uci_get_state network "$INTERFACE" ipaddr) $(uci_get_state network "$INTERFACE" netmask) $INTERFACE
+          $DEBUG set_olsrd_p2pif $DEVICE
+        ;;
+      esac
+    }
+  ;;
+  plugif)
+    case $ACTION in
+      postup)
+        [ "$(uci_get_state network "$INTERFACE" plug)" = 0 ] || {
+            $DEBUG set_olsrd_hna4 $(uci_get_state network "$INTERFACE" ipaddr) $(uci_get_state network "$INTERFACE" netmask) $INTERFACE
+            $DEBUG set_olsrd_p2pif $DEVICE
+        }
+      ;;
+      predown)
+        $DEBUG unset_olsrd_hna4 $INTERFACE
+        $DEBUG unset_olsrd_p2pif $DEVICE
+      ;; 
+    esac
+  ;;
+esac

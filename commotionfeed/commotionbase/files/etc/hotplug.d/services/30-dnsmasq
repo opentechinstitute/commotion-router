@@ -1,0 +1,113 @@
+#DEBUG="echo"
+
+#===  FUNCTION  ================================================================
+#          NAME:  unset_dnsmasq_if
+#   DESCRIPTION:  Unset dnsmasq DHCP settings
+#    PARAMETERS:  
+#       RETURNS:  
+#===============================================================================
+
+unset_dnsmasq_if() {
+  local config="$1"
+ 
+  #For some reason requires pre-load to parse options. 
+  config_load dhcp
+  config_cb() {
+    local type="$1"
+    local name="$2"
+    local interface=
+  
+    case "$type" in
+      dhcp) 
+        config_get interface "$name" interface 
+        case "$interface" in
+          "$config")
+            uci_remove dhcp "$name"
+            ;; 
+        esac
+        ;;
+    esac
+  }
+  config_load dhcp
+  
+  uci_add dhcp dhcp 
+  uci_set dhcp @dhcp[-1] interface "$config"
+  uci_set dhcp @dhcp[-1] ignore "1"
+  uci_commit dhcp && return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_dnsmasq_if
+#   DESCRIPTION:  Set dnsmasq DHCP settings
+#    PARAMETERS:  
+#       RETURNS:  
+#===============================================================================
+
+set_dnsmasq_if() {
+  local config="$1"
+  #local ipv4addr="$2"
+  
+  #Possible race condition causes this check to create an erroneous interface.
+  #unset_dnsmasq_if
+  
+  config_cb() {
+    local type="$1"
+    local name="$2"
+    local interface=
+  
+    case "$type" in
+      dhcp) 
+        config_get interface "$name" interface 
+        case "$interface" in
+          "$config")
+            uci_set dhcp "$name" interface "$config"
+            uci_set dhcp "$name" start "2"
+            uci_set dhcp "$name" limit "252"
+            uci_set dhcp "$name" leasetime "12h"
+            uci_set dhcp "$name" ignore "0"
+            ;; 
+        esac
+    esac
+  }
+  config_load dhcp
+      
+  uci_commit dhcp && return 0
+}
+
+case $PROTO in
+  meshif)
+    [ "$RESET" = 1 ] && {
+      case $ACTION in
+        postup)
+          $DEBUG unset_dnsmasq_if $INTERFACE
+        ;;
+      esac
+    }
+   ;;
+  apif)
+    [ "$RESET" = 1 ] && {
+      case $ACTION in
+        postup)
+          $DEBUG set_dnsmasq_if $INTERFACE
+        ;;
+      esac
+    }
+  ;;
+  plugif)
+    case $ACTION in
+      postup)
+        case $(uci_get_state network "$INTERFACE" plug) in
+          0)
+            $DEBUG unset_dnsmasq_if $INTERFACE
+          ;;  
+          1)
+            $DEBUG set_dnsmasq_if $INTERFACE
+          ;;  
+        esac
+      ;;
+      predown)
+          $DEBUG unset_dnsmasq_if $INTERFACE
+      ;; 
+    esac
+  ;;
+esac
