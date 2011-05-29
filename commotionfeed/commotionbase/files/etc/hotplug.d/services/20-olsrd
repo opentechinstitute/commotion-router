@@ -161,6 +161,8 @@ set_olsrd_hna4() {
   uci_commit olsrd && return 0
 } 
 
+OLSRD_PATH=`which olsrd`;
+[ -x "$OLSRD_PATH" ] && {
 case $PROTO in
   meshif)
     [ "$RESET" = 1 ] && {
@@ -196,3 +198,4 @@ case $PROTO in
     esac
   ;;
 esac
+}
