@@ -1,7 +1,3 @@
 config 'settings' 'network'
 
 config 'settings' 'node'
-
-config 'defaults'
-  option 'name' 'detroit'
-  option 'base' 'HotMesh'
