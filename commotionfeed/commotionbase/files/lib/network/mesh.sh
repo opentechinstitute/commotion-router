@@ -128,7 +128,7 @@ set_apif_wireless() {
   uci_set wireless "$wiconfig" ssid "$basename"-ap_"$location" && uci_commit wireless && return 0
 
   [[ -n "$wiconfig" ]] && [[ -z "$location" ]] && \
-  uci_set wireless "$wiconfig" ssid "$basename"-ap_$( cat /sys/class/net/$iface/address | \
+  uci_set wireless "$wiconfig" ssid "$basename"-ap_$( echo "$mac" | \
    awk -F ':' '{ printf("%d_%d_%d","0x"$4,"0x"$5,"0x"$6) }' ) && uci_commit wireless && return 0
 
   logger -t set_apif_wireless "Error! Wireless configuration for "$config" may not exist." && return 1
@@ -228,7 +228,7 @@ setup_interface_meshif() {
       local prefix=$(uci_get mesh network mesh_prefix "$DEFAULT_MESH_PREFIX")
       $DEBUG set_fwzone "$config" $(uci_get mesh network mesh_zone "$DEFAULT_MESH_FWZONE")
       $DEBUG uci_set network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
-      awk -F ':' '{ printf("$prefix.%d.%d.%d","0x"$4,"0x"$5,"0x"$6) }' )
+      awk -v p=$prefix -F ':' '{ printf(p".%d.%d.%d","0x"$4,"0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" netmask "255.0.0.0"
       $DEBUG uci_set network "$config" broadcast "255.255.255.255"
       $DEBUG uci_set network "$config" reset 0
@@ -257,6 +257,7 @@ coldplug_interface_meshif() {
   [ $(config_get_bool reset "$config" 1) = 0 ] && return 0
   $DEBUG set_meshif_wireless "$config"
   $DEBUG config_get iface "$config" iface
+  $DEBUG /sbin/wifi up "$iface" 
   $DEBUG setup_interface_meshif "$iface" "$config"
 }
 
@@ -296,10 +297,10 @@ setup_interface_apif() {
       $DEBUG set_apif_fwzone "$config"
       $DEBUG set_fwzone "$config" $(uci_get mesh network ap_zone "$DEFAULT_AP_FWZONE")
       $DEBUG uci_set network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
-      awk -F ':' '{ printf("$prefix.%d.%d.1","0x"$5,"0x"$6) }' )
+      awk -v p=$prefix -F ':' '{ printf(p".%d.%d.1","0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" netmask "255.255.255.0"
       $DEBUG uci_set network "$config" broadcast $( cat /sys/class/net/$iface/address | \
-      awk -F ':' '{ printf("$prefix.%d.%d.255","0x"$5,"0x"$6) }' )
+      awk -v p=$prefix -F ':' '{ printf(p".%d.%d.255","0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" reset 0
       uci_commit network
       scan_interfaces
@@ -326,6 +327,7 @@ coldplug_interface_apif() {
   [ $(config_get_bool reset "$config" 1) = 0 ] && return 0
   $DEBUG set_apif_wireless "$config"
   $DEBUG config_get iface "$config" iface
+  $DEBUG /sbin/wifi up "$iface" 
   $DEBUG setup_interface_apif "$iface" "$config"
 }
 
@@ -391,10 +393,10 @@ setup_interface_plugif() {
     1)
       local prefix=$(uci_get mesh network lan_prefix "$DEFAULT_LAN_PREFIX")
       $DEBUG uci_set_state network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
-      awk -F ':' '{ printf("$prefix.%d.%d.1","0x"$5,"0x"$6) }' )
+      awk -v p=$prefix -F ':' '{ printf(p".%d.%d.1","0x"$5,"0x"$6) }' )
       $DEBUG uci_set_state network "$config" netmask "255.255.255.0"
       $DEBUG uci_set_state network "$config" broadcast $( cat /sys/class/net/$iface/address | \
-      awk -F ':' '{ printf("$prefix.%d.%d.255","0x"$5,"0x"$6) }' )
+      awk -v p=$prefix -F ':' '{ printf(p".%d.%d.255","0x"$5,"0x"$6) }' )
       local ipaddr="$(uci_get_state network "$config" ipaddr)"
       local netmask="$(uci_get_state network "$config" netmask)"
       local broadcast="$(uci_get_state network "$config" broadcast)"
