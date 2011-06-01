@@ -4,9 +4,9 @@
 START=39
 STOP=91
 
-MAC="$(uci_get wireless "radio0" macaddr)"
 
 apply_wireless_defaults() {
+  local mac=$1
   $DEBUG uci_set wireless @wifi-device[0] disabled 0
   $DEBUG uci_set wireless @wifi-iface[0] network mesh
   $DEBUG uci_set wireless @wifi-iface[0] mode adhoc
@@ -16,18 +16,19 @@ apply_wireless_defaults() {
   $DEBUG uci_set wireless @wifi-iface[-1] network ap
   $DEBUG uci_set wireless @wifi-iface[-1] mode ap
   $DEBUG uci_set wireless @wifi-iface[-1] encryption none
-  $DEBUG uci_set wireless @wifi-iface[-1] ssid commotion-ap_"$( echo $MAC | \
+  $DEBUG uci_set wireless @wifi-iface[-1] ssid commotion-ap_"$( echo $mac | \
    awk -F ':' '{ printf("%d_%d_%d","0x"$4,"0x"$5,"0x"$6) }' )"
   $DEBUG uci_commit wireless && return 0
 }
 
 apply_hostname_defaults() {
+  local mac=$1
   
-  local hostname="$(uci_get mesh network basename "commotion")_$(uci_get mesh node location $( echo $MAC | \
+  local hostname="$(uci_get mesh network basename "commotion")_$(uci_get mesh node location $( echo $mac | \
    awk -F ':' '{ printf("%d_%d_%d","0x"$4,"0x"$5,"0x"$6) }' ))"
-
+   
   echo "$hostname" > /proc/sys/kernel/hostname
-  $DEBUG uci_set system system hostname "$hostname"
+  $DEBUG uci_set system @system[0] hostname "$hostname"
   $DEBUG uci_commit system && return 0
 }
 
@@ -36,9 +37,13 @@ boot() {
   grep -qs config /etc/config/wireless || { 
     rm -f /etc/config/wireless
     $DEBUG /sbin/wifi detect > /etc/config/wireless
-    $DEBUG apply_wireless_defaults
+    sleep 3
+    $DEBUG apply_wireless_defaults "$(uci_get wireless @wifi-device[0] macaddr)"
   }
   
-  apply_hostname_defaults
+  $DEBUG apply_hostname_defaults "$(uci_get wireless @wifi-device[0] macaddr)"
 }
-   
+
+start() {
+  boot
+ }   

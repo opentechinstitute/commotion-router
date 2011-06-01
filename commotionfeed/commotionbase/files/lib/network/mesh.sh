@@ -64,7 +64,7 @@ DEFAULT_LAN_PREFIX="102"
 set_meshif_wireless() {
   local config="$1"
   local ssid=$(uci_get mesh network ssid "$DEFAULT_MESH_SSID") 
-  local ssid=$(uci_get mesh network bssid "$DEFAULT_MESH_BSSID") 
+  local bssid=$(uci_get mesh network bssid "$DEFAULT_MESH_BSSID") 
   local channel=$(uci_get mesh network channel "$DEFAULT_MESH_CHANNEL") 
   local net dev
 
@@ -88,9 +88,10 @@ set_meshif_wireless() {
   config_load wireless
 
   [[ -n "$net" ]] && [[ -n "$dev" ]] && \
-  uci_set wireless "$net" ssid "$ssid" && uci_set wireless "$dev" channel "$channel" && uci_commit wireless && return 0
+  uci_set wireless "$net" ssid "$ssid" && uci_set wireless "$net" bssid "$bssid" && \
+  uci_set wireless "$dev" channel "$channel" && uci_commit wireless && return 0
 
-  logger -t set_apif_wireless "Error! Wireless configuration for "$config" may not exist." && return 1
+  logger -t set_meshif_wireless "Error! Wireless configuration for "$config" may not exist." && return 1
 }
 
 #===  FUNCTION  ================================================================
@@ -254,11 +255,11 @@ coldplug_interface_meshif() {
   local config="$1"
   local reset=0
 
-  [ $(config_get_bool reset "$config" 1) = 0 ] && return 0
+  [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
   $DEBUG set_meshif_wireless "$config"
-  $DEBUG config_get iface "$config" iface
-  $DEBUG /sbin/wifi up "$iface" 
-  $DEBUG setup_interface_meshif "$iface" "$config"
+  $DEBUG config_get ifname "$config" ifname
+  $DEBUG /sbin/wifi up "$ifname" 
+  $DEBUG setup_interface_meshif "$ifname" "$config"
 }
 
 #===  FUNCTION  ================================================================
@@ -294,7 +295,6 @@ setup_interface_apif() {
   case "$reset" in
     1)
       local prefix=$(uci_get mesh network ap_prefix "$DEFAULT_AP_PREFIX")
-      $DEBUG set_apif_fwzone "$config"
       $DEBUG set_fwzone "$config" $(uci_get mesh network ap_zone "$DEFAULT_AP_FWZONE")
       $DEBUG uci_set network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
       awk -v p=$prefix -F ':' '{ printf(p".%d.%d.1","0x"$5,"0x"$6) }' )
@@ -324,11 +324,11 @@ coldplug_interface_apif() {
   local config="$1"
   local reset=0
 
-  [ $(config_get_bool reset "$config" 1) = 0 ] && return 0
-  $DEBUG set_apif_wireless "$config"
-  $DEBUG config_get iface "$config" iface
-  $DEBUG /sbin/wifi up "$iface" 
-  $DEBUG setup_interface_apif "$iface" "$config"
+  [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
+  $DEBUG config_get ifname "$config" ifname
+  $DEBUG set_apif_wireless "$ifname" "$config"
+  $DEBUG /sbin/wifi up "$ifname" 
+  $DEBUG setup_interface_apif "$ifname" "$config"
 }
 
 #===  FUNCTION  ================================================================

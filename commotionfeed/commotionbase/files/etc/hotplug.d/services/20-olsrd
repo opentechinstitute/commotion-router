@@ -179,7 +179,8 @@ case $PROTO in
     [ "$RESET" = 1 ] && {
       case $ACTION in
         postup)
-          $DEBUG set_olsrd_hna4 $(uci_get_state network "$INTERFACE" ipaddr) $(uci_get_state network "$INTERFACE" netmask) $INTERFACE
+          eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
+          $DEBUG set_olsrd_hna4  $NETWORK $NETMASK $INTERFACE
           $DEBUG set_olsrd_p2pif $DEVICE
         ;;
       esac
@@ -189,7 +190,8 @@ case $PROTO in
     case $ACTION in
       postup)
         [ "$(uci_get_state network "$INTERFACE" plug)" = 0 ] || {
-            $DEBUG set_olsrd_hna4 $(uci_get_state network "$INTERFACE" ipaddr) $(uci_get_state network "$INTERFACE" netmask) $INTERFACE
+            eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
+            $DEBUG set_olsrd_hna4  $NETWORK $NETMASK $INTERFACE
             $DEBUG set_olsrd_p2pif $DEVICE
         }
       ;;
