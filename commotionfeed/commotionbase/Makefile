@@ -36,6 +36,7 @@ endef
 
 define Package/commotionbase/install
 	$(CP) ./files/* $(1)/
+	$(SED) 's,$$$$R,$(REVISION),g' $(1)/etc/banner
 endef
 
 $(eval $(call BuildPackage,commotionbase))
