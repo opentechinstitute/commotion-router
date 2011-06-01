@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Backfire (r27031)
-# Mon May 30 20:02:29 2011
+# Wed Jun  1 10:56:36 2011
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -1155,7 +1155,7 @@ CONFIG_PACKAGE_ip6tables=y
 # CONFIG_PACKAGE_luci-app-ddns is not set
 CONFIG_PACKAGE_luci-app-diag-core=y
 CONFIG_PACKAGE_luci-app-diag-devinfo=y
-CONFIG_PACKAGE_luci-app-ffwizard=y
+# CONFIG_PACKAGE_luci-app-ffwizard is not set
 CONFIG_PACKAGE_luci-app-firewall=y
 CONFIG_PACKAGE_luci-app-freifunk-policyrouting=y
 # CONFIG_PACKAGE_luci-app-hd-idle is not set
@@ -1175,14 +1175,14 @@ CONFIG_PACKAGE_luci-app-qos=y
 # CONFIG_PACKAGE_luci-app-samba is not set
 # CONFIG_PACKAGE_luci-app-siitwizard is not set
 CONFIG_PACKAGE_luci-app-splash=y
-# CONFIG_PACKAGE_luci-app-statistics is not set
+CONFIG_PACKAGE_luci-app-statistics=y
 # CONFIG_PACKAGE_luci-app-tinyproxy is not set
 # CONFIG_PACKAGE_luci-app-upnp is not set
 # CONFIG_PACKAGE_luci-app-ushare is not set
 # CONFIG_PACKAGE_luci-app-vnstat is not set
 CONFIG_PACKAGE_luci-app-voice-core=y
 CONFIG_PACKAGE_luci-app-voice-diag=y
-# CONFIG_PACKAGE_luci-app-wol is not set
+CONFIG_PACKAGE_luci-app-wol=y
 
 #
 # Collections
@@ -1216,8 +1216,8 @@ CONFIG_PACKAGE_luci-lib-ipkg=y
 CONFIG_PACKAGE_luci-lib-json=y
 CONFIG_PACKAGE_luci-lib-lmo=y
 CONFIG_PACKAGE_luci-lib-lucid=y
-# CONFIG_PACKAGE_luci-lib-lucid-http is not set
-# CONFIG_PACKAGE_luci-lib-lucid-rpc is not set
+CONFIG_PACKAGE_luci-lib-lucid-http=y
+CONFIG_PACKAGE_luci-lib-lucid-rpc=y
 CONFIG_PACKAGE_luci-lib-nixio=y
 # CONFIG_PACKAGE_luci-lib-nixio_notls is not set
 # CONFIG_PACKAGE_luci-lib-nixio_axtls is not set
@@ -1235,7 +1235,7 @@ CONFIG_PACKAGE_luci-mod-admin-full=y
 CONFIG_PACKAGE_luci-mod-admin-mini=y
 CONFIG_PACKAGE_luci-mod-freifunk=y
 CONFIG_PACKAGE_luci-mod-niu=y
-# CONFIG_PACKAGE_luci-mod-rpc is not set
+CONFIG_PACKAGE_luci-mod-rpc=y
 
 #
 # Server Interfaces
@@ -1997,7 +1997,7 @@ CONFIG_PACKAGE_libiptc=y
 # CONFIG_PACKAGE_libjpeg is not set
 # CONFIG_PACKAGE_libjs is not set
 # CONFIG_PACKAGE_libjson is not set
-# CONFIG_PACKAGE_libltdl is not set
+CONFIG_PACKAGE_libltdl=y
 CONFIG_PACKAGE_liblua=y
 # CONFIG_PACKAGE_liblzo is not set
 # CONFIG_PACKAGE_libmad is not set
@@ -2060,7 +2060,7 @@ CONFIG_PACKAGE_libpcap=y
 # CONFIG_PACKAGE_libreadline is not set
 # CONFIG_PACKAGE_librpcsecgss is not set
 # CONFIG_PACKAGE_librrd is not set
-# CONFIG_PACKAGE_librrd1 is not set
+CONFIG_PACKAGE_librrd1=y
 # CONFIG_PACKAGE_librsync is not set
 # CONFIG_PACKAGE_libruby is not set
 # CONFIG_PACKAGE_libsamplerate is not set
@@ -2348,15 +2348,15 @@ CONFIG_PACKAGE_l7-protocols=y
 # CONFIG_PACKAGE_net-tools-route is not set
 CONFIG_PACKAGE_olsrd=y
 CONFIG_PACKAGE_olsrd-mod-arprefresh=y
-CONFIG_PACKAGE_olsrd-mod-bmf=y
+# CONFIG_PACKAGE_olsrd-mod-bmf is not set
 CONFIG_PACKAGE_olsrd-mod-dot-draw=y
 CONFIG_PACKAGE_olsrd-mod-dyn-gw=y
 CONFIG_PACKAGE_olsrd-mod-dyn-gw-plain=y
 CONFIG_PACKAGE_olsrd-mod-httpinfo=y
-CONFIG_PACKAGE_olsrd-mod-mdns=y
+# CONFIG_PACKAGE_olsrd-mod-mdns is not set
 CONFIG_PACKAGE_olsrd-mod-nameservice=y
 CONFIG_PACKAGE_olsrd-mod-p2pd=y
-CONFIG_PACKAGE_olsrd-mod-quagga=y
+# CONFIG_PACKAGE_olsrd-mod-quagga is not set
 CONFIG_PACKAGE_olsrd-mod-secure=y
 CONFIG_PACKAGE_olsrd-mod-txtinfo=y
 CONFIG_PACKAGE_olsrd-mod-watchdog=y
@@ -2426,7 +2426,7 @@ CONFIG_PACKAGE_ntpclient=y
 # CONFIG_PACKAGE_l2tpd is not set
 # CONFIG_PACKAGE_l2tpns is not set
 # CONFIG_PACKAGE_matrixtunnel is not set
-# CONFIG_PACKAGE_n2n is not set
+CONFIG_PACKAGE_n2n=y
 # CONFIG_PACKAGE_openconnect is not set
 # CONFIG_PACKAGE_openl2tp is not set
 # CONFIG_PACKAGE_opennhrp is not set
@@ -2538,7 +2538,7 @@ CONFIG_PACKAGE_crda=y
 # CONFIG_PACKAGE_ebtables is not set
 # CONFIG_PACKAGE_ebtables-utils is not set
 # CONFIG_PACKAGE_elinks is not set
-# CONFIG_PACKAGE_etherwake is not set
+CONFIG_PACKAGE_etherwake=y
 # CONFIG_PACKAGE_ethtool is not set
 # CONFIG_PACKAGE_ettercap is not set
 # CONFIG_PACKAGE_faifa is not set
@@ -2552,8 +2552,8 @@ CONFIG_PACKAGE_crda=y
 # CONFIG_PACKAGE_genl is not set
 # CONFIG_PACKAGE_gpsd is not set
 # CONFIG_PACKAGE_hostapd is not set
-CONFIG_PACKAGE_hostapd-mini=y
-CONFIG_PACKAGE_hostapd-utils=y
+# CONFIG_PACKAGE_hostapd-mini is not set
+# CONFIG_PACKAGE_hostapd-utils is not set
 # CONFIG_PACKAGE_hping3 is not set
 CONFIG_PACKAGE_httping=y
 # CONFIG_PACKAGE_ifenslave is not set
@@ -2909,6 +2909,7 @@ CONFIG_PACKAGE_commotionbase=y
 # CONFIG_PACKAGE_ntfs-3g-low is not set
 # CONFIG_PACKAGE_ntfs-3g-utils is not set
 # CONFIG_PACKAGE_ntfsprogs is not set
+# CONFIG_PACKAGE_ntfsprogs_ntfs-3g is not set
 # CONFIG_PACKAGE_owshell is not set
 # CONFIG_PACKAGE_reiserfsprogs is not set
 # CONFIG_PACKAGE_resize2fs is not set
@@ -2996,7 +2997,61 @@ CONFIG_PACKAGE_commotionbase=y
 # CONFIG_PACKAGE_cdparanoia is not set
 # CONFIG_PACKAGE_cksfv is not set
 # CONFIG_PACKAGE_cmdpad is not set
-# CONFIG_PACKAGE_collectd is not set
+CONFIG_PACKAGE_collectd=y
+# CONFIG_PACKAGE_collectd-mod-apache is not set
+# CONFIG_PACKAGE_collectd-mod-apcups is not set
+# CONFIG_PACKAGE_collectd-mod-ascent is not set
+# CONFIG_PACKAGE_collectd-mod-bind is not set
+# CONFIG_PACKAGE_collectd-mod-conntrack is not set
+# CONFIG_PACKAGE_collectd-mod-contextswitch is not set
+# CONFIG_PACKAGE_collectd-mod-cpu is not set
+# CONFIG_PACKAGE_collectd-mod-csv is not set
+# CONFIG_PACKAGE_collectd-mod-curl is not set
+# CONFIG_PACKAGE_collectd-mod-dbi is not set
+# CONFIG_PACKAGE_collectd-mod-df is not set
+# CONFIG_PACKAGE_collectd-mod-disk is not set
+# CONFIG_PACKAGE_collectd-mod-dns is not set
+# CONFIG_PACKAGE_collectd-mod-email is not set
+# CONFIG_PACKAGE_collectd-mod-exec is not set
+# CONFIG_PACKAGE_collectd-mod-filecount is not set
+# CONFIG_PACKAGE_collectd-mod-fscache is not set
+CONFIG_PACKAGE_collectd-mod-interface=y
+# CONFIG_PACKAGE_collectd-mod-iptables is not set
+# CONFIG_PACKAGE_collectd-mod-irq is not set
+CONFIG_PACKAGE_collectd-mod-load=y
+# CONFIG_PACKAGE_collectd-mod-logfile is not set
+# CONFIG_PACKAGE_collectd-mod-madwifi is not set
+# CONFIG_PACKAGE_collectd-mod-memory is not set
+# CONFIG_PACKAGE_collectd-mod-modbus is not set
+# CONFIG_PACKAGE_collectd-mod-mysql is not set
+# CONFIG_PACKAGE_collectd-mod-netlink is not set
+# CONFIG_PACKAGE_collectd-mod-network is not set
+# CONFIG_PACKAGE_collectd-mod-nginx is not set
+# CONFIG_PACKAGE_collectd-mod-ntpd is not set
+# CONFIG_PACKAGE_collectd-mod-nut is not set
+# CONFIG_PACKAGE_collectd-mod-olsrd is not set
+# CONFIG_PACKAGE_collectd-mod-onewire is not set
+# CONFIG_PACKAGE_collectd-mod-openvpn is not set
+# CONFIG_PACKAGE_collectd-mod-ping is not set
+# CONFIG_PACKAGE_collectd-mod-powerdns is not set
+# CONFIG_PACKAGE_collectd-mod-processes is not set
+# CONFIG_PACKAGE_collectd-mod-protocols is not set
+CONFIG_PACKAGE_collectd-mod-rrdtool=y
+# CONFIG_PACKAGE_collectd-mod-sensors is not set
+# CONFIG_PACKAGE_collectd-mod-snmp is not set
+# CONFIG_PACKAGE_collectd-mod-syslog is not set
+# CONFIG_PACKAGE_collectd-mod-table is not set
+# CONFIG_PACKAGE_collectd-mod-tail is not set
+# CONFIG_PACKAGE_collectd-mod-tcpconns is not set
+# CONFIG_PACKAGE_collectd-mod-teamspeak2 is not set
+# CONFIG_PACKAGE_collectd-mod-ted is not set
+# CONFIG_PACKAGE_collectd-mod-thermal is not set
+# CONFIG_PACKAGE_collectd-mod-unixsock is not set
+# CONFIG_PACKAGE_collectd-mod-uptime is not set
+# CONFIG_PACKAGE_collectd-mod-users is not set
+# CONFIG_PACKAGE_collectd-mod-vmem is not set
+CONFIG_PACKAGE_collectd-mod-wireless=y
+# CONFIG_PACKAGE_collectd-mod-write-http is not set
 # CONFIG_PACKAGE_coreutils is not set
 # CONFIG_PACKAGE_cpusage is not set
 # CONFIG_PACKAGE_crypto-tools is not set
@@ -3080,7 +3135,7 @@ CONFIG_PACKAGE_commotionbase=y
 # CONFIG_PACKAGE_psplash is not set
 # CONFIG_PACKAGE_pv is not set
 # CONFIG_PACKAGE_pwcrypt is not set
-# CONFIG_PACKAGE_pwgen is not set
+CONFIG_PACKAGE_pwgen=y
 # CONFIG_PACKAGE_pwrtray-backend is not set
 CONFIG_PACKAGE_px5g=y
 # CONFIG_PACKAGE_qc-usb-utils is not set
@@ -3091,7 +3146,7 @@ CONFIG_PACKAGE_px5g=y
 # CONFIG_PACKAGE_rrdcgi1 is not set
 # CONFIG_PACKAGE_rrdcollect is not set
 # CONFIG_PACKAGE_rrdtool is not set
-# CONFIG_PACKAGE_rrdtool1 is not set
+CONFIG_PACKAGE_rrdtool1=y
 # CONFIG_PACKAGE_sane-backends is not set
 # CONFIG_PACKAGE_sane-frontends is not set
 # CONFIG_PACKAGE_schedtool is not set
