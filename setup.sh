@@ -5,6 +5,8 @@ svn co -r 27031 svn://svn.openwrt.org/openwrt/branches/backfire openwrt || exit 
 cd openwrt
 [ ! -e .config ] && cp -v ../config .config
 [ ! -e feeds.conf ] && cp -v feeds.conf.default feeds.conf
+[ ! -e files ] && mkdir files
+cp -rf -v ../default-files/* files/
 if ! grep -q commotion feeds.conf; then
     echo "adding commotion package feed..."
     echo "src-link commotion ../../commotionfeed" >> feeds.conf
