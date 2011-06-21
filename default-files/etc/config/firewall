@@ -10,7 +10,6 @@ config 'zone'
   option 'input' 'ACCEPT'
   option 'output' 'ACCEPT'
   option 'forward' 'DROP'
-  option 'network' 'plug'
 
 config 'zone'
   option 'name' 'ap'
@@ -65,9 +64,11 @@ config 'forwarding'
 
 config 'forwarding'
   option 'src' 'ap'
+  option 'dest' 'wan'
 
 config 'forwarding'
   option 'src' 'lan'
+  option 'dest' 'wan'
 
 config 'rule'
   option 'src' 'wan'

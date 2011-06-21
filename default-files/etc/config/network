@@ -28,6 +28,7 @@ config 'interface' 'other'
 config 'interface' 'plug'
 	option 'ifname' 'eth0'
 	option 'proto' 'plugif'
+  option 'dns' '8.8.8.8 8.8.4.4'
 	
 config 'alias'
 	option 'interface' 'plug'
