@@ -1,0 +1,137 @@
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons
+END
+datetime.png
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/datetime.png
+END
+flash.png
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/flash.png
+END
+COPYING.oxygen
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/COPYING.oxygen
+END
+stats.png
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/stats.png
+END
+switch.png
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/switch.png
+END
+overview.png
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/overview.png
+END
+shell.png
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/shell.png
+END
+login.png
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/login.png
+END
+logout.png
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/logout.png
+END
+freifunk.png
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/freifunk.png
+END
+desktop.png
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/desktop.png
+END
+worker.png
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/worker.png
+END
+lightbulb.png
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/lightbulb.png
+END
+services.png
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/services.png
+END
+status.png
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/status.png
+END
+restart.png
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/restart.png
+END
+default.png
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/default.png
+END
+system.png
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/system.png
+END
+key.png
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/key.png
+END
+network.png
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/network.png
+END
+harddisk.png
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/harddisk.png
+END
+package.png
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/!svn/ver/6693/luci/branches/luci-0.10/themes/openwrt.org-oxygen/htdocs/luci-static/openwrt.org-oxygen/icons/package.png
+END
