@@ -40,7 +40,7 @@
 # DEFAULTS
 #===============================================================================
 
-DEFAULT_MESH_SSID="commotion-mesh"
+DEFAULT_MESH_SSID="commotionwireless.net"
 DEFAULT_MESH_BSSID="02:CA:FF:EE:BA:BE"
 DEFAULT_MESH_CHANNEL="5"
 DEFAULT_MESH_BASENAME="commotion"
@@ -126,10 +126,10 @@ set_apif_wireless() {
   }
   config_load wireless
   [[ -n "$wiconfig" ]] && [[ -n "$location" ]] && 
-  uci_set wireless "$wiconfig" ssid "$basename"-ap_"$location" && uci_commit wireless && return 0
+  uci_set wireless "$wiconfig" ssid "$basename"_"$location" && uci_commit wireless && return 0
 
   [[ -n "$wiconfig" ]] && [[ -z "$location" ]] && \
-  uci_set wireless "$wiconfig" ssid "$basename"-ap_$( echo "$mac" | \
+  uci_set wireless "$wiconfig" ssid "$basename"_$( echo "$mac" | \
    awk -F ':' '{ printf("%d_%d_%d","0x"$4,"0x"$5,"0x"$6) }' ) && uci_commit wireless && return 0
 
   logger -t set_apif_wireless "Error! Wireless configuration for "$config" may not exist." && return 1
