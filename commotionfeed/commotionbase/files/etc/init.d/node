@@ -10,13 +10,13 @@ apply_wireless_defaults() {
   $DEBUG uci_set wireless @wifi-device[0] disabled 0
   $DEBUG uci_set wireless @wifi-iface[0] network mesh
   $DEBUG uci_set wireless @wifi-iface[0] mode adhoc
-  $DEBUG uci_set wireless @wifi-iface[0] ssid commotion-mesh
+  $DEBUG uci_set wireless @wifi-iface[0] ssid commotionwireless.net
   $DEBUG uci_add wireless wifi-iface
   $DEBUG uci_set wireless @wifi-iface[-1] device radio0
   $DEBUG uci_set wireless @wifi-iface[-1] network ap
   $DEBUG uci_set wireless @wifi-iface[-1] mode ap
   $DEBUG uci_set wireless @wifi-iface[-1] encryption none
-  $DEBUG uci_set wireless @wifi-iface[-1] ssid commotion-ap_"$( echo $mac | \
+  $DEBUG uci_set wireless @wifi-iface[-1] ssid commotion_"$( echo $mac | \
    awk -F ':' '{ printf("%d_%d_%d","0x"$4,"0x"$5,"0x"$6) }' )"
   $DEBUG uci_commit wireless && return 0
 }
@@ -24,8 +24,8 @@ apply_wireless_defaults() {
 apply_hostname_defaults() {
   local mac=$1
   
-  local hostname="$(uci_get mesh network basename "commotion")_$(uci_get mesh node location $( echo $mac | \
-   awk -F ':' '{ printf("%d_%d_%d","0x"$4,"0x"$5,"0x"$6) }' ))"
+  local hostname="$(uci_get mesh network basename "commotion")-$(uci_get mesh node location $( echo $mac | \
+   awk -F ':' '{ printf("%d-%d-%d","0x"$4,"0x"$5,"0x"$6) }' ))"
    
   echo "$hostname" > /proc/sys/kernel/hostname
   $DEBUG uci_set system @system[0] hostname "$hostname"
@@ -40,10 +40,15 @@ boot() {
     sleep 3
     $DEBUG apply_wireless_defaults "$(uci_get wireless @wifi-device[0] macaddr)"
   }
-  
-  $DEBUG apply_hostname_defaults "$(uci_get wireless @wifi-device[0] macaddr)"
+ 
+  local hostname="$(uci_get system @system[0] hostname "OpenWRT")"
+  case "$hostname" in
+    "OpenWRT")
+      $DEBUG apply_hostname_defaults "$(uci_get wireless @wifi-device[0] macaddr)"
+    ;;
+  esac
 }
 
 start() {
   boot
- }   
+}   
