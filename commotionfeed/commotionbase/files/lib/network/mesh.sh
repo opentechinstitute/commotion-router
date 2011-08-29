@@ -411,7 +411,7 @@ setup_interface_plugif() {
       $DEBUG uci_set_state network "$config" plug "0"
       ;;
   esac
-  env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=plugif RESET="$reset" /sbin/hotplug-call "iface" &
+  env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=plugif /sbin/hotplug-call "iface" &
 }
 
 
