@@ -1,6 +1,6 @@
 #!/bin/sh
 
-svn co -r 27031 svn://svn.openwrt.org/openwrt/branches/backfire openwrt || exit 1
+svn co -r 28025 svn://svn.openwrt.org/openwrt/branches/backfire openwrt || exit 1
 
 cd openwrt
 [ ! -e .config ] && cp -v ../config .config
