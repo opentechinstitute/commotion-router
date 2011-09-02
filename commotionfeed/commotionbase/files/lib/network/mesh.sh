@@ -49,6 +49,7 @@ DEFAULT_MESH_FWZONE="mesh"
 DEFAULT_AP_PREFIX="101"
 DEFAULT_AP_FWZONE="ap"
 DEFAULT_LAN_PREFIX="102"
+DEFAULT_LAN_FWZONE="lan"
 
 #===============================================================================
 # SETTING FUNCTIONS
@@ -106,9 +107,13 @@ set_apif_wireless() {
   local wiconfig=
   local basename=$(uci_get mesh network basename "$DEFAULT_MESH_BASENAME")
   local location=$(uci_get mesh node location)
+  local secure=$(uci_get network "$config" secure "0")
+  local key=$(uci_get network "$config" key)
   ifconfig "$iface" 2>/dev/null >/dev/null && {
     local mac=`ifconfig "$iface" | grep 'Link encap:'| awk '{ print $5}'`;
-  } || logger -t set_apif_wireless "Error! Interface "$iface" doesn't exist!"; return 1
+  } || {
+    logger -t set_apif_wireless "Error! Interface "$iface" doesn't exist!"; return 1
+  }
 
   config_cb() {
     local type="$1"
@@ -125,7 +130,14 @@ set_apif_wireless() {
     esac
   }
   config_load wireless
-  [[ -n "$wiconfig" ]] && [[ -n "$location" ]] && 
+
+  [[ -n "$wiconfig" ]] && [ "$secure" = 1 ] && [[ -n "$key" ]] && \
+  uci_set wireless "$wiconfig" encryption "psk2" && uci_set wireless "$wiconfig" key "$key"
+
+  [[ -n "$wiconfig" ]] && [ "$secure" = 1 ] && [[ -z "$key" ]] && \
+  uci_set wireless "$wiconfig" encryption "psk2" && uci_set wireless "$wiconfig" key `pwgen 15 1`
+  
+  [[ -n "$wiconfig" ]] && [[ -n "$location" ]] && \
   uci_set wireless "$wiconfig" ssid "$basename"_"$location" && uci_commit wireless && return 0
 
   [[ -n "$wiconfig" ]] && [[ -z "$location" ]] && \
@@ -233,6 +245,7 @@ setup_interface_meshif() {
       $DEBUG uci_set network "$config" netmask "255.0.0.0"
       $DEBUG uci_set network "$config" broadcast "255.255.255.255"
       $DEBUG uci_set network "$config" reset 0
+      [ "$(uci_get_state network "$config" initialized)" = 1 ] && set_meshif_wireless "$iface" "$config" 
       uci_commit network
       scan_interfaces
       ;;
@@ -258,8 +271,9 @@ coldplug_interface_meshif() {
   [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
   $DEBUG set_meshif_wireless "$config"
   $DEBUG config_get ifname "$config" ifname
-  $DEBUG /sbin/wifi up "$ifname" 
+  $DEBUG /sbin/wifi up 
   $DEBUG setup_interface_meshif "$ifname" "$config"
+  $DEBUG uci_set_state network "$config" initialized 1
 }
 
 #===  FUNCTION  ================================================================
@@ -290,7 +304,7 @@ setup_interface_apif() {
   
   env -i ACTION="preup" INTERFACE="$config" DEVICE="$iface" PROTO=apif /sbin/hotplug-call "services" &
 
-  local ipaddr netmask reset
+  local ipaddr netmask reset initialized
   config_get_bool reset "$config" reset 1
   case "$reset" in
     1)
@@ -302,6 +316,7 @@ setup_interface_apif() {
       $DEBUG uci_set network "$config" broadcast $( cat /sys/class/net/$iface/address | \
       awk -v p=$prefix -F ':' '{ printf(p".%d.%d.255","0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" reset 0
+      [ "$(uci_get_state network "$config" initialized)" = 1 ] && set_apif_wireless "$iface" "$config" 
       uci_commit network
       scan_interfaces
       ;;
@@ -316,7 +331,7 @@ setup_interface_apif() {
 
   config_get type "$config" TYPE
   [ "$type" = "alias" ] && return 0
-
+      
   env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=apif RESET="$reset" /sbin/hotplug-call "iface" &
 }
 
@@ -327,8 +342,9 @@ coldplug_interface_apif() {
   [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
   $DEBUG config_get ifname "$config" ifname
   $DEBUG set_apif_wireless "$ifname" "$config"
-  $DEBUG /sbin/wifi up "$ifname" 
+  $DEBUG /sbin/wifi up 
   $DEBUG setup_interface_apif "$ifname" "$config"
+  $DEBUG uci_set_state network "$config" initialized 1
 }
 
 #===  FUNCTION  ================================================================
@@ -404,7 +420,7 @@ setup_interface_plugif() {
       [ -z "$ipaddr" ] || ifconfig "$iface" inet "$ipaddr" netmask "$netmask" broadcast "${broadcast:-+}"
       [ -z "$dns" ] || add_dns "$config" $dns
       
-      $DEBUG set_fwzone "$config" $(uci_get mesh network lan_zone "lan")
+      $DEBUG set_fwzone "$config" $(uci_get mesh network lan_zone "$DEFAULT_LAN_FWZONE")
       $DEBUG uci_set_state network "$config" plug "1"
       ;;
     0)
