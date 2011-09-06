@@ -12,14 +12,13 @@ include /lib/network
 unset_olsrd_if() {
   local config="$1"
   
-  config_load olsrd
   config_cb() {
     local type="$1"
     local name="$2"
 
     case $type in
       Interface)
-        config_get oldifaces "$name" interface  
+        local oldifaces="$(uci_get olsrd "$name" interface)"
         local newifaces=
         for dev in $(sort_list "$oldifaces" "$config"); do
           list_remove newifaces "$dev"
@@ -42,13 +41,14 @@ unset_olsrd_if() {
 
 set_olsrd_if() {
   local config="$1"
+
   config_cb() {
     local type="$1"
     local name="$2"
 
     case $type in
       Interface)
-        config_get oldifaces "$name" interface  
+        local oldifaces="$(uci_get olsrd "$name" interface)"
         local newifaces=
         for dev in $(sort_list "$oldifaces" "$config"); do
           append newifaces "$dev"
@@ -70,20 +70,22 @@ set_olsrd_if() {
 #===============================================================================
 
 unset_olsrd_p2pif() {
-  local iface="$1"
+  local config="$1"
   
-  config_load olsrd
   config_cb() {
     local type="$1"
     local name="$2"
-    local library=
 
     case $type in
       LoadPlugin)
-        config_get NonOlsrIf "$name" NonOlsrIf  
-        case $NonOlsrIf in
-          "$iface")
-            uci_remove olsrd "$name" NonOlsrIf
+        case "$(uci_get olsrd "$name" library)" in
+          olsrd_p2pd.so.*)
+            local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf)"
+            local newconfigs=
+            for dev in $(sort_list "$oldconfigs" "$config"); do
+              list_remove newconfigs "$dev"
+            done
+            uci_set olsrd "$name" NonOlsrIf "$newconfigs"
             ;;
         esac
       ;;
@@ -102,20 +104,80 @@ unset_olsrd_p2pif() {
 #===============================================================================
 
 set_olsrd_p2pif() {
-  local iface="$1"
+  local config="$1"
   
-  config_load olsrd
   config_cb() {
     local type="$1"
     local name="$2"
-    local library=
 
     case $type in
       LoadPlugin)
-        config_get library "$name" library  
-        case $library in
-          "olsrd_p2pd.so.0.1.0")
-            uci_set olsrd "$name" NonOlsrIf "$iface"
+        case "$(uci_get olsrd "$name" library)" in
+          olsrd_p2pd.so.*)
+            local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf)"
+            local newconfigs=
+            for dev in $(sort_list "$oldconfigs" "$config"); do
+              append newconfigs "$dev"
+            done
+            uci_set olsrd "$name" NonOlsrIf "$newconfigs"
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load olsrd
+
+  uci_commit olsrd && return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  unset_olsrd_dnssrv
+#   DESCRIPTION:  Unsets the p2p plugin stanza for the olsrd config
+#    PARAMETERS:  config name of the interface to remove
+#       RETURNS:  0 on success
+#===============================================================================
+
+unset_olsrd_dnssrv() {
+  local ip4addr="$1"
+  
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      LoadPlugin)
+        case "$(uci_get olsrd "$name" dns_server)" in
+          "$ip4addr")
+            uci_remove olsrd "$name" dns_server
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load olsrd
+
+  uci_commit olsrd && return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_olsrd_dnssrv
+#   DESCRIPTION:  Sets the interface stanza for the olsrd config
+#    PARAMETERS:  
+#       RETURNS:  
+#===============================================================================
+
+set_olsrd_dnssrv() {
+  local ipv4addr="$1"
+  
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      LoadPlugin)
+        case "$(uci_get olsrd "$name" library)" in
+          olsrd_nameservice.so.*)
+            uci_set olsrd "$name" dns_server "$ipv4addr"
             ;;
         esac
       ;;
@@ -163,14 +225,14 @@ set_olsrd_hna4() {
   uci_commit olsrd && return 0
 } 
 
-OLSRD_PATH=`which olsrd`;
-[ -x "$OLSRD_PATH" ] && {
+[ -f "/etc/config/olsrd" ] && {
 case $PROTO in
   meshif)
     [ "$RESET" = 1 ] && {
       case $ACTION in
         postup)
           $DEBUG set_olsrd_if $INTERFACE
+          $DEBUG set_olsrd_dnssrv "$(uci_get_state network "$INTERFACE" ipaddr)"
         ;;
       esac
     }
@@ -181,7 +243,7 @@ case $PROTO in
         postup)
           eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
           $DEBUG set_olsrd_hna4  $NETWORK $NETMASK $INTERFACE
-          $DEBUG set_olsrd_p2pif $DEVICE
+          $DEBUG set_olsrd_p2pif $INTERFACE
         ;;
       esac
     }
@@ -192,12 +254,12 @@ case $PROTO in
         [ "$(uci_get_state network "$INTERFACE" plug)" = 0 ] || {
             eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
             $DEBUG set_olsrd_hna4  $NETWORK $NETMASK $INTERFACE
-            $DEBUG set_olsrd_p2pif $DEVICE
+            $DEBUG set_olsrd_p2pif $INTERFACE
         }
       ;;
       predown)
         $DEBUG unset_olsrd_hna4 $INTERFACE
-        $DEBUG unset_olsrd_p2pif $DEVICE
+        $DEBUG unset_olsrd_p2pif $INTERFACE
       ;; 
     esac
   ;;
