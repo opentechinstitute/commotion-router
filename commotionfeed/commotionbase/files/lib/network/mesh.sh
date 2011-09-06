@@ -271,7 +271,6 @@ coldplug_interface_meshif() {
   [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
   $DEBUG set_meshif_wireless "$config"
   $DEBUG config_get ifname "$config" ifname
-  $DEBUG /sbin/wifi up 
   $DEBUG setup_interface_meshif "$ifname" "$config"
   $DEBUG uci_set_state network "$config" initialized 1
 }
@@ -342,7 +341,6 @@ coldplug_interface_apif() {
   [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
   $DEBUG config_get ifname "$config" ifname
   $DEBUG set_apif_wireless "$ifname" "$config"
-  $DEBUG /sbin/wifi up 
   $DEBUG setup_interface_apif "$ifname" "$config"
   $DEBUG uci_set_state network "$config" initialized 1
 }

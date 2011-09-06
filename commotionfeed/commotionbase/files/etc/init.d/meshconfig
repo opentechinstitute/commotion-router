@@ -1,0 +1,108 @@
+#!/bin/sh /etc/rc.common
+
+. /etc/functions.sh
+
+#DEBUG=echo
+START=39
+STOP=91
+
+apply_mesh_defaults() {
+  local network="$1" 
+  local role="$2"
+
+  touch /etc/config/mesh
+  cd /etc/meshconfig || return 1
+	[ -f "$network/$role" ] || return 2
+	mkdir -p /tmp/.uci
+	. "./$network/$role"
+	uci commit
+  return 0
+}
+
+apply_wireless_defaults() {
+  local n=0
+  
+  # Clear out any existing wireless interfaces
+  $DEBUG uci_remove wireless @wifi-iface[]
+
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case "$type" in
+      "interface")
+        case "$(uci_get network "$name" proto)" in
+          meshif)
+            $DEBUG uci_add wireless wifi-iface
+            $DEBUG uci_set wireless @wifi-iface[-1] network "$name"
+            $DEBUG uci_set wireless @wifi-iface[-1] mode adhoc
+            ;;
+          apif)
+            $DEBUG uci_add wireless wifi-iface
+            $DEBUG uci_set wireless @wifi-iface[-1] network "$name"
+            $DEBUG uci_set wireless @wifi-iface[-1] mode ap
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load network
+  
+  reset_cb
+
+  config_cb() {
+    local type="$1"
+    local name="$2"
+    
+    case "$type" in
+      "wifi-device")
+        $DEBUG uci_set wireless "$name" disabled 0
+        $DEBUG uci_set wireless @wifi-iface[$n] device "$name"
+        n=$(($n+1))
+        lastdev="$name"
+        ;;
+      "wifi-iface")
+        [[ -z $(uci_get wireless "$name" device) ]] && \
+        $DEBUG uci_set wireless "$name" device "$lastdev"
+        ;;
+    esac
+  }
+  config_load wireless
+
+  uci_commit wireless && return 0
+}
+
+apply_hostname_defaults() {
+  local mac=$1
+  
+  local hostname="$(uci_get mesh network basename "commotion")-$(uci_get mesh node location $( echo $mac | \
+   awk -F ':' '{ printf("%d-%d-%d","0x"$4,"0x"$5,"0x"$6) }' ))"
+   
+  echo "$hostname" > /proc/sys/kernel/hostname
+  $DEBUG uci_set system @system[0] hostname "$hostname"
+  $DEBUG uci_commit system && return 0
+}
+
+
+boot() {
+  grep -qs config /etc/config/mesh || { 
+    $DEBUG apply_mesh_defaults "$(uci_get system @system[0] community "default")" "$(uci_get system @system[0] role "default")"
+  }
+
+  grep -qs config /etc/config/wireless || { 
+    rm -f /etc/config/wireless
+    $DEBUG /sbin/wifi detect > /etc/config/wireless
+    sleep 3
+    $DEBUG apply_wireless_defaults
+  }
+ 
+  case "$(uci_get system @system[0] hostname "OpenWRT")" in
+    "OpenWRT")
+      $DEBUG apply_hostname_defaults "$(uci_get wireless @wifi-device[0] macaddr)"
+    ;;
+  esac
+}
+
+start() {
+  boot
+}   
