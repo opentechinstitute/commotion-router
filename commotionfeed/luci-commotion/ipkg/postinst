@@ -1,0 +1,6 @@
+#!/bin/sh
+[ -n "${IPKG_INSTROOT}" ] || {
+	( . /etc/uci-defaults/meshconfig ) && rm -f /etc/uci-defaults/meshconfig
+	/etc/init.d/meshconfig enabled || /etc/init.d/meshconfig enable
+	exit 0
+}
