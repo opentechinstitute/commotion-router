@@ -1,0 +1,13 @@
+Index: dnsmasq
+===================================================================
+--- dnsmasq	(revision 28025)
++++ dnsmasq	(working copy)
+@@ -274,7 +274,7 @@
+ 	append_bool "$cfg" ignore "-2 $ifname" && return 0
+ 
+ 	config_get proto "$net" proto
+-	[ static = "$proto" ] || return 0
++	#[ static = "$proto" ] || return 0
+ 
+ 	config_get ipaddr "$net" ipaddr
+ 	config_get netmask "$cfg" netmask
