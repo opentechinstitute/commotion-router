@@ -50,6 +50,9 @@ DEFAULT_AP_PREFIX="101"
 DEFAULT_AP_FWZONE="ap"
 DEFAULT_LAN_PREFIX="102"
 DEFAULT_LAN_FWZONE="lan"
+DEFAULT_SECUREAP_PREFIX="102"
+DEFAULT_SECUREAP_FWZONE="lan"
+DEFAULT_SECUREAP_KEY="c0MM0t10N!"
 
 #===============================================================================
 # SETTING FUNCTIONS
@@ -64,9 +67,9 @@ DEFAULT_LAN_FWZONE="lan"
 
 set_meshif_wireless() {
   local config="$1"
-  local ssid=$(uci_get mesh network ssid "$DEFAULT_MESH_SSID") 
-  local bssid=$(uci_get mesh network bssid "$DEFAULT_MESH_BSSID") 
-  local channel=$(uci_get mesh network channel "$DEFAULT_MESH_CHANNEL") 
+  local ssid=$(uci_get mesh @network[0] ssid "$DEFAULT_MESH_SSID") 
+  local bssid=$(uci_get mesh @network[0] bssid "$DEFAULT_MESH_BSSID") 
+  local channel=$(uci_get mesh @network[0] channel "$DEFAULT_MESH_CHANNEL") 
   local net dev
 
   config_cb() {
@@ -105,10 +108,10 @@ set_apif_wireless() {
   local iface="$1"
   local config="$2"
   local wiconfig=
-  local basename=$(uci_get mesh network basename "$DEFAULT_MESH_BASENAME")
-  local location=$(uci_get mesh node location)
+  local basename=$(uci_get mesh @network[0] basename "$DEFAULT_MESH_BASENAME")
+  local location=$(uci_get system @system[0] location)
   local secure=$(uci_get network "$config" secure "0")
-  local key=$(uci_get network "$config" key)
+  local key=$(uci_get network "$config" key "$DEFAULT_SECUREAP_KEY")
   ifconfig "$iface" 2>/dev/null >/dev/null && {
     local mac=`ifconfig "$iface" | grep 'Link encap:'| awk '{ print $5}'`;
   } || {
@@ -131,18 +134,18 @@ set_apif_wireless() {
   }
   config_load wireless
 
-  [[ -n "$wiconfig" ]] && [ "$secure" = 1 ] && [[ -n "$key" ]] && \
+  [[ -n "$wiconfig" ]] && [ "$secure" = 1 ]  && \
   uci_set wireless "$wiconfig" encryption "psk2" && uci_set wireless "$wiconfig" key "$key"
 
-  [[ -n "$wiconfig" ]] && [ "$secure" = 1 ] && [[ -z "$key" ]] && \
-  uci_set wireless "$wiconfig" encryption "psk2" && uci_set wireless "$wiconfig" key `pwgen 15 1`
-  
+  [[ -n "$wiconfig" ]] && [ "$secure" = 0 ]  && \
+  uci_remove wireless "$wiconfig" encryption && uci_remove wireless "$wiconfig" key
+
   [[ -n "$wiconfig" ]] && [[ -n "$location" ]] && \
-  uci_set wireless "$wiconfig" ssid "$basename"_"$location" && uci_commit wireless && return 0
+  uci_set wireless "$wiconfig" ssid "$basename"_"$location"_"$config" && uci_commit wireless && return 0
 
   [[ -n "$wiconfig" ]] && [[ -z "$location" ]] && \
   uci_set wireless "$wiconfig" ssid "$basename"_$( echo "$mac" | \
-   awk -F ':' '{ printf("%d_%d_%d","0x"$4,"0x"$5,"0x"$6) }' ) && uci_commit wireless && return 0
+   awk -F ':' '{ printf("%d_%d_%d","0x"$4,"0x"$5,"0x"$6) }' )_"$config" && uci_commit wireless && return 0
 
   logger -t set_apif_wireless "Error! Wireless configuration for "$config" may not exist." && return 1
 }
@@ -157,25 +160,24 @@ set_apif_wireless() {
 unset_fwzone() {
   local config="$1"
   
+  reset_cb
   config_load firewall
   config_cb() {
     local type="$1"
     local name="$2"
     case $type in
       zone)
-        local oldnetworks=
-        config_get oldnetworks "$name" network  
-        local newnetworks=
-        for net in $(sort_list "$oldnetworks" "$config"); do
-          list_remove newnetworks "$net"
+        local networks="$(uci_get firewall "$name" network)"
+        uci_remove firewall "$name" network
+        for net in $networks; do
+          [ "$net" != "$config" ] && uci add_list firewall."$name".network="$net"
         done
-        uci_set firewall "$name" network "$newnetworks"
         ;;
     esac
   }
   config_load firewall
 
-  uci_commit firewall && return 0
+  return 0
 }
   
 #===  FUNCTION  ================================================================
@@ -200,13 +202,7 @@ set_fwzone() {
         local fwname=$(uci_get firewall "$name" name)
         case "$fwname" in
           "$zone")
-            local oldnetworks=
-            config_get oldnetworks "$name" network  
-            local newnetworks=
-            for net in $(sort_list "$oldnetworks" "$config"); do
-              append newnetworks "$net"
-            done
-            uci_set firewall "$name" network "$newnetworks"
+            uci add_list firewall."$name".network="$config"
             ;;
         esac
         ;;
@@ -214,7 +210,7 @@ set_fwzone() {
   }
   config_load firewall
 
-  uci_commit firewall && return 0
+  return 0
 }
 
 #===============================================================================
@@ -224,8 +220,7 @@ set_fwzone() {
 #===  FUNCTION  ================================================================
 #          NAME:  setup_interface_meshif
 #   DESCRIPTION:  The function called by OpenWRT for proto 'meshif' interfaces.
-#    PARAMETERS:  2; config name and interface
-#       RETURNS:  
+#    PARAMETERS:  2; interface and config name
 #===============================================================================
 
 setup_interface_meshif() {
@@ -238,14 +233,16 @@ setup_interface_meshif() {
   config_get_bool reset "$config" reset 1
   case "$reset" in
     1)
-      local prefix=$(uci_get mesh network mesh_prefix "$DEFAULT_MESH_PREFIX")
-      $DEBUG set_fwzone "$config" $(uci_get mesh network mesh_zone "$DEFAULT_MESH_FWZONE")
+      local prefix=$(uci_get mesh @network[0] mesh_prefix "$DEFAULT_MESH_PREFIX")
+      $DEBUG unset_fwzone "$config"
+      $DEBUG set_fwzone "$config" $(uci_get mesh @network[0] mesh_zone "$DEFAULT_MESH_FWZONE")
+      $DEBUG uci_commit firewall
       $DEBUG uci_set network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
       awk -v p=$prefix -F ':' '{ printf(p".%d.%d.%d","0x"$4,"0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" netmask "255.0.0.0"
       $DEBUG uci_set network "$config" broadcast "255.255.255.255"
       $DEBUG uci_set network "$config" reset 0
-      [ "$(uci_get_state network "$config" initialized)" = 1 ] && set_meshif_wireless "$iface" "$config" 
+      [ "$(uci_get_state network "$config" boot)" = 1 ] || set_meshif_wireless "$iface" "$config" 
       uci_commit network
       scan_interfaces
       ;;
@@ -264,6 +261,12 @@ setup_interface_meshif() {
   env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=meshif RESET="$reset" /sbin/hotplug-call "iface" &
 }
 
+#===  FUNCTION  ================================================================
+#          NAME:  coldplug_interface_meshif
+#   DESCRIPTION:  Early loading of meshif wireless configuration.
+#    PARAMETERS:  1; Config name of interface
+#===============================================================================
+
 coldplug_interface_meshif() {
   local config="$1"
   local reset=0
@@ -271,15 +274,15 @@ coldplug_interface_meshif() {
   [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
   $DEBUG set_meshif_wireless "$config"
   $DEBUG config_get ifname "$config" ifname
+  $DEBUG /sbin/wifi 
+  $DEBUG uci_set_state network "$config" boot 1
   $DEBUG setup_interface_meshif "$ifname" "$config"
-  $DEBUG uci_set_state network "$config" initialized 1
 }
 
 #===  FUNCTION  ================================================================
 #          NAME:  stop_interface_meshif
-#   DESCRIPTION:  
-#    PARAMETERS:  
-#       RETURNS:  
+#   DESCRIPTION:  Stops meshif interfaces, calls postdown service hooks.
+#    PARAMETERS:  1; Config name of interface
 #===============================================================================
 
 stop_interface_meshif() {
@@ -293,8 +296,7 @@ stop_interface_meshif() {
 #===  FUNCTION  ================================================================
 #          NAME:  setup_interface_apif
 #   DESCRIPTION:  The function called by OpenWRT for proto 'apif' interfaces.
-#    PARAMETERS:  2; config name and interface
-#       RETURNS:  
+#    PARAMETERS:  2; interface and config name
 #===============================================================================
 
 setup_interface_apif() {
@@ -307,15 +309,28 @@ setup_interface_apif() {
   config_get_bool reset "$config" reset 1
   case "$reset" in
     1)
-      local prefix=$(uci_get mesh network ap_prefix "$DEFAULT_AP_PREFIX")
-      $DEBUG set_fwzone "$config" $(uci_get mesh network ap_zone "$DEFAULT_AP_FWZONE")
+      local prefix
+      case "$(uci_get network "$config" secure 0)" in
+        0)
+          $DEBUG unset_fwzone "$config"
+          $DEBUG set_fwzone "$config" $(uci_get mesh @network[0] ap_zone "$DEFAULT_AP_FWZONE")
+          $DEBUG uci_commit firewall
+          prefix=$(uci_get mesh @network[0] ap_prefix "$DEFAULT_AP_PREFIX")
+          ;;
+        1)
+          $DEBUG unset_fwzone "$config"
+          $DEBUG set_fwzone "$config" $(uci_get mesh @network[0] secureap_zone "$DEFAULT_SECUREAP_FWZONE")
+          $DEBUG uci_commit firewall
+          prefix=$(uci_get mesh @network[0] secureap_prefix "$DEFAULT_SECUREAP_PREFIX")
+          ;;
+      esac
       $DEBUG uci_set network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
       awk -v p=$prefix -F ':' '{ printf(p".%d.%d.1","0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" netmask "255.255.255.0"
       $DEBUG uci_set network "$config" broadcast $( cat /sys/class/net/$iface/address | \
       awk -v p=$prefix -F ':' '{ printf(p".%d.%d.255","0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" reset 0
-      [ "$(uci_get_state network "$config" initialized)" = 1 ] && set_apif_wireless "$iface" "$config" 
+      [ "$(uci_get_state network "$config" boot)" = 1 ] || set_apif_wireless "$iface" "$config"
       uci_commit network
       scan_interfaces
       ;;
@@ -334,6 +349,12 @@ setup_interface_apif() {
   env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=apif RESET="$reset" /sbin/hotplug-call "iface" &
 }
 
+#===  FUNCTION  ================================================================
+#          NAME:  coldplug_interface_apif
+#   DESCRIPTION:  Early loading of apif wireless configuration.
+#    PARAMETERS:  1; Config name of interface
+#===============================================================================
+
 coldplug_interface_apif() {
   local config="$1"
   local reset=0
@@ -341,15 +362,15 @@ coldplug_interface_apif() {
   [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
   $DEBUG config_get ifname "$config" ifname
   $DEBUG set_apif_wireless "$ifname" "$config"
+  $DEBUG /sbin/wifi 
+  $DEBUG uci_set_state network "$config" boot 1
   $DEBUG setup_interface_apif "$ifname" "$config"
-  $DEBUG uci_set_state network "$config" initialized 1
 }
 
 #===  FUNCTION  ================================================================
 #          NAME:  stop_interface_apif
-#   DESCRIPTION:  
-#    PARAMETERS:  
-#       RETURNS:  
+#   DESCRIPTION:  Stops apif interfaces, calls postdown service hooks.
+#    PARAMETERS:  1; Config name of interface
 #===============================================================================
 
 stop_interface_apif() {
@@ -362,9 +383,8 @@ stop_interface_apif() {
 
 #===  FUNCTION  ================================================================
 #          NAME:  setup_interface_plugif
-#   DESCRIPTION:  
-#    PARAMETERS:  
-#       RETURNS:  
+#   DESCRIPTION:  The function called by OpenWRT for proto 'plugif' interfaces.
+#    PARAMETERS:  2; interface and config name
 #===============================================================================
 
 setup_interface_plugif() {
@@ -389,7 +409,7 @@ setup_interface_plugif() {
   config_get_bool broadcast "$config" broadcast 0                 
                                                                      
   [ -z "$ipaddr" ] || $DEBUG ifconfig "$iface" "$ipaddr" ${netmask:+netmask "$netmask"}
-  $DEBUG set_fwzone "$config" $(uci_get mesh network wan_zone "wan")
+  $DEBUG set_fwzone "$config" $(uci_get mesh @network[0] wan_zone "wan")
                                                                                                 
   # don't stay running in background.
   local dhcpopts="-n -q"                                                         
@@ -405,7 +425,7 @@ setup_interface_plugif() {
 
   case "$?" in
     1)
-      local prefix=$(uci_get mesh network lan_prefix "$DEFAULT_LAN_PREFIX")
+      local prefix=$(uci_get mesh @network[0] lan_prefix "$DEFAULT_LAN_PREFIX")
       $DEBUG uci_set_state network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
       awk -v p=$prefix -F ':' '{ printf(p".%d.%d.1","0x"$5,"0x"$6) }' )
       $DEBUG uci_set_state network "$config" netmask "255.255.255.0"
@@ -418,22 +438,23 @@ setup_interface_plugif() {
       [ -z "$ipaddr" ] || ifconfig "$iface" inet "$ipaddr" netmask "$netmask" broadcast "${broadcast:-+}"
       [ -z "$dns" ] || add_dns "$config" $dns
       
-      $DEBUG set_fwzone "$config" $(uci_get mesh network lan_zone "$DEFAULT_LAN_FWZONE")
+      $DEBUG unset_fwzone "$config"
+      $DEBUG set_fwzone "$config" $(uci_get mesh @network[0] lan_zone "$DEFAULT_LAN_FWZONE")
+      $DEBUG uci_commit firewall
       $DEBUG uci_set_state network "$config" plug "1"
       ;;
     0)
       $DEBUG uci_set_state network "$config" plug "0"
+      $DEBUG uci_commit firewall
       ;;
   esac
   env -i ACTION="ifup" INTERFACE="$config" DEVICE="$iface" PROTO=plugif /sbin/hotplug-call "iface" &
 }
 
-
 #===  FUNCTION  ================================================================
 #          NAME:  stop_interface_plugif
-#   DESCRIPTION:  
-#    PARAMETERS:  
-#       RETURNS:  
+#   DESCRIPTION:  Stops plugif interfaces, clears configs.
+#    PARAMETERS:  1; Config name of interface
 #===============================================================================
 
 stop_interface_plugif() {
