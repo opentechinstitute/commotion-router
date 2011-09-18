@@ -3,8 +3,8 @@
 #===  FUNCTION  ================================================================
 #          NAME:  unset_splash_if
 #   DESCRIPTION:  Unset luci_splash interface/zone settings
-#    PARAMETERS:  
-#       RETURNS:  
+#    PARAMETERS:  config name of network
+#       RETURNS:  0 on success
 #===============================================================================
 
 unset_splash_if() {
@@ -26,14 +26,14 @@ unset_splash_if() {
   }
   config_load luci_splash
   
-  uci_commit luci_splash && return 0
+  return 0
 }
 
 #===  FUNCTION  ================================================================
 #          NAME:  set_splash_if
 #   DESCRIPTION:  Set luci_splash interface settings
-#    PARAMETERS:  
-#       RETURNS:  
+#    PARAMETERS:  2; config name of network, firewall zone
+#       RETURNS:  0 on success
 #===============================================================================
 
 set_splash_if() {
@@ -43,14 +43,14 @@ set_splash_if() {
   uci_add luci_splash iface 
   uci_set luci_splash @iface[-1] network "$config"
   uci_set luci_splash @iface[-1] zone "$zone"
-  uci_commit luci_splash && return 0
+  return 0
 }
 
 #===  FUNCTION  ================================================================
 #          NAME:  get_fwzone_if
 #   DESCRIPTION:  Get firewall zone for corresponding interface.
-#    PARAMETERS:  
-#       RETURNS:  
+#    PARAMETERS:  config name of network
+#       RETURNS:  0 on success
 #===============================================================================
 
 get_fwzone_if() {
@@ -84,9 +84,16 @@ case $PROTO in
           case $(uci_get network "$INTERFACE" splash "1") in
             0)
               $DEBUG unset_splash_if $INTERFACE
+              $DEBUG uci_commit luci_splash
+              $DEBUG /etc/init.d/luci_splash restart
+              $DEBUG /etc/init.d/uhttpd restart
             ;;
             1)
+              $DEBUG unset_splash_if $INTERFACE
               $DEBUG set_splash_if $INTERFACE $(get_fwzone_if "$INTERFACE") 
+              $DEBUG uci_commit luci_splash
+              $DEBUG /etc/init.d/luci_splash restart
+              $DEBUG /etc/init.d/uhttpd restart
             ;;
           esac
         ;;
@@ -94,6 +101,9 @@ case $PROTO in
           case $(uci_get network "$INTERFACE" splash "1") in
             1)
               $DEBUG unset_splash_if $INTERFACE 
+              $DEBUG uci_commit luci_splash
+              $DEBUG /etc/init.d/luci_splash restart
+              $DEBUG /etc/init.d/uhttpd restart
             ;;
           esac
         ;;
