@@ -98,9 +98,9 @@ unset_olsrd_p2pif() {
 
 #===  FUNCTION  ================================================================
 #          NAME:  set_olsrd_p2pif
-#   DESCRIPTION:  Sets the interface stanza for the olsrd config
-#    PARAMETERS:  
-#       RETURNS:  
+#   DESCRIPTION:  Sets the p2p plugin stanza for the olsrd config
+#    PARAMETERS:  config name of the interface to add
+#       RETURNS:  0 on success
 #===============================================================================
 
 set_olsrd_p2pif() {
@@ -132,8 +132,8 @@ set_olsrd_p2pif() {
 
 #===  FUNCTION  ================================================================
 #          NAME:  unset_olsrd_dnssrv
-#   DESCRIPTION:  Unsets the p2p plugin stanza for the olsrd config
-#    PARAMETERS:  config name of the interface to remove
+#   DESCRIPTION:  Unsets the dns-server plugin option for the olsrd config
+#    PARAMETERS:  IP address of the interface to remove
 #       RETURNS:  0 on success
 #===============================================================================
 
@@ -161,9 +161,9 @@ unset_olsrd_dnssrv() {
 
 #===  FUNCTION  ================================================================
 #          NAME:  set_olsrd_dnssrv
-#   DESCRIPTION:  Sets the interface stanza for the olsrd config
-#    PARAMETERS:  
-#       RETURNS:  
+#   DESCRIPTION:  Sets the dns-server plugin option for the olsrd config
+#    PARAMETERS:  IP address of the interface to add
+#       RETURNS:  0 on success
 #===============================================================================
 
 set_olsrd_dnssrv() {
@@ -191,8 +191,8 @@ set_olsrd_dnssrv() {
 #===  FUNCTION  ================================================================
 #          NAME:  unset_olsrd_hna4
 #   DESCRIPTION:  Unset HNA4 stanza in olsrd config
-#    PARAMETERS:  1; IPv4 address of network to unset
-#       RETURNS:  0 on success, 1 on failure
+#    PARAMETERS:  1; config name of interface to unset
+#       RETURNS:  0 on success
 #===============================================================================
 
 unset_olsrd_hna4() {
@@ -206,8 +206,8 @@ unset_olsrd_hna4() {
 #===  FUNCTION  ================================================================
 #          NAME:  set_olsrd_hna4
 #   DESCRIPTION:  Set HNA4 stanza in olsrd config
-#    PARAMETERS:  2; IPv4 address and netmask to set
-#       RETURNS:  0 on success, 1 on failure
+#    PARAMETERS:  3; IPv4 address, netmask to set, and config
+#       RETURNS:  0 on success
 #===============================================================================
 
 set_olsrd_hna4() {
@@ -215,12 +215,9 @@ set_olsrd_hna4() {
   local netmask=$2
   local config=$3
 
-  #Remove duplicates  
-  #unset_olsrd_hna4 ipv4addr
-
   uci_add olsrd Hna4 "$config" 
-  uci_set olsrd @Hna4[-1] netaddr "$ipv4addr"
-  uci_set olsrd @Hna4[-1] netmask "$netmask"
+  uci_set olsrd "$config" netaddr "$ipv4addr"
+  uci_set olsrd "$config" netmask "$netmask"
 
   uci_commit olsrd && return 0
 } 
@@ -232,7 +229,7 @@ case $PROTO in
       case $ACTION in
         postup)
           $DEBUG set_olsrd_if $INTERFACE
-          $DEBUG set_olsrd_dnssrv "$(uci_get_state network "$INTERFACE" ipaddr)"
+          #$DEBUG set_olsrd_dnssrv "$(uci_get_state network "$INTERFACE" ipaddr)"
         ;;
       esac
     }
