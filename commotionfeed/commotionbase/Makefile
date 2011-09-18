@@ -17,7 +17,7 @@ define Package/commotionbase
   CATEGORY:=Commotion
   TITLE:=Commotion Base System
   DEPENDS:=+dnsmasq +olsrd
-  URL:=http://tech.chambana.net/projects/commotion
+  URL:=http://commotionwireless.net
 endef
 
 define Build/Prepare
