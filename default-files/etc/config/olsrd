@@ -3,6 +3,7 @@ config 'olsrd'
   option 'IpVersion' '4'
   option 'LinkQualityLevel' '2'
   option 'LinkQualityAlgorithm' 'etx_ffeth'
+  #option 'SmartGateway' 'yes'
 
 config 'LoadPlugin'
   option 'library' 'olsrd_arprefresh.so.0.1'
@@ -17,7 +18,7 @@ config 'LoadPlugin'
 
 config 'LoadPlugin'
   option 'library' 'olsrd_nameservice.so.0.3'
-#  option 'resolv-file' '/tmp/resolv.conf.auto'
+  #option 'resolv_file' '/tmp/resolv.conf.auto'
   option 'suffix' '.mesh'
 
 config 'LoadPlugin'
