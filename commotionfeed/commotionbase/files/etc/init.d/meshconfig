@@ -3,8 +3,13 @@
 . /etc/functions.sh
 
 #DEBUG=echo
-START=39
+START=38
 STOP=91
+EXTRA_COMMANDS="configure upgrade cron"
+EXTRA_HELP=<<EOF
+        configure Set mesh configuration defaults.
+        upgrade Run remote system upgrades.
+EOF
 
 apply_mesh_defaults() {
   local network="$1" 
@@ -15,8 +20,11 @@ apply_mesh_defaults() {
 	[ -f "$network/$role" ] || return 2
 	mkdir -p /tmp/.uci
 	. "./$network/$role"
-	uci commit
-  return 0
+
+  $DEBUG uci_set system @system[0] community "$network"
+  $DEBUG uci_set system @system[0] role "$role"
+
+	uci_commit
 }
 
 apply_wireless_defaults() {
@@ -36,11 +44,13 @@ apply_wireless_defaults() {
             $DEBUG uci_add wireless wifi-iface
             $DEBUG uci_set wireless @wifi-iface[-1] network "$name"
             $DEBUG uci_set wireless @wifi-iface[-1] mode adhoc
+            $DEBUG uci_set wireless @wifi-iface[-1] ssid "CommotionSetup-$name"
             ;;
           apif)
             $DEBUG uci_add wireless wifi-iface
             $DEBUG uci_set wireless @wifi-iface[-1] network "$name"
             $DEBUG uci_set wireless @wifi-iface[-1] mode ap
+            $DEBUG uci_set wireless @wifi-iface[-1] ssid "CommotionSetup-$name"
             ;;
         esac
       ;;
@@ -69,36 +79,38 @@ apply_wireless_defaults() {
   }
   config_load wireless
 
-  uci_commit wireless && return 0
+  uci_commit wireless
 }
 
 apply_hostname_defaults() {
   local mac=$1
   
-  local hostname="$(uci_get mesh network basename "commotion")-$(uci_get mesh node location $( echo $mac | \
+  local hostname="$(uci_get mesh @network[0] basename "commotion")-$(uci_get system @system[0] location $( echo $mac | \
    awk -F ':' '{ printf("%d-%d-%d","0x"$4,"0x"$5,"0x"$6) }' ))"
    
   echo "$hostname" > /proc/sys/kernel/hostname
   $DEBUG uci_set system @system[0] hostname "$hostname"
-  $DEBUG uci_commit system && return 0
+  $DEBUG uci_commit system
 }
 
 
 boot() {
   grep -qs config /etc/config/mesh || { 
     $DEBUG apply_mesh_defaults "$(uci_get system @system[0] community "default")" "$(uci_get system @system[0] role "default")"
+    logger -t meshconfig "Applied mesh defaults."
   }
 
   grep -qs config /etc/config/wireless || { 
     rm -f /etc/config/wireless
     $DEBUG /sbin/wifi detect > /etc/config/wireless
-    sleep 3
     $DEBUG apply_wireless_defaults
+    logger -t meshconfig "Applied wireless defaults."
   }
  
-  case "$(uci_get system @system[0] hostname "OpenWRT")" in
-    "OpenWRT")
+  case "$(uci_get system @system[0] hostname "OpenWrt")" in
+    "OpenWrt")
       $DEBUG apply_hostname_defaults "$(uci_get wireless @wifi-device[0] macaddr)"
+      logger -t meshconfig "Applied hostname defaults."
     ;;
   esac
 }
@@ -106,3 +118,49 @@ boot() {
 start() {
   boot
 }   
+
+restart() {
+  trap '' TERM
+  stop "$@"
+
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case "$type" in
+      "interface")
+        case "$(uci_get network "$name" proto)" in
+          meshif)
+            $DEBUG uci_set network "$name" reset 1
+            ;;
+          apif)
+            $DEBUG uci_set network "$name" reset 1
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load network
+  $DEBUG uci_commit network
+
+  $DEBUG apply_hostname_defaults "$(uci_get wireless @wifi-device[0] macaddr)"
+
+  start "$@"
+}
+
+configure() {
+  $DEBUG apply_mesh_defaults "$1" "$2"
+}
+
+upgrade() {
+  local args
+  [ -z "$(uci_get system @upgrade[0] noverify 0)" ] || append args "-v"
+  [ -z "$(uci_get system @upgrade[0] nobackup 0)" ] || append args "-n"
+  $DEBUG remote-update "$args" && return 0
+}
+
+cron() {
+  [ -z "$(uci_get system @upgrade[0] noverify 0)" ] || upgrade
+  return 0
+} 
+  

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+uci -q batch <<-EOF >/dev/null
+  add mesh network
+  set mesh.@network[0].basename=commotion
+  set mesh.@network[0].ssid=commotionwireless.net
+  set mesh.@network[0].bssid=02:CA:FF:EE:BA:BE
+  set mesh.@network[0].channel=5
+  set mesh.@network[0].mesh_prefix=5
+  set mesh.@network[0].mesh_fwzone=mesh
+  set mesh.@network[0].ap_prefix=101
+  set mesh.@network[0].ap_fwzone=ap
+  set mesh.@network[0].lan_prefix=102
+  set mesh.@network[0].lan_fwzone=lan
+  set mesh.@network[0].secureap_prefix=102
+  set mesh.@network[0].secureap_fwzone=lan
+  add system upgrade
+  set system.@upgrade[0].repository=http://repo.commotionwireless.net
+  commit mesh
+  commit system
+EOF
