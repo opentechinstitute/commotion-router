@@ -51,4 +51,8 @@ if communities then
   end
 end
 
+function m:on_commit(map)
+  os.execute("/etc/init.d/meshconfig restart")
+end
+
 return m
