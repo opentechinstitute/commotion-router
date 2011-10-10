@@ -1,0 +1,14 @@
+#!/bin/sh /etc/rc.common
+START=98
+
+RNGD_INTERVAL=30
+RNGD_AMOUNT=4000
+RNGD_DEVICE=/dev/urandom
+
+start() {
+    rngd -r $RNGD_DEVICE -W $RNGD_AMOUNT -t $RNGD_INTERVAL
+}
+
+stop() {
+    killall rngd
+}
