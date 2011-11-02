@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Backfire (r28025)
-# Fri Sep 16 16:18:47 2011
+# Mon Oct 10 15:28:24 2011
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -1913,7 +1913,7 @@ CONFIG_PACKAGE_libopenssl=y
 # CONFIG_PACKAGE_libsqlite3 is not set
 # CONFIG_PACKAGE_tokyocabinet is not set
 # CONFIG_PACKAGE_alsa-lib is not set
-# CONFIG_PACKAGE_argp-standalone is not set
+CONFIG_PACKAGE_argp-standalone=y
 # CONFIG_PACKAGE_argtable is not set
 # CONFIG_PACKAGE_bind-libs is not set
 # CONFIG_PACKAGE_bluez-libs is not set
@@ -3184,6 +3184,7 @@ CONFIG_PACKAGE_px5g=y
 # CONFIG_PACKAGE_qc-usb-utils is not set
 # CONFIG_PACKAGE_rcs is not set
 # CONFIG_PACKAGE_restorefactory is not set
+CONFIG_PACKAGE_rng-tools=y
 # CONFIG_PACKAGE_robocfg is not set
 # CONFIG_PACKAGE_rrdcgi is not set
 # CONFIG_PACKAGE_rrdcgi1 is not set
