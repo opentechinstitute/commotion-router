@@ -13,7 +13,7 @@ if ! grep -q commotion feeds.conf; then
 fi
 
 scripts/feeds update
-scripts/feeds install commotionbase
+for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo " Commotion OpenWrt is prepared. To build the firmware, type:"
