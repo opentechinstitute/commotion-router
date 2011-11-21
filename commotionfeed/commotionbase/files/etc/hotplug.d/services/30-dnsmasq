@@ -54,7 +54,7 @@ set_dnsmasq_if() {
           "$config")
             uci_set dhcp "$name" interface "$config"
             uci_set dhcp "$name" start "2"
-            uci_set dhcp "$name" limit "252"
+            uci_set dhcp "$name" limit "150"
             uci_set dhcp "$name" leasetime "12h"
             uci_set dhcp "$name" ignore "0"
             ;; 

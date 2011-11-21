@@ -19,7 +19,7 @@ config 'dnsmasq'
 config 'dhcp'
 	option 'interface' 'ap'
 	option 'start' '2'
-	option 'limit' '252'
+	option 'limit' '150'
 	option 'leasetime' '12h'
 	option 'ignore' '0'
 
