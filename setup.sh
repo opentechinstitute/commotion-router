@@ -12,7 +12,7 @@ if ! grep -q commotion feeds.conf; then
     echo "src-link commotion ../../commotionfeed" >> feeds.conf
 fi
 
-scripts/feeds update
+scripts/feeds update -a
 for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
