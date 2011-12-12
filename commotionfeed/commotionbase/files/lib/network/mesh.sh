@@ -409,6 +409,7 @@ setup_interface_plugif() {
   config_get_bool broadcast "$config" broadcast 0                 
                                                                      
   [ -z "$ipaddr" ] || $DEBUG ifconfig "$iface" "$ipaddr" ${netmask:+netmask "$netmask"}
+  $DEBUG unset_fwzone "$config"
   $DEBUG set_fwzone "$config" $(uci_get mesh @network[0] wan_zone "wan")
                                                                                                 
   # don't stay running in background.
