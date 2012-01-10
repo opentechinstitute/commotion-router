@@ -16,7 +16,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/luci-$(MODULE_NAME)
   SECTION:=luci
   CATEGORY:=LuCI
-  SUBMENU:=Modules
+  SUBMENU:=2. Modules
   DEPENDS:=+commotionbase
   TITLE:=LuCI Module - $(MODULE_TITLE)
   URL:=http://commotionwireless.net/
