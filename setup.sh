@@ -3,6 +3,7 @@
 svn co svn://svn.openwrt.org/openwrt/tags/backfire_10.03.1 openwrt || exit 1
 
 cd openwrt
+make defconfig
 [ ! -e .config ] && cp -v ../config .config
 [ ! -e .config.old ] && cp -v ../config .config.old
 [ ! -e feeds.conf ] && cp -v feeds.conf.default feeds.conf
