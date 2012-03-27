@@ -6,11 +6,11 @@ config 'interface' 'loopback'
 	option 'netmask' '255.0.0.0'
 
 config 'interface' 'mesh'
-	option 'ifname' 'wlan2'
+	option 'ifname' 'wlan0-2'
 	option 'proto' 'meshif'
 
 config 'interface' 'secure'
-	option 'ifname' 'wlan1'
+	option 'ifname' 'wlan0-1'
 	option 'proto' 'apif'
   option 'secure' '1'
   option 'splash' '0'
