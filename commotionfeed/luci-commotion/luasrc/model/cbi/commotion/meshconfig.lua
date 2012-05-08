@@ -36,6 +36,7 @@ o = m2:section(TypedSection, "system", translate("Settings specific to this node
 o.anonymous = true
 
 o:option(Value, "location", translate("Location"), translate("Human-readable location, optionally used to generate hostname/SSID. No spaces or underscores."))
+o:option(Value, "homepage", translate("Homepage"), translate("Homepage for this node or network, used in the splash screen."))
 --[[
 LatLon and OpenStreetMap implementation borrowed from Freifunk.
 ]]--
