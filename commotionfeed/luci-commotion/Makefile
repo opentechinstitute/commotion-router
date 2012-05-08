@@ -39,6 +39,10 @@ define Package/luci-$(MODULE_NAME)/install
 	$(CP) -a ./luasrc/controller/$(MODULE_NAME)/* $(1)/usr/lib/lua/luci/controller/$(MODULE_NAME)/ 2>/dev/null || true
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/$(MODULE_NAME)
 	$(CP) -a ./luasrc/model/cbi/$(MODULE_NAME)/* $(1)/usr/lib/lua/luci/model/cbi/$(MODULE_NAME)/ 2>/dev/null || true
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/admin_network
+	$(CP) -a ./luasrc/model/cbi/admin_network/* $(1)/usr/lib/lua/luci/model/cbi/admin_network/ 2>/dev/null || true
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/network
+	$(CP) -a ./luasrc/model/network/* $(1)/usr/lib/lua/luci/model/network/ 2>/dev/null || true
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/$(MODULE_NAME)
 	$(CP) -a ./luasrc/view/$(MODULE_NAME)/* $(1)/usr/lib/lua/luci/view/$(MODULE_NAME)/ 2>/dev/null || true
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/cbi

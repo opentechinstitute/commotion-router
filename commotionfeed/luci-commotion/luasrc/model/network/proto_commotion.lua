@@ -45,7 +45,7 @@ for _, p in ipairs({"meshif", "apif", "plugif"}) do
 	end
 
 	function proto.is_installed(self)
-		return nixio.fs.access("/lib/network/mesh.sh")
+		return nixio.fs.access("/lib/network/commotion.sh")
 	end
 
 	function proto.is_virtual(self)
