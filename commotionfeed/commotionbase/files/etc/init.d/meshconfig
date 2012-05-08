@@ -18,14 +18,14 @@ apply_mesh_defaults() {
 
   touch /etc/config/mesh
   cd /etc/meshconfig || return 1
-	[ -f "$network/$role" ] || return 2
-	mkdir -p /tmp/.uci
-	. "./$network/$role"
+  [ -f "$network/$role" ] || return 2
+  mkdir -p /tmp/.uci
+  . "./$network/$role"
 
   $DEBUG uci_set system @system[0] community "$network"
   $DEBUG uci_set system @system[0] role "$role"
 
-	uci_commit
+  uci_commit
 }
 
 apply_wireless_defaults() {
