@@ -1,9 +1,6 @@
 #!/bin/sh
 
 [ -f "/usr/bin/patch" ] && { \
-  cd /usr/lib/lua/luci/model/cbi/admin_network/
-  patch < /usr/share/commotion/patches/luci-admin.patch
-  
   cd /etc/init.d/
   patch < /usr/share/commotion/patches/dnsmasq.patch
   
