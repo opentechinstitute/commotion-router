@@ -228,15 +228,19 @@ setup_interface_meshif() {
   case "$reset" in
     1)
       local prefix=$(uci_get mesh @network[0] mesh_prefix "$DEFAULT_MESH_PREFIX")
+      local mac=$(uci_get wireless @wifi-device[0] macaddr 0)
+      [ $mac = 0 ] && \
+      logger -t setup_interface_meshif "Error! Could not get MAC from config file."
       $DEBUG unset_fwzone "$config"
       $DEBUG set_fwzone "$config" $(uci_get mesh @network[0] mesh_zone "$DEFAULT_MESH_FWZONE")
       $DEBUG uci_commit firewall
-      $DEBUG uci_set network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
+      $DEBUG uci_set network "$config" ipaddr $( echo $mac | \
       awk -v p=$prefix -F ':' '{ printf(p".%d.%d.%d","0x"$4,"0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" netmask "255.0.0.0"
       $DEBUG uci_set network "$config" broadcast "255.255.255.255"
       $DEBUG uci_set network "$config" reset 0
-      [ "$(uci_get_state network "$config" boot)" = 1 ] || set_meshif_wireless "$iface" "$config" 
+      [ "$(uci_get_state network "$config" boot)" = 1 ] || set_meshif_wireless "$config" 
+      $DEBUG uci_set_state network "$config" boot 0
       uci_commit network
       scan_interfaces
       ;;
@@ -328,13 +332,17 @@ setup_interface_apif() {
           prefix=$(uci_get mesh @network[0] secureap_prefix "$DEFAULT_SECUREAP_PREFIX")
           ;;
       esac
-      $DEBUG uci_set network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
+      local mac=$(uci_get wireless @wifi-device[0] macaddr 0)
+      [ $mac = 0 ] && \
+      logger -t setup_interface_apif "Error! Could not get MAC from config file."
+      $DEBUG uci_set network "$config" ipaddr $( echo $mac | \
       awk -v p=$prefix -F ':' '{ printf(p".%d.%d.1","0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" netmask "255.255.255.0"
-      $DEBUG uci_set network "$config" broadcast $( cat /sys/class/net/$iface/address | \
+      $DEBUG uci_set network "$config" broadcast $( echo $mac | \
       awk -v p=$prefix -F ':' '{ printf(p".%d.%d.255","0x"$5,"0x"$6) }' )
       $DEBUG uci_set network "$config" reset 0
-      [ "$(uci_get_state network "$config" boot)" = 1 ] || set_apif_wireless "$iface" "$config"
+      [ "$(uci_get_state network "$config" boot)" = 1 ] || set_apif_wireless "$config"
+      $DEBUG uci_set_state network "$config" boot 0
       uci_commit network
       scan_interfaces
       ;;
@@ -438,10 +446,13 @@ setup_interface_plugif() {
   case "$?" in
     1)
       local prefix=$(uci_get mesh @network[0] lan_prefix "$DEFAULT_LAN_PREFIX")
-      $DEBUG uci_set_state network "$config" ipaddr $( cat /sys/class/net/$iface/address | \
+      local mac=$(uci_get wireless @wifi-device[0] macaddr 0)
+      [ $mac = 0 ] && \
+      logger -t setup_interface_apif "Error! Could not get MAC from config file."
+      $DEBUG uci_set_state network "$config" ipaddr $( echo $mac | \
       awk -v p=$prefix -F ':' '{ printf(p".%d.%d.1","0x"$5,"0x"$6) }' )
       $DEBUG uci_set_state network "$config" netmask "255.255.255.0"
-      $DEBUG uci_set_state network "$config" broadcast $( cat /sys/class/net/$iface/address | \
+      $DEBUG uci_set_state network "$config" broadcast $( echo $mac | \
       awk -v p=$prefix -F ':' '{ printf(p".%d.%d.255","0x"$5,"0x"$6) }' )
       local ipaddr="$(uci_get_state network "$config" ipaddr)"
       local netmask="$(uci_get_state network "$config" netmask)"
