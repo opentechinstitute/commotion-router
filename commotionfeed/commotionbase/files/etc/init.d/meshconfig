@@ -1,6 +1,7 @@
 #!/bin/sh /etc/rc.common
 
 . /etc/functions.sh
+. /lib/functions/meshconfig.sh
 
 #DEBUG=echo
 START=38
@@ -85,8 +86,7 @@ apply_wireless_defaults() {
 apply_hostname_defaults() {
   local mac=$1
   
-  local hostname="$(uci_get mesh @network[0] basename "commotion")-$(uci_get system @system[0] location $( echo $mac | \
-   awk -F ':' '{ printf("%d-%d-%d","0x"$4,"0x"$5,"0x"$6) }' ))"
+  local hostname="$(uci_get mesh @network[0] basename "commotion")-$(uci_get system @system[0] location $(uci_get system @system[0] nodeid))"
    
   echo "$hostname" > /proc/sys/kernel/hostname
   $DEBUG uci_set system @system[0] hostname "$hostname"
@@ -100,12 +100,35 @@ boot() {
     logger -t meshconfig "Applied mesh defaults."
   }
 
-  grep -qs config /etc/config/wireless || { 
-    rm -f /etc/config/wireless
-    $DEBUG /sbin/wifi detect > /etc/config/wireless
-    $DEBUG apply_wireless_defaults
-    logger -t meshconfig "Applied wireless defaults."
-  }
+  case "$(uci_get wireless @wifi-device[0] disabled 1)" in
+    1)
+      case "$(uci_get wireless @wifi-iface[0] ssid "OpenWrt")" in
+        "OpenWrt")
+          rm -f /etc/config/wireless
+          $DEBUG /sbin/wifi detect > /etc/config/wireless
+          $DEBUG apply_wireless_defaults
+          logger -t meshconfig "Applied wireless defaults."
+        ;;
+      esac
+    ;;
+  esac
+
+  case "$(uci_get system @system[0] nodeid "blank")" in
+    "blank")
+      local getid=$(uci_get mesh @network[0] idgen "default")
+      local id=$(get_id_"$getid")
+      $DEBUG uci_set system @system[0] nodeid "$id"
+      logger -t meshconfig "Generated Node ID $id via method $getid"
+    ;;
+  esac
+  
+  case "$(uci_get system @system[0] homepage "blank")" in
+    "blank")
+      local homepage=$(uci_get mesh @network[0] homepage "http://commotionwireless.net")
+      $DEBUG uci_set system @system[0] homepage "$homepage"
+      logger -t meshconfig "Applied homepage defaults."
+    ;;
+  esac
  
   case "$(uci_get system @system[0] hostname "OpenWrt")" in
     "OpenWrt")
