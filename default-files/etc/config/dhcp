@@ -1,4 +1,3 @@
-
 config 'dnsmasq'
 	option 'domainneeded' '1'
 	option 'boguspriv' '1'
@@ -15,11 +14,3 @@ config 'dnsmasq'
 	option 'leasefile' '/tmp/dhcp.leases'
 	option 'resolvfile' '/tmp/resolv.conf.auto'
   list 'addnhosts' '/var/run/hosts_olsr'
-
-config 'dhcp'
-	option 'interface' 'ap'
-	option 'start' '2'
-	option 'limit' '150'
-	option 'leasetime' '12h'
-	option 'ignore' '0'
-
