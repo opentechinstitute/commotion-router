@@ -105,18 +105,13 @@ set_meshif_wireless() {
 #       RETURNS:  0 == success, 1 == failure
 #===============================================================================
 set_apif_wireless() {
-  local iface="$1"
-  local config="$2"
+  local config="$1"
   local wiconfig=
   local basename=$(uci_get mesh @network[0] basename "$DEFAULT_MESH_BASENAME")
   local location=$(uci_get system @system[0] location)
+  local nodeid=$(uci_get system @system[0] nodeid)
   local secure=$(uci_get network "$config" secure "0")
   local key=$(uci_get network "$config" key "$DEFAULT_SECUREAP_KEY")
-  ifconfig "$iface" 2>/dev/null >/dev/null && {
-    local mac=`ifconfig "$iface" | grep 'Link encap:'| awk '{ print $5}'`;
-  } || {
-    logger -t set_apif_wireless "Error! Interface "$iface" doesn't exist!"; return 1
-  }
 
   config_cb() {
     local type="$1"
@@ -144,8 +139,7 @@ set_apif_wireless() {
   uci_set wireless "$wiconfig" ssid "$basename"_"$location"_"$config" && uci_commit wireless && return 0
 
   [[ -n "$wiconfig" ]] && [[ -z "$location" ]] && \
-  uci_set wireless "$wiconfig" ssid "$basename"_$( echo "$mac" | \
-   awk -F ':' '{ printf("%d_%d_%d","0x"$4,"0x"$5,"0x"$6) }' )_"$config" && uci_commit wireless && return 0
+  uci_set wireless "$wiconfig" ssid "$basename"_"$nodeid"_"$config" && uci_commit wireless && return 0
 
   logger -t set_apif_wireless "Error! Wireless configuration for "$config" may not exist." && return 1
 }
