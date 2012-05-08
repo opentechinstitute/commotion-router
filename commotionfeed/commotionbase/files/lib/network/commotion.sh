@@ -264,13 +264,23 @@ setup_interface_meshif() {
 coldplug_interface_meshif() {
   local config="$1"
   local reset=0
+  local wireless=0
+  local ifname ifnames
 
   [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
-  $DEBUG set_meshif_wireless "$config"
+
+  $DEBUG config_get type "$config" TYPE
+  [ "$type" = "alias" ] && return 0
+  [ "$type" = "bridge" ] && \
+  $DEBUG config_get ifnames "$config" ifnames
   $DEBUG config_get ifname "$config" ifname
-  $DEBUG /sbin/wifi 
+  for ifn in $ifname $ifnames; do 
+    $DEBUG cat /proc/net/wireless | grep -q "$ifn"
+    [ "$?" = "0" ] && wireless=1
+  done
+  [ "$wireless" = "1" ] && $DEBUG set_meshif_wireless "$config" && $DEBUG /sbin/wifi 
   $DEBUG uci_set_state network "$config" boot 1
-  $DEBUG setup_interface_meshif "$ifname" "$config"
+  $DEBUG setup_interface_meshif "$config"
 }
 
 #===  FUNCTION  ================================================================
@@ -354,9 +364,16 @@ coldplug_interface_apif() {
   local reset=0
 
   [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
+  $DEBUG config_get type "$config" TYPE
+  [ "$type" = "alias" ] && return 0
+  [ "$type" = "bridge" ] && \
+  $DEBUG config_get ifnames "$config" ifnames
   $DEBUG config_get ifname "$config" ifname
-  $DEBUG set_apif_wireless "$ifname" "$config"
-  $DEBUG /sbin/wifi 
+  for ifn in $ifname $ifnames; do 
+    $DEBUG cat /proc/net/wireless | grep -q "$ifn"
+    [ "$?" = "0" ] && wireless=1
+  done
+  [ "$wireless" = "1" ] && $DEBUG set_apif_wireless "$config" && $DEBUG /sbin/wifi 
   $DEBUG uci_set_state network "$config" boot 1
   $DEBUG setup_interface_apif "$ifname" "$config"
 }
