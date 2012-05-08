@@ -1,6 +1,6 @@
 #!/bin/sh
 
-svn co svn://svn.openwrt.org/openwrt/tags/backfire_10.03.1 openwrt || exit 1
+svn co -r 31639 svn://svn.openwrt.org/openwrt/trunk openwrt || exit 1
 
 cd openwrt
 make defconfig
