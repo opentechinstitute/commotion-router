@@ -1,6 +1,6 @@
 #===============================================================================
 #
-#          FILE:  mesh.sh
+#          FILE:  commotion.sh
 # 
 #         USAGE:  include /lib/network
 # 
