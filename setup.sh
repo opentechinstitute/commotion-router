@@ -3,9 +3,7 @@
 svn co -r 31639 svn://svn.openwrt.org/openwrt/trunk openwrt || exit 1
 
 cd openwrt
-make defconfig
-[ ! -e .config ] && cp -v ../config .config
-[ ! -e .config.old ] && cp -v ../config .config.old
+
 [ ! -e feeds.conf ] && cp -v feeds.conf.default feeds.conf
 [ ! -e files ] && mkdir files
 [ ! -e dl ] && mkdir ../dl && ln -sf ../dl dl
@@ -18,6 +16,9 @@ fi
 scripts/feeds update -a
 scripts/feeds install -a
 for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
+
+[ ! -e .config ] && cp -v ../config .config
+make defconfig
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo " Commotion OpenWrt is prepared. To build the firmware, type:"
