@@ -1,6 +1,3 @@
-# Copyright (C) 2009 Vertical Inc.
-# License is whatever is appropriate here.
-
 include $(TOPDIR)/rules.mk
 
 THEME_NAME:=commotion
@@ -16,9 +13,9 @@ define Package/luci-theme-$(THEME_NAME)
   SECTION:=luci
   CATEGORY:=LuCI
   SUBMENU:=4. Themes
-  DEPENDS:=+luci-web
+  DEPENDS:=+luci-theme-base
   TITLE:=LuCI Theme - $(THEME_TITLE)
-  URL:=http://example.org/
+  URL:=http://commotionwireless.net/
 endef
 
 define Build/Configure
