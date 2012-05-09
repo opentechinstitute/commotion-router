@@ -18,7 +18,7 @@ unset_olsrd_if() {
 
     case $type in
       Interface)
-        local oldifaces="$(uci_get olsrd "$name" interface)"
+        local oldifaces="$(uci_get olsrd "$name" interface "")"
         local newifaces=
         for dev in $(sort_list "$oldifaces" "$config"); do
           list_remove newifaces "$dev"
@@ -48,7 +48,7 @@ set_olsrd_if() {
 
     case $type in
       Interface)
-        local oldifaces="$(uci_get olsrd "$name" interface)"
+        local oldifaces="$(uci_get olsrd "$name" interface "")"
         local newifaces=
         for dev in $(sort_list "$oldifaces" "$config"); do
           append newifaces "$dev"
@@ -80,7 +80,7 @@ unset_olsrd_p2pif() {
       LoadPlugin)
         case "$(uci_get olsrd "$name" library)" in
           olsrd_p2pd.so.*)
-            local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf)"
+            local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf "")"
             local newconfigs=
             for dev in $(sort_list "$oldconfigs" "$config"); do
               list_remove newconfigs "$dev"
@@ -114,7 +114,7 @@ set_olsrd_p2pif() {
       LoadPlugin)
         case "$(uci_get olsrd "$name" library)" in
           olsrd_p2pd.so.*)
-            local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf)"
+            local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf "")"
             local newconfigs=
             for dev in $(sort_list "$oldconfigs" "$config"); do
               append newconfigs "$dev"
@@ -146,7 +146,7 @@ unset_olsrd_dnssrv() {
 
     case $type in
       LoadPlugin)
-        case "$(uci_get olsrd "$name" dns_server)" in
+        case "$(uci_get olsrd "$name" dns_server "")" in
           "$ip4addr")
             uci_remove olsrd "$name" dns_server
             ;;
@@ -175,7 +175,7 @@ set_olsrd_dnssrv() {
 
     case $type in
       LoadPlugin)
-        case "$(uci_get olsrd "$name" library)" in
+        case "$(uci_get olsrd "$name" library "")" in
           olsrd_nameservice.so.*)
             uci_set olsrd "$name" dns_server "$ipv4addr"
             ;;
@@ -222,7 +222,7 @@ set_olsrd_hna4() {
   uci_commit olsrd && return 0
 } 
 
-[ -f "/etc/config/olsrd" ] && {
+[ -f "/etc/config/olsrd" ] && [ "$(uci_get network "$INTERFACE" routing)" = "olsrd" ] && {
 case $PROTO in
   meshif)
     [ "$RESET" = 1 ] && {
