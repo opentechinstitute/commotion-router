@@ -5,7 +5,7 @@
   patch < /usr/share/commotion/patches/dnsmasq.patch
   
   cd /usr/lib/lua/luci/
-  patch < /usr/share/commotion/patches/luci_splash.patch
+  patch -p0 < /usr/share/commotion/patches/luci_splash.patch
 }
 
 [ -f "/usr/share/commotion/banner" ] && { \
