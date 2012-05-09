@@ -53,6 +53,7 @@ DEFAULT_LAN_FWZONE="lan"
 DEFAULT_SECUREAP_PREFIX="103"
 DEFAULT_SECUREAP_FWZONE="lan"
 DEFAULT_SECUREAP_KEY="c0MM0t10N!"
+DEFAULT_SECUREMESH_KEY="c0MM0t10N!"
 
 #===============================================================================
 # SETTING FUNCTIONS
@@ -70,6 +71,8 @@ set_meshif_wireless() {
   local ssid=$(uci_get mesh @network[0] ssid "$DEFAULT_MESH_SSID") 
   local bssid=$(uci_get mesh @network[0] bssid "$DEFAULT_MESH_BSSID") 
   local channel=$(uci_get mesh @network[0] channel "$DEFAULT_MESH_CHANNEL") 
+  local secure=$(uci_get network "$config" secure "0")
+  local key=$(uci_get network "$config" key "$DEFAULT_SECUREMESH_KEY")
   local net dev
 
   config_cb() {
@@ -90,6 +93,12 @@ set_meshif_wireless() {
     esac
   }
   config_load wireless
+
+  [[ -n "$wiconfig" ]] && [ "$secure" = 1 ]  && \
+  uci_set wireless "$wiconfig" encryption "psk2" && uci_set wireless "$wiconfig" key "$key"
+
+  [[ -n "$wiconfig" ]] && [ "$secure" = 0 ]  && \
+  uci_remove wireless "$wiconfig" encryption && uci_remove wireless "$wiconfig" key
 
   [[ -n "$net" ]] && [[ -n "$dev" ]] && \
   uci_set wireless "$net" ssid "$ssid" && uci_set wireless "$net" bssid "$bssid" && \
