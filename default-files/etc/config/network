@@ -11,15 +11,18 @@ config 'interface' 'mesh'
 
 config 'interface' 'secure'
 	option 'proto' 'apif'
+  option 'routing' 'olsrd'
   option 'secure' '1'
   option 'splash' '0'
 	
 config 'interface' 'ap'
 	option 'proto' 'apif'
+  option 'routing' 'olsrd'
 
 config 'interface' 'plug'
 	option 'ifname' 'eth0'
 	option 'proto' 'plugif'
+  option 'routing' 'olsrd'
 	
 config 'alias'
 	option 'interface' 'plug'
