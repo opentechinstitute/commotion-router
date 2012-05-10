@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
-THEME_NAME:=commotion
-THEME_TITLE:=Commotion
+THEME_NAME:=commotionClassic
+THEME_TITLE:=CommotionClassic
 
 PKG_NAME:=luci-theme-$(THEME_NAME)
 PKG_VERSION:=1
@@ -15,7 +15,7 @@ define Package/luci-theme-$(THEME_NAME)
   SUBMENU:=4. Themes
   DEPENDS:=+luci-theme-base
   TITLE:=LuCI Theme - $(THEME_TITLE)
-  URL:=http://www.commotionwireless.net/
+  URL:=http://commotionwireless.net/
 endef
 
 define Build/Configure
