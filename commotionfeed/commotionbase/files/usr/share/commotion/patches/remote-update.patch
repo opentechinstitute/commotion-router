@@ -1,0 +1,19 @@
+Index: remote-update
+===================================================================
+--- remote-update	(revision 8676)
++++ remote-update	(working copy)
+@@ -8,11 +8,11 @@
+ 
+ find_architecture()
+ {
+-	local ifs="$IFS"; IFS="-"
+-	set -- $(opkg list_installed kernel)
++	local ifs="$IFS"; IFS=" "
++	set -- $(opkg info kernel | grep Architecture)
+ 	IFS="$ifs"
+ 
+-	echo "$3"
++	echo "$2"
+ }
+ 
+ find_image()
