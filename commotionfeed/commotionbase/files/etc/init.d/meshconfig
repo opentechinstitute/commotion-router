@@ -93,6 +93,51 @@ apply_hostname_defaults() {
   $DEBUG uci_commit system
 }
 
+apply_analytics_defaults() {
+  [ -f /usr/lib/collectd/network.so ] || logger -t meshconfig "Collectd network plugin not installed!" 
+  local host=$(uci_get mesh @network[0] analytics_server "blank")
+  case "$host" in
+    "blank")
+      logger -t meshconfig "No analytics server specified for this network!" && return 2
+    ;;
+    *)
+      grep -qs collectd_network /etc/config/luci_statistics || $DEBUG uci_add luci_statistics statistics collectd_network 
+      $DEBUG uci_set luci_statistics collectd_network enable 1
+      grep -qs collectd_network_server /etc/config/luci_statistics || $DEBUG uci_add luci_statistics collectd_network_server 
+      $DEBUG uci_set luci_statistics @collectd_network_server[0] host "$host"
+      $DEBUG uci_set luci_statistics @collectd_network_server[0] port "$(uci_get mesh @network[0] analytics_port 25826)"
+    ;;
+  esac
+  grep -qs commotion_config /etc/config/luci_statistics || $DEBUG uci_add luci_statistics commotion_config 
+  $DEBUG uci_set luci_statistics @commotion_config[0] reset 0
+  $DEBUG uci_commit luci_statistics
+}
+
+apply_vpn_defaults() {
+  [ -f /etc/config/network ] || logger -t meshconfig "N2N not installed!"
+  local host=$(uci_get mesh @network[0] vpn_server "blank")
+  case "$host" in
+    "blank")
+      logger -t meshconfig "No VPN server specified for this network!" && return 2
+    ;;
+    *)
+      grep -qs edge /etc/config/n2n || $DEBUG uci_add n2n edge 
+      local mac=$(uci_get wireless @wifi-device[0] macaddr 0)
+      [ $mac = 0 ] && \
+      logger -t meshconfig "Error! Could not get MAC from config file."
+      $DEBUG uci_set n2n @edge[0] ipaddr $( echo $mac | \
+      awk -v p="$(uci_get mesh @network[0] vpn_prefix 10)" -F ':' '{ printf(p".%d.%d.%d","0x"$4,"0x"$5,"0x"$6) }' )
+      $DEBUG uci_set n2n @edge[0] supernode "$host"
+      $DEBUG uci_set n2n @edge[0] port "$(uci_get mesh @network[0] vpn_port 7654)"
+      $DEBUG uci_set n2n @edge[0] community "$(uci_get system @system[0] community "default")"
+      $DEBUG uci_set n2n @edge[0] key "$(uci_get mesh @network[0] vpn_key "c0MM0t10N!r0ckS!")"
+      $DEBUG uci_set n2n @edge[0] route "$(uci_get mesh @network[0] vpn_route "0")"
+    ;;
+  esac
+  grep -qs commotion_config /etc/config/n2n || $DEBUG uci_add n2n commotion_config 
+  $DEBUG uci_set n2n @commotion_config[0] reset 0
+  $DEBUG uci_commit n2n
+}
 
 boot() {
   grep -qs config /etc/config/mesh || { 
@@ -122,6 +167,16 @@ boot() {
     ;;
   esac
   
+  [ "$(uci_get luci_statistics @commotion_config[0] reset 1)" = "0" ] || { 
+    apply_analytics_defaults
+    logger -t meshconfig "Applied analytics defaults"
+  }
+  
+  [ "$(uci_get n2n @commotion_config[0] reset 1)" = "0" ] || { 
+    apply_vpn_defaults
+    logger -t meshconfig "Applied VPN defaults"
+  }
+
   case "$(uci_get system @system[0] homepage "blank")" in
     "blank")
       local homepage=$(uci_get mesh @network[0] homepage "http://commotionwireless.net")
