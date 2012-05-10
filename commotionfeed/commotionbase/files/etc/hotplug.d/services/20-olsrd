@@ -222,6 +222,64 @@ set_olsrd_hna4() {
   uci_commit olsrd && return 0
 } 
 
+#===  FUNCTION  ================================================================
+#          NAME:  unset_olsrd_secure
+#   DESCRIPTION:  Unset olsrd_secure stanza in olsrd config
+#    PARAMETERS:  None
+#       RETURNS:  0 on success
+#===============================================================================
+
+unset_olsrd_secure() {
+
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      LoadPlugin)
+        case "$(uci_get olsrd "$name" library "")" in
+          olsrd_secure.so.*)
+            uci_remove olsrd "$name"
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load olsrd
+
+  uci_commit olsrd && return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_olsrd_secure
+#   DESCRIPTION:  Set olsrd_secure stanza in olsrd config
+#    PARAMETERS:  None
+#       RETURNS:  0 on success
+#===============================================================================
+
+set_olsrd_secure() {
+
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      LoadPlugin)
+        case "$(uci_get olsrd "$name" library "")" in
+          olsrd_secure.so.*)
+            uci_set olsrd "$name" Keyfile "/etc/olsrd.d/commotion.key"
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load olsrd
+
+  [ -f /etc/olsrd.d/commotion.key ] && echo "$(uci_get mesh @network[0] olsrd_key)" > /etc/olsrd.d/commotion.key
+
+  uci_commit olsrd && return 0
+} 
+
 [ -f "/etc/config/olsrd" ] && [ "$(uci_get network "$INTERFACE" routing)" = "olsrd" ] && {
 case $PROTO in
   meshif)
@@ -230,6 +288,8 @@ case $PROTO in
         postup)
           $DEBUG set_olsrd_if $INTERFACE
           #$DEBUG set_olsrd_dnssrv "$(uci_get_state network "$INTERFACE" ipaddr)"
+          [ "$(uci_get network "$INTERFACE" secure 0)" = "1" ] && \
+           $DEBUG set_olsrd_secure $INTERFACE
         ;;
       esac
     }
