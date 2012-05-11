@@ -12,6 +12,9 @@ config 'LoadPlugin'
   option 'library' 'olsrd_dyn_gw.so.0.5'
 
 config 'LoadPlugin'
+  option 'library' 'olsrd_secure.so.0.6'
+
+config 'LoadPlugin'
   option 'library' 'olsrd_httpinfo.so.0.1'
   option 'port' '1978'
   list 'Net' '0.0.0.0 0.0.0.0'
