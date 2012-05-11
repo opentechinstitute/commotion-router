@@ -14,8 +14,10 @@ uci -q batch <<-EOF >/dev/null
   set mesh.@network[0].lan_fwzone=lan
   set mesh.@network[0].secureap_prefix=103
   set mesh.@network[0].secureap_fwzone=lan
-  add system upgrade
-  set system.@upgrade[0].repository=http://repo.commotionwireless.net
+  set mesh.@network[0].vpn_server=vpn.commotionwireless.net
+  set mesh.@network[0].analytics_server=monitor.commotionwireless.net
+  set system.upgrade=upgrade
+  set system.upgrade.repository=http://repo.commotionwireless.net
   commit mesh
   commit system
 EOF
