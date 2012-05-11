@@ -181,6 +181,7 @@ boot() {
     "blank")
       local homepage=$(uci_get mesh @network[0] homepage "http://commotionwireless.net")
       $DEBUG uci_set system @system[0] homepage "$homepage"
+      $DEBUG uci_set luci_splash general homepage "$homepage"
       logger -t meshconfig "Applied homepage defaults."
     ;;
   esac

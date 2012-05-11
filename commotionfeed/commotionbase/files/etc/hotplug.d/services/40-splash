@@ -75,6 +75,26 @@ get_fwzone_if() {
   echo "$fwzone" && return 0
 }
 
+#===  FUNCTION  ================================================================
+#          NAME:  splash_boot
+#   DESCRIPTION:  Jumpstart the initialization of luci_splash at boot time
+#    PARAMETERS:  None
+#       RETURNS:  0 on success
+#===============================================================================
+
+splash_boot() {
+  grep -qs splash /etc/config/uhttpd || {                                        
+    $DEBUG uci_add uhttpd uhttpd splash
+    $DEBUG uci_set uhttpd splash home "/www/cgi-bin/splash/"                                 
+    $DEBUG uci_set uhttpd splash interpreter ".sh=/bin/ash"                                 
+    $DEBUG uci_set uhttpd splash listen_http "8082"                                
+    $DEBUG uci_set uhttpd splash index_page "splash.sh"                                
+    $DEBUG uci_set uhttpd splash error_page "/splash.sh"                                
+    $DEBUG uci_commit uhttpd
+  } 
+  return 0
+}
+
 [ -f "/etc/config/luci_splash" ] && {
 case $PROTO in
   apif)
@@ -83,12 +103,14 @@ case $PROTO in
         postup)
           case $(uci_get network "$INTERFACE" splash "1") in
             0)
+              $DEBUG splash_boot
               $DEBUG unset_splash_if $INTERFACE
               $DEBUG uci_commit luci_splash
               $DEBUG /etc/init.d/luci_splash restart
               $DEBUG /etc/init.d/uhttpd restart
             ;;
             1)
+              $DEBUG splash_boot
               $DEBUG unset_splash_if $INTERFACE
               $DEBUG set_splash_if $INTERFACE $(get_fwzone_if "$INTERFACE") 
               $DEBUG uci_commit luci_splash
