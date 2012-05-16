@@ -94,11 +94,11 @@ set_meshif_wireless() {
   }
   config_load wireless
 
-  [[ -n "$wiconfig" ]] && [ "$secure" = 1 ]  && \
-  uci_set wireless "$wiconfig" encryption "psk2" && uci_set wireless "$wiconfig" key "$key"
-
-  [[ -n "$wiconfig" ]] && [ "$secure" = 0 ]  && \
-  uci_remove wireless "$wiconfig" encryption && uci_remove wireless "$wiconfig" key
+  [[ -n "$net" ]] && [[ -n "$dev" ]] && [ "$secure" = 1 ] && \
+  uci_set wireless "$net" encryption "psk2" && uci_set wireless "$net" key "$key"
+                                                                            
+  [[ -n "$net" ]] && [[ -n "$dev" ]] && [ "$secure" = 0 ] && \
+  uci_remove wireless "$net" encryption && uci_remove wireless "$net" key
 
   [[ -n "$net" ]] && [[ -n "$dev" ]] && \
   uci_set wireless "$net" ssid "$ssid" && uci_set wireless "$net" bssid "$bssid" && \
@@ -276,22 +276,12 @@ setup_interface_meshif() {
 
 coldplug_interface_meshif() {
   local config="$1"
-  local reset=0
-  local wireless=0
-  local ifname ifnames
+  local reset="$(uci_get network "$config" reset 1)"
 
-  [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
-
+  [ $reset = 0 ] && return 0
   $DEBUG config_get type "$config" TYPE
   [ "$type" = "alias" ] && return 0
-  [ "$type" = "bridge" ] && \
-  $DEBUG config_get ifnames "$config" ifnames
-  $DEBUG config_get ifname "$config" ifname
-  for ifn in $ifname $ifnames; do 
-    $DEBUG cat /proc/net/wireless | grep -q "$ifn"
-    [ "$?" = "0" ] && wireless=1
-  done
-  [ "$wireless" = "1" ] && $DEBUG set_meshif_wireless "$config" && $DEBUG /sbin/wifi 
+  $DEBUG set_meshif_wireless "$config" && $DEBUG /sbin/wifi 
   $DEBUG uci_set_state network "$config" boot 1
   $DEBUG setup_interface_meshif "$config"
 }
@@ -378,19 +368,13 @@ setup_interface_apif() {
 
 coldplug_interface_apif() {
   local config="$1"
-  local reset=0
+  local reset="$(uci_get network "$config" reset 1)"
+  local wireless=0
 
-  [ "$(config_get_bool reset "$config" reset 1)" = 0 ] && return 0
+  [ $reset = 0 ] && return 0
   $DEBUG config_get type "$config" TYPE
   [ "$type" = "alias" ] && return 0
-  [ "$type" = "bridge" ] && \
-  $DEBUG config_get ifnames "$config" ifnames
-  $DEBUG config_get ifname "$config" ifname
-  for ifn in $ifname $ifnames; do 
-    $DEBUG cat /proc/net/wireless | grep -q "$ifn"
-    [ "$?" = "0" ] && wireless=1
-  done
-  [ "$wireless" = "1" ] && $DEBUG set_apif_wireless "$config" && $DEBUG /sbin/wifi 
+  $DEBUG set_apif_wireless "$config" && $DEBUG /sbin/wifi 
   $DEBUG uci_set_state network "$config" boot 1
   $DEBUG setup_interface_apif "$ifname" "$config"
 }
