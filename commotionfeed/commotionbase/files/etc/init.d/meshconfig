@@ -178,6 +178,9 @@ boot() {
     logger -t meshconfig "Applied VPN defaults"
   }
 
+  echo "$(uci_get mesh @network[0] olsrd_key "c0mm0t10N!r0cks!")" > /etc/olsrd.d/olsrd_secure_key
+  logger -t meshconfig "Applied OLSRd secure key"
+
   case "$(uci_get system @system[0] homepage "blank")" in
     "blank")
       local homepage=$(uci_get mesh @network[0] homepage "http://commotionwireless.net")
