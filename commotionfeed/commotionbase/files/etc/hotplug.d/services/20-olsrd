@@ -2,6 +2,81 @@ include /lib/network
 
 #DEBUG="echo"
 
+
+#===  FUNCTION  ================================================================
+#          NAME:  remove_olsrd_plugin
+#   DESCRIPTION:  Remove the specified OLSRd plugin
+#    PARAMETERS:  name of the plugin to remove
+#       RETURNS:  0 on success, 1 on failure
+#===============================================================================
+remove_olsrd_plugin() {
+  local pname="$1"
+  local r=1
+
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      LoadPlugin)
+        case "$(uci_get olsrd "$name" library "")" in
+          olsrd_"$pname"\.so\.*)
+            uci_remove olsrd "$name" && r=0
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load olsrd
+
+  return $r
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  add_olsrd_plugin
+#   DESCRIPTION:  Add the specified OLSRd plugin to config
+#    PARAMETERS:  name of the plugin to add
+#       RETURNS:  0 on success, 1 on plugin nonexistance, 2 on failure
+#===============================================================================
+add_olsrd_plugin() {
+  local pname="$1"
+  local LIB=/usr/lib
+
+  ls $LIB/olsrd_"$pname"\.so\.* &>/dev/null
+
+  case $? in
+    1)
+      return 1
+    ;;
+    0)
+      cd $LIB
+      local plugin="$(ls olsrd_"$pname"\.so\.* 2>/dev/null)"
+      config_cb() {
+        local type="$1"
+        local name="$2"
+    
+        case $type in
+          LoadPlugin)
+            case "$(uci_get olsrd "$name" library)" in
+              "$plugin")
+                  echo "$name" && exit 0
+                ;;
+            esac
+          ;;
+          "")
+            $DEBUG uci_add olsrd LoadPlugin "$pname"
+            $DEBUG uci_set olsrd @LoadPlugin[-1] library "$plugin"
+            echo "$pname" && return 0
+          ;;
+        esac
+      }
+      config_load olsrd
+    ;;
+  esac
+
+  return 2
+}
+
 #===  FUNCTION  ================================================================
 #          NAME:  unset_olsrd_if
 #   DESCRIPTION:  Unsets the interface stanza for the olsrd config
@@ -29,7 +104,7 @@ unset_olsrd_if() {
   }
   config_load olsrd
 
-  uci_commit olsrd && return 0
+  return 0
 }
 
 #===  FUNCTION  ================================================================
@@ -53,13 +128,19 @@ set_olsrd_if() {
         for dev in $(sort_list "$oldifaces" "$config"); do
           append newifaces "$dev"
         done
-        uci_set olsrd "$name" interface "$newifaces"
+        $DEBUG uci_set olsrd "$name" interface "$newifaces"
+        exit 0
+        ;;
+      "")
+        $DEBUG uci_add olsrd Interface
+        $DEBUG uci_set olsrd @Interface[-1] interface "$config"
+        return 0
         ;;
     esac
   }
   config_load olsrd
 
-  uci_commit olsrd && return 0
+  return 1
 }
 
 #===  FUNCTION  ================================================================
@@ -93,7 +174,7 @@ unset_olsrd_p2pif() {
   }
   config_load olsrd
 
-  uci_commit olsrd && return 0
+  return 0
 }
 
 #===  FUNCTION  ================================================================
@@ -106,28 +187,15 @@ unset_olsrd_p2pif() {
 set_olsrd_p2pif() {
   local config="$1"
   
-  config_cb() {
-    local type="$1"
-    local name="$2"
+  local name="$(add_olsrd_plugin "p2pd")"
+  local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf "")"
+  local newconfigs=
+  for dev in $(sort_list "$oldconfigs" "$config"); do
+    append newconfigs "$dev"
+  done
+  uci_set olsrd "$name" NonOlsrIf "$newconfigs"
 
-    case $type in
-      LoadPlugin)
-        case "$(uci_get olsrd "$name" library)" in
-          olsrd_p2pd.so.*)
-            local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf "")"
-            local newconfigs=
-            for dev in $(sort_list "$oldconfigs" "$config"); do
-              append newconfigs "$dev"
-            done
-            uci_set olsrd "$name" NonOlsrIf "$newconfigs"
-            ;;
-        esac
-      ;;
-    esac
-  }
-  config_load olsrd
-
-  uci_commit olsrd && return 0
+  return 0
 }
 
 #===  FUNCTION  ================================================================
@@ -156,7 +224,7 @@ unset_olsrd_dnssrv() {
   }
   config_load olsrd
 
-  uci_commit olsrd && return 0
+  return 0
 }
 
 #===  FUNCTION  ================================================================
@@ -169,23 +237,9 @@ unset_olsrd_dnssrv() {
 set_olsrd_dnssrv() {
   local ipv4addr="$1"
   
-  config_cb() {
-    local type="$1"
-    local name="$2"
-
-    case $type in
-      LoadPlugin)
-        case "$(uci_get olsrd "$name" library "")" in
-          olsrd_nameservice.so.*)
-            uci_set olsrd "$name" dns_server "$ipv4addr"
-            ;;
-        esac
-      ;;
-    esac
-  }
-  config_load olsrd
-
-  uci_commit olsrd && return 0
+  local name="$(add_olsrd_plugin "nameservice")"
+  $DEBUG uci_set olsrd "$name" dns_server "$ipv4addr"
+  return 0
 }
 
 #===  FUNCTION  ================================================================
@@ -200,7 +254,7 @@ unset_olsrd_hna4() {
   
   uci_remove olsrd "$config"
         
-  uci_commit olsrd && return 0
+  return 0
 }
 
 #===  FUNCTION  ================================================================
@@ -219,36 +273,8 @@ set_olsrd_hna4() {
   uci_set olsrd "$config" netaddr "$ipv4addr"
   uci_set olsrd "$config" netmask "$netmask"
 
-  uci_commit olsrd && return 0
+  return 0
 } 
-
-#===  FUNCTION  ================================================================
-#          NAME:  unset_olsrd_secure
-#   DESCRIPTION:  Unset olsrd_secure stanza in olsrd config
-#    PARAMETERS:  None
-#       RETURNS:  0 on success
-#===============================================================================
-
-unset_olsrd_secure() {
-
-  config_cb() {
-    local type="$1"
-    local name="$2"
-
-    case $type in
-      LoadPlugin)
-        case "$(uci_get olsrd "$name" library "")" in
-          olsrd_secure.so.*)
-            uci_remove olsrd "$name"
-            ;;
-        esac
-      ;;
-    esac
-  }
-  config_load olsrd
-
-  uci_commit olsrd && return 0
-}
 
 #===  FUNCTION  ================================================================
 #          NAME:  set_olsrd_secure
@@ -259,25 +285,12 @@ unset_olsrd_secure() {
 
 set_olsrd_secure() {
 
-  config_cb() {
-    local type="$1"
-    local name="$2"
+  local name="$(add_olsrd_plugin "secure")"
+  $DEBUG uci_set olsrd "$name" Keyfile "/etc/olsrd.d/commotion.key"
 
-    case $type in
-      LoadPlugin)
-        case "$(uci_get olsrd "$name" library "")" in
-          olsrd_secure.so.*)
-            uci_set olsrd "$name" Keyfile "/etc/olsrd.d/commotion.key"
-            ;;
-        esac
-      ;;
-    esac
-  }
-  config_load olsrd
+  [ -f /etc/olsrd.d/commotion.key ] || echo "$(uci_get mesh @network[0] olsrd_key "c0mm0t10N!r0ckS!")" > /etc/olsrd.d/commotion.key
 
-  [ -f /etc/olsrd.d/commotion.key ] && echo "$(uci_get mesh @network[0] olsrd_key)" > /etc/olsrd.d/commotion.key
-
-  uci_commit olsrd && return 0
+  return 0
 } 
 
 [ -f "/etc/config/olsrd" ] && [ "$(uci_get network "$INTERFACE" routing)" = "olsrd" ] && {
@@ -288,10 +301,21 @@ case $PROTO in
         postup)
           $DEBUG set_olsrd_if $INTERFACE
           #$DEBUG set_olsrd_dnssrv "$(uci_get_state network "$INTERFACE" ipaddr)"
-          [ "$(uci_get network "$INTERFACE" secure 0)" = "1" ] && \
-           $DEBUG set_olsrd_secure $INTERFACE
+          case "$(uci_get network "$INTERFACE" secure 0)" in
+            0)
+              $DEBUG remove_olsrd_plugin "secure"
+              ;;
+            1)
+              $DEBUG set_olsrd_secure
+              ;;
+          esac
         ;;
+        predown)
+          $DEBUG unset_olsrd_if $INTERFACE
+          ;;
       esac
+
+      uci_commit olsrd
     }
    ;;
   apif)
@@ -303,6 +327,8 @@ case $PROTO in
           $DEBUG set_olsrd_p2pif $INTERFACE
         ;;
       esac
+
+      uci_commit olsrd
     }
   ;;
   plugif)
@@ -319,6 +345,8 @@ case $PROTO in
         $DEBUG unset_olsrd_p2pif $INTERFACE
       ;; 
     esac
+
+    uci_commit olsrd
   ;;
 esac
 }
