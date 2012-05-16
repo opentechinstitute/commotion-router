@@ -8,7 +8,7 @@ config 'interface' 'loopback'
 config 'interface' 'mesh'
 	option 'proto' 'meshif'
   option 'routing' 'olsrd'
-  option 'secure' '1'
+  option 'secure' '0'
 
 config 'interface' 'secure'
 	option 'proto' 'apif'
