@@ -43,10 +43,6 @@ config 'forwarding'
 	option 'dest' 'mesh'
 
 config 'forwarding'
-	option 'src' 'lan'
-	option 'dest' 'lan'
-
-config 'forwarding'
 	option 'src' 'ap'
 	option 'dest' 'ap'
 
