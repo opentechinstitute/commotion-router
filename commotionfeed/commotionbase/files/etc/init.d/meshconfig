@@ -127,6 +127,7 @@ apply_vpn_defaults() {
       logger -t meshconfig "Error! Could not get MAC from config file."
       $DEBUG uci_set n2n @edge[0] ipaddr $( echo $mac | \
       awk -v p="$(uci_get mesh @network[0] vpn_prefix 10)" -F ':' '{ printf(p".%d.%d.%d","0x"$4,"0x"$5,"0x"$6) }' )
+      $DEBUG uci_set n2n @edge[0] netmask "255.0.0.0"
       $DEBUG uci_set n2n @edge[0] supernode "$host"
       $DEBUG uci_set n2n @edge[0] port "$(uci_get mesh @network[0] vpn_port 7654)"
       $DEBUG uci_set n2n @edge[0] community "$(uci_get system @system[0] community "default")"
