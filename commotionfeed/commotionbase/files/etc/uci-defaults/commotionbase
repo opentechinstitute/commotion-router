@@ -12,8 +12,8 @@
   patch -p0 < /usr/share/commotion/patches/remote-update.patch
 }
 
-[ -f "/usr/share/commotion/banner" ] && { \
-  cp -f /usr/share/commotion/banner /etc/banner
+[ -f "/usr/share/commotion/files/banner" ] && { \
+  cp -f /usr/share/commotion/files/banner /etc/banner
 }
 
 if ! grep -q "meshconfig" /etc/crontabs/root 2>/dev/null; then

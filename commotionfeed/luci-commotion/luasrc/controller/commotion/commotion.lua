@@ -33,7 +33,7 @@ function index()
   entry({"commotion"}, alias("commotion", "index"), i18n("Commotion"), 10)
 	entry({"commotion", "index"}, alias("commotion", "index", "index"), i18n("Overview"), 10).index = true
 	entry({"commotion", "index", "index"}, template("commotion/splash"), i18n("Front Page"), 10).ignoreindex = true
-
+    entry({"commotion", "index", "olsr-viz"}, template("olsr-viz/olsr-viz"), _("OLSR-Viz"), 90)
   
 
 	local config   = entry({"admin", "commotion"}, alias("admin", "commotion", "meshconfig"), i18n("Commotion"), 10)

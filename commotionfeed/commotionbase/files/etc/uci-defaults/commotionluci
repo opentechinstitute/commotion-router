@@ -1,0 +1,16 @@
+#!/bin/sh
+
+[ -f "/usr/share/commotion/files/node-mini.gif" ] && { \
+cp -f /use/share/commotion/files/node-mini.gif /www/luci-ststic/resources/olsr-viz/node-mini.gif
+}
+
+[ -f "/usr/share/commotion/files/node-hna-mini.gif" ] && { \
+cp -f /use/share/commotion/files/node-hna-mini.gif /www/luci-ststic/resources/olsr-viz/node-hna-mini.gif
+}
+
+[ -f "/usr/share/commotion/files/olsr-viz.sh" ] && { \
+cp -f /use/share/commotion/files/olsr-viz.sh /www/cgi-bin/olsr-viz.sh
+}
+
+
+exit 0
