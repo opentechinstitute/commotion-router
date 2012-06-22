@@ -4,7 +4,7 @@ svn co -r 31639 svn://svn.openwrt.org/openwrt/trunk openwrt || exit 1
 
 cd openwrt
 
-[ ! -e feeds.conf ] && cp -v feeds.conf.default feeds.conf
+[ ! -e feeds.conf ] && cp -v ../feeds.conf feeds.conf
 [ ! -e files ] && mkdir files
 [ ! -e dl ] && mkdir ../dl && ln -sf ../dl dl
 cp -rf -v ../default-files/* files/
