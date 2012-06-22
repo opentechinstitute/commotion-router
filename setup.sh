@@ -17,8 +17,7 @@ scripts/feeds update -a
 scripts/feeds install -a
 for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
 
-[ ! -e .config ] && cp -v ../config .config
-make defconfig
+cp -v ../config .config
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo " Commotion OpenWrt is prepared. To build the firmware, type:"
