@@ -16,7 +16,7 @@ define Package/commotionbase
   SECTION:=commotion
   CATEGORY:=Commotion
   TITLE:=Commotion Base System
-  DEPENDS:=+dnsmasq +olsrd
+  DEPENDS:=+dnsmasq +olsrd +patch
   URL:=http://commotionwireless.net
 endef
 
