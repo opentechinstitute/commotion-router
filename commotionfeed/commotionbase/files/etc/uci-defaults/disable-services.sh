@@ -11,13 +11,3 @@
   /etc/init.d/sysntpd stop
 }
 
-[ -f "/etc/init.d/freifunk-p2pblock" ] && { \
-  /etc/init.d/freifunk-p2pblock disable
-  /etc/init.d/freifunk-p2pblock stop
-}
-
-[ -f "/etc/init.d/freifunk-watchdog" ] && { \
-  /etc/init.d/freifunk-watchdog disable
-  /etc/init.d/freifunk-watchdog stop
-}
-
