@@ -17,7 +17,7 @@ define Package/luci-$(MODULE_NAME)
   SECTION:=luci
   CATEGORY:=LuCI
   SUBMENU:=2. Modules
-  DEPENDS:=+commotionbase +luci-mod-admin-full +luci-app-splash +luci-theme-commotion
+  DEPENDS:=+commotionbase
   TITLE:=LuCI Module - $(MODULE_TITLE)
   URL:=http://commotionwireless.net/
 endef
