@@ -26,6 +26,10 @@ config 'interface' 'plug'
 	option 'ifname' 'eth0'
 	option 'proto' 'plugif'
   option 'routing' 'olsrd'
+
+config 'interface' 'vpn'
+	option 'ifname' 'edge0'
+	option 'proto' 'none'
 	
 config 'alias'
 	option 'interface' 'plug'
