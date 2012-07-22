@@ -5,9 +5,6 @@
   patch -p0 < /usr/share/commotion/patches/dnsmasq.patch
   patch -p0 < /usr/share/commotion/patches/n2n.patch
   
-  cd /usr/lib/lua/luci/
-  patch -p0 < /usr/share/commotion/patches/luci_splash.patch
-  
   cd /usr/sbin/
   patch -p0 < /usr/share/commotion/patches/remote-update.patch
 }
