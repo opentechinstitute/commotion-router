@@ -12,6 +12,16 @@ cp -f /use/share/commotion/files/node-hna-mini.gif /www/luci-ststic/resources/ol
 cp -f /use/share/commotion/files/olsr-viz.sh /www/cgi-bin/olsr-viz.sh
 }
 
+[ -f "/usr/bin/patch" ] && { \
+  cd /usr/lib/lua/luci/
+  patch -p0 < /usr/share/commotion/patches/luci_splash.patch
+
+  cd /
+  patch -p3 < /usr/share/commotion/patches/luci-splash_fix-dropped-clients.diff
+}
+  
+
+
 uci -q batch <<-EOF >/dev/null
 	delete ucitrack.@mesh[-1]
 	add ucitrack mesh
