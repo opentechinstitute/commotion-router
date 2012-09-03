@@ -87,4 +87,27 @@ get_id_default ()
 #  #TODO: Implement 
 #}	# ----------  end of function get_ipv4_hash  ----------
 
+#---  FUNCTION  ----------------------------------------------------------------   
+#          NAME:  echo_eval                                                     
+#   DESCRIPTION:  For debugging purposes, echo all parameters passed to me, and then evaluate them.                                                                 
+#    PARAMETERS:                                                                   
+#       RETURNS:                                                                   
+#-------------------------------------------------------------------------------   
+echo_eval ()                                                                   
+{                                                                                 
+  echo ${@}
+  return `eval ${@}`
+}      # ----------  end of function logger  ----------                     
+
+#---  FUNCTION  ----------------------------------------------------------------                   
+#          NAME:  logger_eval                                                                        
+#   DESCRIPTION:  For debugging purposes, log all parameters passed to me, and then evaluate them.
+#    PARAMETERS:                                                                
+#       RETURNS:                                                                
+#-------------------------------------------------------------------------------  
+logger_eval ()                                           
+{                                                                               
+  logger ${@}                                             
+  return `eval ${@}`                                                                       
+}      # ----------  end of function logger  ----------   
 

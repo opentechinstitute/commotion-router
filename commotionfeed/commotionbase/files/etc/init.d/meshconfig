@@ -3,7 +3,7 @@
 . /etc/functions.sh
 . /lib/functions/meshconfig.sh
 
-#DEBUG=echo
+DEBUG=echo_eval
 START=38
 STOP=91
 EXTRA_COMMANDS="configure upgrade cron"
