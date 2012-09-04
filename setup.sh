@@ -17,6 +17,7 @@ scripts/feeds update -a
 scripts/feeds install -a
 for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
 
+cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
 cp -v ../config .config
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
