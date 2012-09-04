@@ -90,25 +90,10 @@ add_olsrd_plugin() {
 #===============================================================================
 
 unset_olsrd_if() {
-  local config="$1"
+  local config=$1
   
-  config_cb() {
-    local type="$1"
-    local name="$2"
-
-    case $type in
-      Interface)
-        local oldifaces="$(uci_get olsrd "$name" interface "")"
-        local newifaces=
-        for dev in $(sort_list "$oldifaces" "$config"); do
-          list_remove newifaces "$dev"
-        done
-        uci_set olsrd "$name" interface "$newifaces"
-        ;;
-    esac
-  }
-  config_load olsrd
-
+  uci_remove olsrd "$config"
+        
   return 0
 }
 
@@ -121,35 +106,25 @@ unset_olsrd_if() {
 
 set_olsrd_if() {
   local config="$1"
-  local set=0
+  local mode="ether"
+  $DEBUG uci_add olsrd Interface "$config"
+  $DEBUG uci_set olsrd "$config" interface "$config"
 
   config_cb() {
     local type="$1"
     local name="$2"
 
     case $type in
-      Interface)
-        local oldifaces="$(uci_get olsrd "$name" interface "")"
-        local newifaces=
-        for dev in $(sort_list "$oldifaces" "$config"); do
-          append newifaces "$dev"
-        done
-        $DEBUG uci_set olsrd "$name" interface "$newifaces"
-        set=1
-        return 0
-        ;;
-      "")
-        [ $set = 0 ] && {
-          $DEBUG uci_add olsrd Interface
-          $DEBUG uci_set olsrd @Interface[-1] interface "$config"
-          return 0
-        }
+      wifi-iface)
+        [ "$(uci_get wireless "$name" network)" = "$config" ] && mode="mesh"
         ;;
     esac
   }
-  config_load olsrd
+  config_load wireless
+  $DEBUG uci_set olsrd "$config" Mode "$mode"
+  $DEBUG uci_set olsrd "$config" Ip4Broadcast "255.255.255.255"
 
-  return 1
+  return 0
 }
 
 #===  FUNCTION  ================================================================
