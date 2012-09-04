@@ -115,7 +115,7 @@ apply_analytics_defaults() {
 }
 
 apply_vpn_defaults() {
-  [ -f /etc/config/network ] || logger -t meshconfig "N2N not installed!"
+  [ -f /etc/config/n2n ] || logger -t meshconfig "N2N not installed!"
   local host=$(uci_get mesh @network[0] vpn_server "blank")
   case "$host" in
     "blank")
@@ -169,12 +169,12 @@ boot() {
     ;;
   esac
   
-  [ "$(uci_get luci_statistics @commotion_config[0] reset 1)" = "0" ] || { 
+  [ "$(uci_get luci_statistics @commotion_config[0] reset 1)" = "0" ] && [ "$(uci_get mesh @network[0] analytics_enable 0)" = "1" ] || { 
     apply_analytics_defaults
     logger -t meshconfig "Applied analytics defaults"
   }
   
-  [ "$(uci_get n2n @commotion_config[0] reset 1)" = "0" ] || { 
+  [ "$(uci_get n2n @commotion_config[0] reset 1)" = "0" ] && [ "$(uci_get mesh @network[0] vpn_enable 0)" = "1" ] || { 
     apply_vpn_defaults
     logger -t meshconfig "Applied VPN defaults"
   }
