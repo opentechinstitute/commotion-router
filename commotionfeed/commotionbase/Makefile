@@ -42,7 +42,7 @@ endef
 define Package/commotionbase/postinst
 #!/bin/sh
 [ -n "$${IPKG_INSTROOT}" ] || {
-	( . /etc/uci-defaults/commotionbase) ) && rm -f /etc/uci-defaults/commotionbase
+	( . /etc/uci-defaults/commotionbase ) && rm -f /etc/uci-defaults/commotionbase
 }
 endef
 
