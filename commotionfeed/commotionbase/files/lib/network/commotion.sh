@@ -42,7 +42,8 @@
 
 DEFAULT_MESH_SSID="commotionwireless.net"
 DEFAULT_MESH_BSSID="02:CA:FF:EE:BA:BE"
-DEFAULT_MESH_CHANNEL="5"
+DEFAULT_MESH_CHANNEL_2="5"
+DEFAULT_MESH_CHANNEL_5="36"
 DEFAULT_MESH_BASENAME="commotion"
 DEFAULT_MESH_PREFIX="5"
 DEFAULT_MESH_FWZONE="mesh"
@@ -54,10 +55,90 @@ DEFAULT_SECUREAP_PREFIX="103"
 DEFAULT_SECUREAP_FWZONE="lan"
 DEFAULT_SECUREAP_KEY="c0MM0t10N!r0ckS!"
 DEFAULT_SECUREMESH_KEY="c0MM0t10N!r0ckS!"
+DEFAULT_DNS_SERVERS="8.8.8.8 8.8.4.4"
 
 #===============================================================================
 # SETTING FUNCTIONS
 #===============================================================================
+
+#===  FUNCTION  ================================================================
+#          NAME:  truncate_substring
+#   DESCRIPTION:  Utility function to truncate string plus suffix to a length 
+#    PARAMETERS:  3; substring, desired length, and suffix
+#===============================================================================
+
+truncate_substring() {
+  local substring=$1
+  local length=$2
+  local suffix=$3
+  local string="$substring$suffix"
+  if [ "${#string}" -gt "$length" ]
+          then
+                  local suffixlength="${#suffix}"
+                  local newlength="$((length-suffixlength))"
+                  local subsubstring=$(echo $substring | cut -c1-"$newlength")
+                  local newstring="$subsubstring$suffix"
+                  echo $newstring
+          else
+                  echo $string
+  fi
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  remove_dns
+#   DESCRIPTION:  Utility function borrowed from config.sh, alter resolv.conf
+#    PARAMETERS:  Config name for network.
+#===============================================================================
+
+remove_dns() {                                                                   
+        local cfg="$1"                                                           
+                                                                                 
+        [ -n "$cfg" ] && {                                                       
+                [ -f /tmp/resolv.conf.auto ] && {                                
+                        local dns=$(uci_get_state network "$cfg" resolv_dns)     
+                        for dns in $dns; do                                      
+                                sed -i -e "/^nameserver ${dns//./\\.}$/d" /tmp/resolv.conf.auto
+                        done                                                                   
+                }                                                                              
+                                                                                               
+                uci_revert_state network "$cfg" dns                                            
+                uci_revert_state network "$cfg" resolv_dns                                     
+        }                                                                                      
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  add_dns
+#   DESCRIPTION:  Utility function borrowed from config.sh, alter resolv.conf
+#    PARAMETERS:  Config name for network.
+#===============================================================================
+
+add_dns() {                                                                  
+        local cfg="$1"; shift                                                  
+                                                                                               
+        remove_dns "$cfg"                                                      
+                                                                               
+        # We may be called by pppd's ip-up which has a nonstandard umask set.  
+        # Create an empty file here and force its permission to 0644, otherwise  
+        # dnsmasq will not be able to re-read the resolv.conf.auto .             
+        [ ! -f /tmp/resolv.conf.auto ] && {                                    
+                touch /tmp/resolv.conf.auto                                    
+                chmod 0644 /tmp/resolv.conf.auto                               
+        }                                                                        
+                                                                                 
+        local dns                                                                
+        local add                                                                
+        for dns in "$@"; do                                                      
+                grep -qsE "^nameserver ${dns//./\\.}$" /tmp/resolv.conf.auto || {
+                        add="${add:+$add }$dns"                                  
+                        echo "nameserver $dns" >> /tmp/resolv.conf.auto          
+                }                                                                
+        done                                                                     
+                                                                                 
+        [ -n "$cfg" ] && {                                                       
+                uci_toggle_state network "$cfg" dns "$add"                       
+                uci_toggle_state network "$cfg" resolv_dns "$add"                
+        }                                                                        
+} 
 
 #===  FUNCTION  ================================================================
 #          NAME:  set_meshif_wireless
@@ -70,10 +151,9 @@ set_meshif_wireless() {
   local config="$1"
   local ssid=$(uci_get mesh @network[0] ssid "$DEFAULT_MESH_SSID") 
   local bssid=$(uci_get mesh @network[0] bssid "$DEFAULT_MESH_BSSID") 
-  local channel=$(uci_get mesh @network[0] channel "$DEFAULT_MESH_CHANNEL") 
   local secure=$(uci_get network "$config" secure "0")
   local key=$(uci_get network "$config" key "$DEFAULT_SECUREMESH_KEY")
-  local net dev
+  local net dev channel
 
   config_cb() {
     local type="$1"
@@ -94,8 +174,17 @@ set_meshif_wireless() {
   }
   config_load wireless
 
+  case "$(uci_get wireless $dev hwmode)" in
+    11ng|11b|11g)
+      channel=$(uci_get mesh @network[0] channel_2 "$DEFAULT_MESH_CHANNEL_2") 
+      ;;
+    11na|11a)
+      channel=$(uci_get mesh @network[0] channel_5 "$DEFAULT_MESH_CHANNEL_5") 
+      ;;
+  esac      
+
   [[ -n "$net" ]] && [[ -n "$dev" ]] && [ "$secure" = 1 ] && \
-  uci_set wireless "$net" encryption "psk2" && uci_set wireless "$net" key "$key"
+  uci_set wireless "$net" encryption "psk" && uci_set wireless "$net" key "$key"
                                                                             
   [[ -n "$net" ]] && [[ -n "$dev" ]] && [ "$secure" = 0 ] && \
   uci_remove wireless "$net" encryption && uci_remove wireless "$net" key
@@ -115,7 +204,7 @@ set_meshif_wireless() {
 #===============================================================================
 set_apif_wireless() {
   local config="$1"
-  local wiconfig=
+  local wiconfig ssid
   local basename=$(uci_get mesh @network[0] basename "$DEFAULT_MESH_BASENAME")
   local location=$(uci_get system @system[0] location)
   local nodeid=$(uci_get system @system[0] nodeid)
@@ -145,10 +234,12 @@ set_apif_wireless() {
   uci_remove wireless "$wiconfig" encryption && uci_remove wireless "$wiconfig" key
 
   [[ -n "$wiconfig" ]] && [[ -n "$location" ]] && \
-  uci_set wireless "$wiconfig" ssid "$basename"_"$location"_"$config" && uci_commit wireless && return 0
+  ssid="$(truncate_substring "$basename"_"$location" 32 _"$config")"
 
   [[ -n "$wiconfig" ]] && [[ -z "$location" ]] && \
-  uci_set wireless "$wiconfig" ssid "$basename"_"$nodeid"_"$config" && uci_commit wireless && return 0
+  ssid="$(truncate_substring "$basename"_"$nodeid" 32 _"$config")"
+
+  uci_set wireless "$wiconfig" ssid "$(truncate_substring "$basename"_"$nodeid" 32 "_$config")" && uci_commit wireless && return 0
 
   logger -t set_apif_wireless "Error! Wireless configuration for "$config" may not exist." && return 1
 }
@@ -232,11 +323,11 @@ setup_interface_meshif() {
 
   env -i ACTION="preup" INTERFACE="$config" DEVICE="$iface" PROTO=meshif /sbin/hotplug-call "services" &
   
-  local ipaddr netmask reset
+  local ipaddr netmask reset prefix
   config_get_bool reset "$config" reset 1
   case "$reset" in
     1)
-      local prefix=$(uci_get mesh @network[0] mesh_prefix "$DEFAULT_MESH_PREFIX")
+      config_get prefix "$config" prefix $(uci_get mesh @network[0] mesh_prefix "$DEFAULT_MESH_PREFIX")
       local mac=$(uci_get wireless @wifi-device[0] macaddr 0)
       [ $mac = 0 ] && \
       logger -t setup_interface_meshif "Error! Could not get MAC from config file."
@@ -258,7 +349,7 @@ setup_interface_meshif() {
   config_get ipaddr "$config" ipaddr
   config_get netmask "$config" netmask
   config_get bcast "$config" broadcast
-  config_get dns "$config" dns
+  config_get dns "$config" dns $(uci_get mesh @network[0] dns_servers "$DEFAULT_DNS_SERVERS")
   [ -z "$ipaddr" ] || $DEBUG ifconfig "$iface" "$ipaddr" netmask "$netmask" broadcast "${bcast:-+}"
   [ -z "$dns" ] || add_dns "$config" $dns
 
@@ -322,13 +413,13 @@ setup_interface_apif() {
           $DEBUG unset_fwzone "$config"
           $DEBUG set_fwzone "$config" $(uci_get mesh @network[0] ap_zone "$DEFAULT_AP_FWZONE")
           $DEBUG uci_commit firewall
-          prefix=$(uci_get mesh @network[0] ap_prefix "$DEFAULT_AP_PREFIX")
+          config_get prefix "$config" prefix $(uci_get mesh @network[0] ap_prefix "$DEFAULT_AP_PREFIX")
           ;;
         1)
           $DEBUG unset_fwzone "$config"
           $DEBUG set_fwzone "$config" $(uci_get mesh @network[0] secureap_zone "$DEFAULT_SECUREAP_FWZONE")
           $DEBUG uci_commit firewall
-          prefix=$(uci_get mesh @network[0] secureap_prefix "$DEFAULT_SECUREAP_PREFIX")
+          config_get prefix "$config" prefix $(uci_get mesh @network[0] secureap_prefix "$DEFAULT_SECUREAP_PREFIX")
           ;;
       esac
       local mac=$(uci_get wireless @wifi-device[0] macaddr 0)
@@ -411,7 +502,7 @@ setup_interface_plugif() {
   $DEBUG service_kill udhcpc "$pidfile"                                                                            
 
   #Attempt to acquire address.
-  local ipaddr netmask hostname proto1 clientid vendorid broadcast                                          
+  local ipaddr netmask hostname proto1 clientid vendorid broadcast prefix                                         
   config_get ipaddr "$config" ipaddr                                                                        
   config_get netmask "$config" netmask                            
   config_get hostname "$config" hostname                          
@@ -438,7 +529,7 @@ setup_interface_plugif() {
 
   case "$?" in
     1)
-      local prefix=$(uci_get mesh @network[0] lan_prefix "$DEFAULT_LAN_PREFIX")
+      config_get prefix "$config" prefix $(uci_get mesh @network[0] lan_prefix "$DEFAULT_LAN_PREFIX")
       local mac=$(uci_get wireless @wifi-device[0] macaddr 0)
       [ $mac = 0 ] && \
       logger -t setup_interface_apif "Error! Could not get MAC from config file."
