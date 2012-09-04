@@ -21,3 +21,21 @@ reset.disabled = "0"
 reset.default  = reset.disabled
 reset:depends("proto", "meshif")
 
+prefix = s:taboption("advanced", Value, "prefix", translate("Subnet Prefix"), translate("Set the class A subnet prefix to be used for this interface when the configuration is reset."))
+prefix.optional    = true
+prefix.placeholder = "5"
+prefix.datatype = and(uinteger,range(1,254))
+prefix:depends("proto", "meshif")
+
+secure = s:taboption("advanced", Flag, "secure", translate("Secure"), translate("Set the flag to set this access point to use WPA when the configuration is reset."))
+secure.optional    = true
+secure.enabled  = "1"
+secure.disabled = "0"
+secure.default  = secure.disabled
+secure:depends("proto", "meshif")
+ 
+key = s:taboption("advanced", Value, "key", translate("WPA Key"), translate("Set the WPA key to be used for this interface when the configuration is reset."))
+key.optional    = true
+key.placeholder = "c0MM0t10N!r0ckS!"
+key.datatype = "wpakey"
+key:depends("secure", "1")
