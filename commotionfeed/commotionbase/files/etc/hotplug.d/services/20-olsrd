@@ -270,9 +270,7 @@ set_olsrd_hna4() {
 set_olsrd_secure() {
 
   local name="$(add_olsrd_plugin "secure")"
-  $DEBUG uci_set olsrd "$name" Keyfile "/etc/olsrd.d/commotion.key"
-
-  [ -f /etc/olsrd.d/commotion.key ] || echo "$(uci_get mesh @network[0] olsrd_key "c0mm0t10N!r0ckS!")" > /etc/olsrd.d/commotion.key
+  $DEBUG uci_set olsrd "$name" Keyfile "/etc/olsrd.d/olsrd_secure_key"
 
   return 0
 } 
