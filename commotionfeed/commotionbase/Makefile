@@ -39,4 +39,11 @@ define Package/commotionbase/install
 	$(SED) 's,$$$$R,$(REVISION),g' $(1)/usr/share/commotion/files/banner
 endef
 
+define Package/commotionbase/postinst
+#!/bin/sh
+[ -n "$${IPKG_INSTROOT}" ] || {
+	( . /etc/uci-defaults/commotionbase) ) && rm -f /etc/uci-defaults/commotionbase
+}
+endef
+
 $(eval $(call BuildPackage,commotionbase))
