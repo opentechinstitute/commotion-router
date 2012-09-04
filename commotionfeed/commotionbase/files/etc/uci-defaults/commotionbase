@@ -7,6 +7,9 @@
   
   cd /usr/sbin/
   patch -p0 < /usr/share/commotion/patches/remote-update.patch
+
+  cd /lib/wifi/
+  patch -p0 < /usr/share/commotion/patches/wpa-none.patch
 }
 
 [ -f "/usr/share/commotion/files/banner" ] && { \
