@@ -35,6 +35,8 @@ endef
 define Package/luci-$(MODULE_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(CP) -a ./files/etc/uci-defaults/* $(1)/etc/uci-defaults/ 2>/dev/null || true
+	$(INSTALL_DIR) $(1)/usr/share/commotion/files
+	$(CP) -a ./files/usr/share/commotion/files/* $(1)/usr/share/commotion/files/ 2>/dev/null || true
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller/$(MODULE_NAME)
 	$(CP) -a ./luasrc/controller/$(MODULE_NAME)/* $(1)/usr/lib/lua/luci/controller/$(MODULE_NAME)/ 2>/dev/null || true
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/$(MODULE_NAME)
