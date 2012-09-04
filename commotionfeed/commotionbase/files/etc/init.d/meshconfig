@@ -32,6 +32,7 @@ apply_wireless_defaults() {
   local n=0
   
   # Clear out any existing wireless interfaces
+  $DEBUG uci_load wireless
   $DEBUG uci_remove wireless @wifi-iface[]
 
   config_cb() {
