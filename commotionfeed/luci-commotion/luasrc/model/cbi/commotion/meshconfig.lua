@@ -75,7 +75,7 @@ o.anonymous = true
 location = o:option(Value, "location", translate("Location"), translate("Human-readable location, optionally used to generate hostname/SSID. No spaces or underscores."))
 location.datatype = "hostname"
 homepage = o:option(Value, "homepage", translate("Homepage"), translate("Homepage for this node or network, used in the splash screen."))
-homepage.datatype = "host"
+-- homepage.datatype = "host"
 --[[
 LatLon and OpenStreetMap implementation borrowed from Freifunk.
 ]]--
