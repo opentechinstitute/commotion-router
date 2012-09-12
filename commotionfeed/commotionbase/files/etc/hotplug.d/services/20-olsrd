@@ -323,7 +323,7 @@ case $PROTO in
             $DEBUG set_olsrd_p2pif $INTERFACE
             ;;
           1)
-            [ "$(uci_get network "$INTERFACE" meshable 0)" = 1 ] && $DEBUG set_olsrd_if $INTERFACE
+            [ "$(uci_get network "$INTERFACE" meshable 0)" = 1 ] && $DEBUG unset_olsrd_hna4 $INTERFACE && $DEBUG set_olsrd_if $INTERFACE
             ;;
         esac
       ;;
