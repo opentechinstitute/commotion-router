@@ -17,7 +17,7 @@
 }
 
 if ! grep -q "meshconfig" /etc/crontabs/root 2>/dev/null; then
-	echo "0 */1 * * *	/etc/init.d/meshconfig cron" >> /etc/crontabs/root
+	echo "*/5 * * * *	/etc/init.d/meshconfig cron" >> /etc/crontabs/root
 fi
 
 exit 0
