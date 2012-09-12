@@ -23,6 +23,7 @@ config 'LoadPlugin'
   option 'library' 'olsrd_nameservice.so.0.3'
   #option 'resolv_file' '/tmp/resolv.conf.auto'
   option 'sighup_pid_file' '/var/run/dnsmasq.pid'
+  option 'hosts_file' '/var/run/hosts_olsr'
   option 'suffix' '.mesh'
 
 config 'LoadPlugin'
