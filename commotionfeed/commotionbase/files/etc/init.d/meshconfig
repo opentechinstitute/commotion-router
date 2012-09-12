@@ -246,6 +246,8 @@ upgrade() {
 }
 
 cron() {
+  ( ps w | grep -q "^\ *$(cat /var/run/olsrd.pid)" || [ ! -h /etc/rc.d/S[0-9]*olsrd ] ) || /etc/init.d/olsrd restart
+  ( ps w | grep -q "^\ *$(cat /var/run/dnsmasq.pid)" || [ ! -h /etc/rc.d/S[0-9]*dnsmasq ] ) || /etc/init.d/dnsmasq restart
   [ -z "$(uci_get system @upgrade[0] noverify 0)" ] || upgrade
   return 0
 } 
