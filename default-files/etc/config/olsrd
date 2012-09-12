@@ -9,7 +9,7 @@ config 'LoadPlugin'
   option 'library' 'olsrd_arprefresh.so.0.1'
 
 config 'LoadPlugin'
-  option 'library' 'olsrd_dyn_gw.so.0.5'
+  option 'library' 'olsrd_dyn_gw_plain.so.0.4'
 
 config 'LoadPlugin'
   option 'library' 'olsrd_secure.so.0.6'
