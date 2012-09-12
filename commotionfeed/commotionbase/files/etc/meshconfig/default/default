@@ -20,6 +20,13 @@ uci -q batch <<-EOF >/dev/null
   set mesh.@network[0].dns_servers='8.8.8.8 8.8.4.4'
   set system.upgrade=upgrade
   set system.upgrade.repository=http://repo.commotionwireless.net
+  delete freifunk-gwcheck.hosts
+  commit freifunk-gwcheck
+  set freifunk-gwcheck.hosts=gwcheck
+  add_list freifunk-gwcheck.hosts.host=google.com
+  add_list freifunk-gwcheck.hosts.host=slashdot.org
+  add_list freifunk-gwcheck.hosts.host=commotionwireless.net
+  commit freifunk-gwcheck
   commit mesh
   commit system
 EOF
