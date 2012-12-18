@@ -1,0 +1,54 @@
+Ref: https://patchwork.kernel.org/patch/1515101/
+diff --git a/drivers/net/wireless/ath/ath9k/htc_drv_init.c b/drivers/net/wireless/ath/ath9k/htc_drv_init.c
+index d98255e..4d65af1 100644
+--- a/drivers/net/wireless/ath/ath9k/htc_drv_init.c
++++ b/drivers/net/wireless/ath/ath9k/htc_drv_init.c
+@@ -694,6 +694,38 @@  err_hw:
+ 	return ret;
+ }
+ 
++/*
++ * It is possible to have atmost ATH9K_HTC_MAX_BCN_VIF beaconing interfaces
++ * therefore either we have 1 IBSS + ATH9K_HTC_MAX_BCN_VIF - 1 AP's, or we
++ * have only ATH9K_HTC_MAX_BCN_VIF AP's
++ */
++
++static const struct ieee80211_iface_limit if_limits_ibss[] = {
++	{.max = ATH9K_HTC_MAX_VIF, .types = BIT(NL80211_IFTYPE_STATION)},
++	{.max = ATH9K_HTC_MAX_VIF - 1, .types = BIT(NL80211_IFTYPE_AP)},
++	{.max = 1, .types = BIT(NL80211_IFTYPE_ADHOC)},
++};
++
++static const struct ieee80211_iface_limit if_limits_no_ibss[] = {
++	{.max = ATH9K_HTC_MAX_VIF, .types = BIT(NL80211_IFTYPE_STATION)},
++	{.max = ATH9K_HTC_MAX_VIF, .types = BIT(NL80211_IFTYPE_AP)},
++};
++
++static const struct ieee80211_iface_combination if_comb[] = {
++	{.limits = if_limits_ibss,
++	 .n_limits = ARRAY_SIZE(if_limits_ibss),
++	 .max_interfaces = ATH9K_HTC_MAX_VIF,
++	 .num_different_channels = 1,
++	 .beacon_int_infra_match = true,
++	},
++	{.limits = if_limits_no_ibss,
++	 .n_limits = ARRAY_SIZE(if_limits_no_ibss),
++	 .max_interfaces = ATH9K_HTC_MAX_VIF,
++	 .num_different_channels = 1,
++	 .beacon_int_infra_match = true,
++	},
++};
++
+ static void ath9k_set_hw_capab(struct ath9k_htc_priv *priv,
+ 			       struct ieee80211_hw *hw)
+ {
+@@ -716,6 +748,9 @@  static void ath9k_set_hw_capab(struct ath9k_htc_priv *priv,
+ 		BIT(NL80211_IFTYPE_P2P_GO) |
+ 		BIT(NL80211_IFTYPE_P2P_CLIENT);
+ 
++	hw->wiphy->iface_combinations = if_comb;
++	hw->wiphy->n_iface_combinations = ARRAY_SIZE(if_comb);
++
+ 	hw->wiphy->flags &= ~WIPHY_FLAG_PS_ON_BY_DEFAULT;
+ 
+ 	hw->wiphy->flags |= WIPHY_FLAG_IBSS_RSN |
