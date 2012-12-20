@@ -24,7 +24,7 @@ reset:depends("proto", "apif")
 prefix = s:taboption("advanced", Value, "prefix", translate("Subnet Prefix"), translate("Set the class A subnet prefix to be used for this interface when the configuration is reset."))
 prefix.optional    = true
 prefix.placeholder = "101"
-prefix.datatype = and(uinteger,range(1,254))
+prefix.datatype = "and(uinteger,range(1,254))"
 prefix:depends("proto", "apif")
 
 secure = s:taboption("advanced", Flag, "secure", translate("Secure"), translate("Set the flag to set this access point to use WPA when the configuration is reset."))
