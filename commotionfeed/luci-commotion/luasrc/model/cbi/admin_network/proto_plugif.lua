@@ -24,7 +24,7 @@ reset:depends("proto", "plugif")
 prefix = s:taboption("advanced", Value, "prefix", translate("Subnet Prefix"), translate("Set the class A subnet prefix to be used for this interface when the configuration is reset."))
 prefix.optional    = true
 prefix.placeholder = "102"
-prefix.datatype = and(uinteger,range(1,254))
+prefix.datatype = "and(uinteger,range(1,254))"
 prefix:depends("proto", "plugif")
 
 meshable = s:taboption("advanced", Flag, "meshable", translate("Meshable"), translate("Set whether to attempt to mesh over ethernet using this interface."))
