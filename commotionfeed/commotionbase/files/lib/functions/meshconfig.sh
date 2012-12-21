@@ -97,7 +97,7 @@ echo_eval ()
 {                                                                                 
   echo ${@}
   return `eval ${@}`
-}      # ----------  end of function logger  ----------                     
+}      # ----------  end of function echo_eval  ----------                     
 
 #---  FUNCTION  ----------------------------------------------------------------                   
 #          NAME:  logger_eval                                                                        
