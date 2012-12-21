@@ -6,3 +6,7 @@
   /etc/init.d/usb stop
 }
 
+[ -f "/etc/init.d/freifunk-p2pblock" ] && { \
+  /etc/init.d/freifunk-p2pblock disable
+  /etc/init.d/freifunk-p2pblock stop
+}
