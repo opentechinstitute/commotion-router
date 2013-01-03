@@ -26,6 +26,12 @@ cp -v ../patches/893_mac80211_add_supported_rates_change_notification_ibss.patch
 cp -v ../patches/894_ath9k_htc_implement_sta_rc_update_mac80211_callback.patch package/mac80211/patches
 cp -v ../config .config
 
+# Backport compat-wireless-2012-09-07
+if ! grep -q 2012-09-07 package/mac80211/Makefile; then
+    echo "backporting compat-wireless-2012-09-07 drivers..."
+    patch -p0 ../patches/backport_compat_wireless_09-07-12.patch
+fi
+
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo " Commotion OpenWrt is prepared. To build the firmware, type:"
 echo " cd openwrt"
