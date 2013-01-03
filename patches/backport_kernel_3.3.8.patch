@@ -1,0 +1,539 @@
+Index: include/kernel-version.mk
+===================================================================
+--- include/kernel-version.mk	(revision 31639)
++++ include/kernel-version.mk	(working copy)
+@@ -38,8 +38,8 @@
+ ifeq ($(LINUX_VERSION),3.2.16)
+   LINUX_KERNEL_MD5SUM:=246e6bd28ea44c90ec66c7f8b56e4803
+ endif
+-ifeq ($(LINUX_VERSION),3.3.4)
+-  LINUX_KERNEL_MD5SUM:=113baeccd2a3341ecc62ae5e73c2ed1d
++ifeq ($(LINUX_VERSION),3.3.8)
++  LINUX_KERNEL_MD5SUM:=21068f0fd262b9b3670947f7892e1d6b
+ endif
+ 
+ # disable the md5sum check for unknown kernel versions
+Index: target/linux/rdc/Makefile
+===================================================================
+--- target/linux/rdc/Makefile	(revision 31639)
++++ target/linux/rdc/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS:=-Os -pipe -march=i486 -mtune=i486 -fno-caller-saves
+ MAINTAINER:=Florian Fainelli <florian@openwrt.org>
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/gemini/Makefile
+===================================================================
+--- target/linux/gemini/Makefile	(revision 31639)
++++ target/linux/gemini/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS:=-Os -pipe -march=armv4 -mtune=fa526 -fno-caller-saves
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=2.6.37.6
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/generic/files/include/linux/rt2x00_platform.h
+===================================================================
+--- target/linux/generic/files/include/linux/rt2x00_platform.h	(revision 31639)
++++ target/linux/generic/files/include/linux/rt2x00_platform.h	(working copy)
+@@ -14,9 +14,11 @@
+ 
+ struct rt2x00_platform_data {
+ 	char *eeprom_file_name;
++	const u8 *mac_address;
+ 
+ 	int disable_2ghz;
+ 	int disable_5ghz;
++	int clk_is_20mhz;
+ };
+ 
+ #endif /* _RT2X00_PLATFORM_H */
+Index: target/linux/generic/files/include/linux/ath9k_platform.h
+===================================================================
+--- target/linux/generic/files/include/linux/ath9k_platform.h	(revision 31639)
++++ target/linux/generic/files/include/linux/ath9k_platform.h	(working copy)
+@@ -31,6 +31,9 @@
+ 
+ 	bool endian_check;
+ 	bool is_clk_25mhz;
++	bool disable_2ghz;
++	bool disable_5ghz;
++
+ 	int (*get_mac_revision)(void);
+ 	int (*external_reset)(void);
+ 
+Index: target/linux/cns3xxx/Makefile
+===================================================================
+--- target/linux/cns3xxx/Makefile	(revision 31639)
++++ target/linux/cns3xxx/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS:=-Os -pipe -march=armv6k -mtune=mpcore -mfloat-abi=softfp -mfpu=vfp -fno-caller-saves
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=2.6.39.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/at91/Makefile
+===================================================================
+--- target/linux/at91/Makefile	(revision 31639)
++++ target/linux/at91/Makefile	(working copy)
+@@ -14,7 +14,7 @@
+ CFLAGS:=-Os -pipe -march=armv5te -mtune=arm926ej-s -fno-caller-saves
+ SUBTARGETS:=9g20 9260 9263
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ DEVICE_TYPE=
+ 
+ include $(INCLUDE_DIR)/target.mk
+Index: target/linux/ppc40x/Makefile
+===================================================================
+--- target/linux/ppc40x/Makefile	(revision 31639)
++++ target/linux/ppc40x/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS:=-Os -pipe -fno-caller-saves -mcpu=405
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/omap4/Makefile
+===================================================================
+--- target/linux/omap4/Makefile	(revision 31639)
++++ target/linux/omap4/Makefile	(working copy)
+@@ -11,7 +11,7 @@
+ BOARDNAME:=TI OMAP4
+ FEATURES:=usb targz audio display
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ CFLAGS:=-Os -pipe -march=armv7-a -mfpu=vfpv3-d16 -mfloat-abi=softfp
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+Index: target/linux/omap24xx/Makefile
+===================================================================
+--- target/linux/omap24xx/Makefile	(revision 31639)
++++ target/linux/omap24xx/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ MAINTAINER:=Michael Buesch <m@bues.ch>
+ FEATURES:=targz squashfs jffs2 usb usbgadget display gpio audio
+ 
+-LINUX_VERSION:=3.1.10
++LINUX_VERSION:=3.3.8
+ 
+ define Target/Description
+ 	TI OMAP-24xx
+Index: target/linux/ppc44x/Makefile
+===================================================================
+--- target/linux/ppc44x/Makefile	(revision 31639)
++++ target/linux/ppc44x/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS:=-Os -pipe -fno-caller-saves -mcpu=440
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=3.2.16
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/iop32x/Makefile
+===================================================================
+--- target/linux/iop32x/Makefile	(revision 31639)
++++ target/linux/iop32x/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ FEATURES:=squashfs
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=2.6.37.6
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/orion/Makefile
+===================================================================
+--- target/linux/orion/Makefile	(revision 31639)
++++ target/linux/orion/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS=-Os -pipe -march=armv5te -mtune=xscale -fno-caller-saves
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=3.0.18
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/pxa/Makefile
+===================================================================
+--- target/linux/pxa/Makefile	(revision 31639)
++++ target/linux/pxa/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ FEATURES:=squashfs
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=2.6.37.6
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/ar7/Makefile
+===================================================================
+--- target/linux/ar7/Makefile	(revision 31639)
++++ target/linux/ar7/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ FEATURES:=squashfs jffs2 atm
+ MAINTAINER:=Florian Fainelli <florian@openwrt.org>
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/kirkwood/Makefile
+===================================================================
+--- target/linux/kirkwood/Makefile	(revision 31639)
++++ target/linux/kirkwood/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ FEATURES:=targz usb jffs2
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=2.6.37.6
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/rb532/Makefile
+===================================================================
+--- target/linux/rb532/Makefile	(revision 31639)
++++ target/linux/rb532/Makefile	(working copy)
+@@ -11,7 +11,7 @@
+ BOARDNAME:=Mikrotik RouterBoard 532
+ FEATURES:=jffs2 pci targz broken
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ DEFAULT_PACKAGES += wpad-mini kmod-madwifi kmod-input-rb532
+Index: target/linux/avr32/Makefile
+===================================================================
+--- target/linux/avr32/Makefile	(revision 31639)
++++ target/linux/avr32/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ FEATURES:=squashfs
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/adm8668/Makefile
+===================================================================
+--- target/linux/adm8668/Makefile	(revision 31639)
++++ target/linux/adm8668/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ FEATURES:=squashfs
+ MAINTAINER:=Florian Fainelli <florian@openwrt.org>
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ DEFAULT_PACKAGES += wpad-mini kmod-rt61-pci
+Index: target/linux/ixp4xx/Makefile
+===================================================================
+--- target/linux/ixp4xx/Makefile	(revision 31639)
++++ target/linux/ixp4xx/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ SUBTARGETS=generic harddisk
+ 
+-LINUX_VERSION:=2.6.37.6
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/cobalt/Makefile
+===================================================================
+--- target/linux/cobalt/Makefile	(revision 31639)
++++ target/linux/cobalt/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS:=-O2 -pipe -mtune=r5000 -fno-caller-saves
+ MAINTAINER:=Florian Fainelli <florian@openwrt.org>
+ 
+-LINUX_VERSION:=3.2.16
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/au1000/Makefile
+===================================================================
+--- target/linux/au1000/Makefile	(revision 31639)
++++ target/linux/au1000/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ SUBTARGETS=au1500 au1550
+ MAINTAINER:=Florian Fainelli <florian@openwrt.org>
+ 
+-LINUX_VERSION:=3.2.16
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ DEFAULT_PACKAGES += wpad-mini yamonenv
+Index: target/linux/cns21xx/Makefile
+===================================================================
+--- target/linux/cns21xx/Makefile	(revision 31639)
++++ target/linux/cns21xx/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ FEATURES:=squashfs broken
+ CFLAGS:=-Os -pipe -march=armv4 -mtune=fa526 -fno-caller-saves
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/adm5120/Makefile
+===================================================================
+--- target/linux/adm5120/Makefile	(revision 31639)
++++ target/linux/adm5120/Makefile	(working copy)
+@@ -9,7 +9,7 @@
+ 
+ BOARD:=adm5120
+ BOARDNAME:=Infineon/ADMtek ADM5120
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ SUBTARGETS:=router_le router_be rb1xx
+ INITRAMFS_EXTRA_FILES:=
+ 
+Index: target/linux/mpc83xx/Makefile
+===================================================================
+--- target/linux/mpc83xx/Makefile	(revision 31639)
++++ target/linux/mpc83xx/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ FEATURES:=squashfs targz
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/brcm63xx/Makefile
+===================================================================
+--- target/linux/brcm63xx/Makefile	(revision 31639)
++++ target/linux/brcm63xx/Makefile	(working copy)
+@@ -10,7 +10,7 @@
+ BOARD:=brcm63xx
+ BOARDNAME:=Broadcom BCM63xx
+ FEATURES:=squashfs jffs2 usb atm pci pcmcia
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ MAINTAINER:=Florian Fainelli <florian@openwrt.org>
+ 
+ include $(INCLUDE_DIR)/target.mk
+Index: target/linux/mpc85xx/Makefile
+===================================================================
+--- target/linux/mpc85xx/Makefile	(revision 31639)
++++ target/linux/mpc85xx/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ FEATURES:=spe_fpu ramdisk
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=2.6.38.8
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/brcm47xx/Makefile
+===================================================================
+--- target/linux/brcm47xx/Makefile	(revision 31639)
++++ target/linux/brcm47xx/Makefile	(working copy)
+@@ -11,7 +11,7 @@
+ BOARDNAME:=Broadcom BCM947xx/953xx
+ FEATURES:=squashfs usb pcmcia
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ DEFAULT_PACKAGES += wpad-mini kmod-switch kmod-diag nvram
+Index: target/linux/realview/Makefile
+===================================================================
+--- target/linux/realview/Makefile	(revision 31639)
++++ target/linux/realview/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS:=-Os -pipe -march=armv6k -mtune=mpcore -mfloat-abi=softfp -mfpu=vfp -fno-caller-saves
+ MAINTAINER:=Florian Fainelli <florian@openwrt.org>
+ 
+-LINUX_VERSION:=3.0.18
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/amazon/Makefile
+===================================================================
+--- target/linux/amazon/Makefile	(revision 31639)
++++ target/linux/amazon/Makefile	(working copy)
+@@ -10,7 +10,7 @@
+ BOARD:=amazon
+ BOARDNAME:=Infineon Amazon
+ FEATURES:=squashfs jffs2 broken
+-LINUX_VERSION:=2.6.37.6
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/x86/Makefile
+===================================================================
+--- target/linux/x86/Makefile	(revision 31639)
++++ target/linux/x86/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ FEATURES:=squashfs jffs2 ext4 vdi vmdk pcmcia targz
+ SUBTARGETS=generic olpc xen_domu ep80579 net5501 kvm_guest geos alix2 thincan
+ 
+-LINUX_VERSION:=2.6.39.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/xburst/Makefile
+===================================================================
+--- target/linux/xburst/Makefile	(revision 31639)
++++ target/linux/xburst/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ FEATURES:=jffs2 targz ubifs audio
+ SUBTARGETS:=qi_lb60 n516 n526 id800wt
+ 
+-LINUX_VERSION:=3.2.16
++LINUX_VERSION:=3.3.8
+ 
+ DEVICE_TYPE=other
+ 
+Index: target/linux/lantiq/Makefile
+===================================================================
+--- target/linux/lantiq/Makefile	(revision 31639)
++++ target/linux/lantiq/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ FEATURES:=squashfs jffs2
+ DEFAULT_SUBTARGET:=danube
+ 
+-LINUX_VERSION:=3.2.16
++LINUX_VERSION:=3.3.8
+ 
+ CFLAGS=-Os -pipe -mips32r2 -mtune=mips32r2 -fno-caller-saves
+ 
+Index: target/linux/ar71xx/Makefile
+===================================================================
+--- target/linux/ar71xx/Makefile	(revision 31639)
++++ target/linux/ar71xx/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS:=-Os -pipe -mips32r2 -mtune=mips32r2 -fno-caller-saves
+ SUBTARGETS:=generic nand
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/ramips/Makefile
+===================================================================
+--- target/linux/ramips/Makefile	(revision 31639)
++++ target/linux/ramips/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS:=-Os -pipe -mips32r2 -mtune=mips32r2 -fno-caller-saves
+ FEATURES:=squashfs
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ DEFAULT_PACKAGES+=\
+Index: target/linux/uml/Makefile
+===================================================================
+--- target/linux/uml/Makefile	(revision 31639)
++++ target/linux/uml/Makefile	(working copy)
+@@ -23,7 +23,7 @@
+ FEATURES:=ext4 audio
+ MAINTAINER:=Florian Fainelli <florian@openwrt.org>
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/malta/Makefile
+===================================================================
+--- target/linux/malta/Makefile	(revision 31639)
++++ target/linux/malta/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ INITRAMFS_EXTRA_FILES:=
+ MAINTAINER:=Florian Fainelli <florian@openwrt.org>
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/sibyte/Makefile
+===================================================================
+--- target/linux/sibyte/Makefile	(revision 31639)
++++ target/linux/sibyte/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS:=-Os -pipe -march=sb1 -fno-caller-saves
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-LINUX_VERSION:=2.6.37.6
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/ep93xx/Makefile
+===================================================================
+--- target/linux/ep93xx/Makefile	(revision 31639)
++++ target/linux/ep93xx/Makefile	(working copy)
+@@ -13,7 +13,7 @@
+ CFLAGS:=-Os -pipe -march=armv4t -fno-caller-saves
+ MAINTAINER:=Florian Fainelli <florian@openwrt.org>
+ 
+-LINUX_VERSION:=3.2.16
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/atheros/Makefile
+===================================================================
+--- target/linux/atheros/Makefile	(revision 31639)
++++ target/linux/atheros/Makefile	(working copy)
+@@ -11,7 +11,7 @@
+ BOARDNAME:=Atheros AR231x/AR5312
+ FEATURES:=squashfs jffs2
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
+Index: target/linux/mpc52xx/Makefile
+===================================================================
+--- target/linux/mpc52xx/Makefile	(revision 31639)
++++ target/linux/mpc52xx/Makefile	(working copy)
+@@ -12,7 +12,7 @@
+ CFLAGS:=-Os -pipe -fno-caller-saves -mcpu=603e
+ FEATURES:=targz ext4
+ 
+-LINUX_VERSION:=3.3.4
++LINUX_VERSION:=3.3.8
+ 
+ include $(INCLUDE_DIR)/target.mk
+ 
