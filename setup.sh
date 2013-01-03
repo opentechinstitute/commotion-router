@@ -26,6 +26,12 @@ if ! grep -q 2012-09-07 package/mac80211/Makefile; then
     patch -p0 ../patches/backport_compat_wireless_09-07-12.patch
 fi
 
+# Backport kernel 3.3.8
+if ! grep -q 3.3.8 include/kernel-version.mk; then
+    echo "backporting kernel v3.3.8..."
+    patch -p0 ../patches/backport_kernel_3.3.8.patch
+fi
+
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo " Commotion OpenWrt is prepared. To build the firmware, type:"
 echo " cd openwrt"
