@@ -20,6 +20,12 @@ for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
 cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
 cp -v ../config .config
 
+# Backport compat-wireless-2012-09-07
+if ! grep -q 2012-09-07 package/mac80211/Makefile; then
+    echo "backporting compat-wireless-2012-09-07 drivers..."
+    patch -p0 ../patches/backport_compat_wireless_09-07-12.patch
+fi
+
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo " Commotion OpenWrt is prepared. To build the firmware, type:"
 echo " cd openwrt"
