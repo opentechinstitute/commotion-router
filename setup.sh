@@ -19,6 +19,8 @@ for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
 
 # Copy in Commotion-specific patches
 cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
+cp -v ../patches/900-leds-gpio-asm-include.patch target/linux/atheros/patches-3.3/
+cp -v ../patches/901-remove-irqf-sample-random.patch target/linux/atheros/patches-3.3/
 cp -v ../config .config
 
 # Backport compat-wireless-2012-09-07
