@@ -24,6 +24,10 @@ cp -v ../patches/891_ath9k_htc_advertize_allowed_vif_combinations.patch package/
 cp -v ../patches/892_ath9k_htc_remove_interface_combination_specific_checks.patch package/mac80211/patches
 cp -v ../config .config
 
+# Remove outdated patch
+    echo "Removing outdated AR933X_WMAC_reset_code patch ..."
+patch -p0 < ../patches/delete_AR933X_WMAC_reset_code.patch
+
 # Backport compat-wireless-2012-09-07
 if ! grep -q 2012-09-07 package/mac80211/Makefile; then
     echo "backporting compat-wireless-2012-09-07 drivers..."
