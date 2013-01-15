@@ -21,6 +21,10 @@ for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
 cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
 cp -v ../config .config
 
+# Remove outdated patch
+    echo "Removing outdated AR933X_WMAC_reset_code patch ..."
+patch -p0 < ../patches/delete_AR933X_WMAC_reset_code.patch
+
 # Backport compat-wireless-2012-09-07
 if ! grep -q 2012-09-07 package/mac80211/Makefile; then
     echo "backporting compat-wireless-2012-09-07 drivers..."
