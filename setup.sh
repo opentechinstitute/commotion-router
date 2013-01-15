@@ -19,7 +19,6 @@ for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
 
 # Copy in Commotion-specific patches
 cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
-cp -v ../patches/892_ath9k_htc_remove_interface_combination_specific_checks.patch package/mac80211/patches
 cp -v ../config .config
 
 # Remove outdated patch
