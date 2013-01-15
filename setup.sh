@@ -23,6 +23,10 @@ cp -v ../patches/900-leds-gpio-asm-include.patch target/linux/atheros/patches-3.
 cp -v ../patches/901-remove-irqf-sample-random.patch target/linux/atheros/patches-3.3/
 cp -v ../config .config
 
+# Remove outdated patch
+    echo "Removing outdated AR933X_WMAC_reset_code patch ..."
+patch -p0 < ../patches/delete_AR933X_WMAC_reset_code.patch
+
 # Backport compat-wireless-2012-09-07
 if ! grep -q 2012-09-07 package/mac80211/Makefile; then
     echo "backporting compat-wireless-2012-09-07 drivers..."
