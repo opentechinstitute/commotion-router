@@ -1,0 +1,6 @@
+[submodule "commotionfeed/commotion-openwrt-theme"]
+	path = commotionfeed/commotion-openwrt-theme
+	url = https://github.com/opentechinstitute/commotion-openwrt-theme.git
+[submodule "commotionfeed/commotion-quick-start"]
+	path = commotionfeed/commotion-quick-start
+	url = https://github.com/opentechinstitute/commotion-quick-start.git

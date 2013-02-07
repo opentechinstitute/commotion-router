@@ -1,6 +1,11 @@
 #!/bin/sh
 
-svn co -r 31639 svn://svn.openwrt.org/openwrt/trunk openwrt || exit 1
+# Pull commotion feature packages from oti github
+# Don't forget to pin revisions
+git submodule update --init
+
+#svn co -r 31639 svn://svn.openwrt.org/openwrt/trunk openwrt || exit 1
+svn co svn://svn.openwrt.org/openwrt/branches/attitude_adjustment openwrt || exit 1
 
 cd openwrt
 
@@ -25,3 +30,5 @@ echo " Commotion OpenWrt is prepared. To build the firmware, type:"
 echo " cd openwrt"
 echo " make menuconfig #If you wish to add or change packages."
 echo " make V=99"
+echo " Please make use of the DR1rc wiki page:"
+echo " https://code.commotionwireless.net/projects/commotion/wiki/AttitudeAdjustmentBuild"
