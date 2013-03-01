@@ -1,7 +1,5 @@
 #!/bin/sh
 
-git submodule update --init
-
 #svn co -r 31639 svn://svn.openwrt.org/openwrt/trunk openwrt || exit 1
 svn co svn://svn.openwrt.org/openwrt/branches/attitude_adjustment openwrt || exit 1
 
@@ -13,12 +11,12 @@ cd openwrt
 #cp -rf -v ../default-files/* files/
 if ! grep -q commotion feeds.conf; then
     echo "adding commotion package feed..."
-    echo "src-link commotion ../../commotionfeed" >> feeds.conf
+    echo "src-git commotion git://github.com/opentechinstitute/commotion-feed.git" >> feeds.conf
 fi
 
 scripts/feeds update -a
 scripts/feeds install -a
-for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
+#for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
 
 # Copy in Commotion-specific patches
 #cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
