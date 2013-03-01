@@ -16,6 +16,8 @@ fi
 
 scripts/feeds update -a
 scripts/feeds install -a
+scripts/feeds uninstall olsrd
+scripts/feeds install -p commotion olsrd
 #for i in $(ls ../commotionfeed/); do scripts/feeds install $i; done
 
 # Copy in Commotion-specific patches
