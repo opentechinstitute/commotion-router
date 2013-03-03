@@ -23,7 +23,7 @@ scripts/feeds install -p commotion olsrd
 # Copy in Commotion-specific patches
 #cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
 #cp -v ../config .config
-cp -v ../config-aa .config
+cp -v ../config-aa-dr1-modules .config
 
 # Remove outdated patch
 #    echo "Removing outdated AR933X_WMAC_reset_code patch ..."
@@ -46,4 +46,6 @@ echo " Commotion OpenWrt is prepared. To build the firmware, type:"
 echo " cd openwrt"
 echo " make menuconfig #If you wish to add or change packages."
 echo " make V=99"
+echo " Please make use of the DR1rc wiki page:"
+echo " https://code.commotionwireless.net/projects/commotion/wiki/AttitudeAdjustmentBuild"
 
