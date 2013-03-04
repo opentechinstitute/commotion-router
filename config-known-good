@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Attitude Adjustment (r35864)
-# Sun Mar  3 17:56:31 2013
+# Mon Mar  4 08:06:26 2013
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -564,7 +564,7 @@ CONFIG_FEATURE_drawing-backend_DirectFB=y
 # Base system
 #
 CONFIG_PACKAGE_base-files=y
-# CONFIG_PACKAGE_block-mount is not set
+CONFIG_PACKAGE_block-mount=y
 CONFIG_EXTROOT_SETTLETIME=20
 # CONFIG_PACKAGE_bridge is not set
 CONFIG_PACKAGE_busybox=y
@@ -1331,8 +1331,8 @@ CONFIG_PACKAGE_hotplug2=y
 # CONFIG_PACKAGE_hsflowd is not set
 CONFIG_PACKAGE_libc=y
 CONFIG_PACKAGE_libgcc=y
-# CONFIG_PACKAGE_libpthread is not set
-# CONFIG_PACKAGE_librt is not set
+CONFIG_PACKAGE_libpthread=y
+CONFIG_PACKAGE_librt=y
 # CONFIG_PACKAGE_libstdcpp is not set
 # CONFIG_PACKAGE_mksh is not set
 CONFIG_PACKAGE_mtd=y
@@ -1346,7 +1346,7 @@ CONFIG_PACKAGE_opkg=y
 CONFIG_PACKAGE_swconfig=y
 CONFIG_PACKAGE_uci=y
 # CONFIG_PACKAGE_udev is not set
-# CONFIG_PACKAGE_wireless-tools is not set
+CONFIG_PACKAGE_wireless-tools=y
 
 #
 # IPv6
@@ -1355,7 +1355,7 @@ CONFIG_PACKAGE_uci=y
 #
 # Firewall
 #
-# CONFIG_PACKAGE_ip6tables is not set
+CONFIG_PACKAGE_ip6tables=y
 # CONFIG_PACKAGE_shorewall6-lite is not set
 
 #
@@ -1571,7 +1571,7 @@ CONFIG_PACKAGE_kmod-nls-base=y
 #
 # CONFIG_PACKAGE_kmod-arptables is not set
 # CONFIG_PACKAGE_kmod-ebtables is not set
-# CONFIG_PACKAGE_kmod-ip6tables is not set
+CONFIG_PACKAGE_kmod-ip6tables=y
 CONFIG_PACKAGE_kmod-ipt-core=y
 # CONFIG_PACKAGE_kmod-ipt-account is not set
 # CONFIG_PACKAGE_kmod-ipt-chaos is not set
@@ -1683,7 +1683,7 @@ CONFIG_PACKAGE_kmod-ipt-nathelper=y
 # CONFIG_PACKAGE_kmod-ipsec is not set
 # CONFIG_PACKAGE_kmod-iptunnel4 is not set
 # CONFIG_PACKAGE_kmod-iptunnel6 is not set
-# CONFIG_PACKAGE_kmod-ipv6 is not set
+CONFIG_PACKAGE_kmod-ipv6=y
 # CONFIG_PACKAGE_kmod-isdn4linux is not set
 # CONFIG_PACKAGE_kmod-l2tp is not set
 # CONFIG_PACKAGE_kmod-l2tp-eth is not set
@@ -1942,12 +1942,12 @@ CONFIG_PACKAGE_MAC80211_MESH=y
 #
 # 4. Themes
 #
-# CONFIG_PACKAGE_luci-theme-base is not set
-# CONFIG_PACKAGE_luci-theme-bootstrap is not set
-# CONFIG_PACKAGE_luci-theme-commotion is not set
+CONFIG_PACKAGE_luci-theme-base=y
+CONFIG_PACKAGE_luci-theme-bootstrap=y
+CONFIG_PACKAGE_luci-theme-commotion=y
 # CONFIG_PACKAGE_luci-theme-freifunk-bno is not set
 # CONFIG_PACKAGE_luci-theme-freifunk-generic is not set
-# CONFIG_PACKAGE_luci-theme-openwrt is not set
+CONFIG_PACKAGE_luci-theme-openwrt=y
 
 #
 # 5. Translations
@@ -2129,7 +2129,7 @@ CONFIG_PACKAGE_uboot-ar71xx-nbg460n_550n_550nh=y
 #
 # CONFIG_PACKAGE_libfko is not set
 CONFIG_PACKAGE_libip4tc=y
-# CONFIG_PACKAGE_libip6tc is not set
+CONFIG_PACKAGE_libip6tc=y
 # CONFIG_PACKAGE_libipq is not set
 # CONFIG_PACKAGE_libiptc is not set
 CONFIG_PACKAGE_libxtables=y
@@ -2143,7 +2143,12 @@ CONFIG_PACKAGE_libxtables=y
 # CONFIG_PACKAGE_libgnutls-extra is not set
 # CONFIG_PACKAGE_libgnutls-openssl is not set
 # CONFIG_PACKAGE_libmatrixssl is not set
-# CONFIG_PACKAGE_libopenssl is not set
+CONFIG_PACKAGE_libopenssl=y
+
+#
+# Configuration
+#
+# CONFIG_OPENSSL_ENGINE_CRYPTO is not set
 # CONFIG_PACKAGE_libpolarssl is not set
 
 #
@@ -2217,7 +2222,7 @@ CONFIG_PACKAGE_libxtables=y
 # CONFIG_PACKAGE_libavahi is not set
 # CONFIG_PACKAGE_libavahi-client is not set
 # CONFIG_PACKAGE_libavahi-dbus-support is not set
-# CONFIG_PACKAGE_libblkid is not set
+CONFIG_PACKAGE_libblkid=y
 CONFIG_PACKAGE_libblobmsg-json=y
 # CONFIG_PACKAGE_libboblight is not set
 # CONFIG_PACKAGE_libbz2 is not set
@@ -2294,7 +2299,7 @@ CONFIG_PACKAGE_libblobmsg-json=y
 # CONFIG_PACKAGE_libjpeg is not set
 # CONFIG_PACKAGE_libjs is not set
 CONFIG_PACKAGE_libjson=y
-# CONFIG_PACKAGE_libldns is not set
+CONFIG_PACKAGE_libldns=y
 # CONFIG_PACKAGE_libleptonica is not set
 # CONFIG_PACKAGE_libltdl is not set
 # CONFIG_PACKAGE_liblua is not set
@@ -2339,6 +2344,7 @@ CONFIG_PACKAGE_libnl-tiny=y
 # CONFIG_PACKAGE_liboil is not set
 # CONFIG_PACKAGE_libol is not set
 # CONFIG_PACKAGE_libopal is not set
+# CONFIG_PACKAGE_libopencdk is not set
 # CONFIG_PACKAGE_libopenh323 is not set
 # CONFIG_PACKAGE_libopenldap is not set
 # CONFIG_PACKAGE_liboping is not set
@@ -2402,7 +2408,7 @@ CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libusb-1.0 is not set
 # CONFIG_PACKAGE_libusbmuxd is not set
 # CONFIG_PACKAGE_libusbpp is not set
-# CONFIG_PACKAGE_libuuid is not set
+CONFIG_PACKAGE_libuuid=y
 # CONFIG_PACKAGE_libv4l is not set
 # CONFIG_PACKAGE_libvncserver is not set
 # CONFIG_PACKAGE_libvorbis is not set
@@ -2443,7 +2449,7 @@ CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_xmpp4r is not set
 # CONFIG_PACKAGE_zaptel-libtonezone is not set
 # CONFIG_PACKAGE_zaptel14-libtonezone is not set
-# CONFIG_PACKAGE_zlib is not set
+CONFIG_PACKAGE_zlib=y
 
 #
 # Network
@@ -3454,7 +3460,7 @@ CONFIG_PACKAGE_ubusd=y
 #
 # disc
 #
-# CONFIG_PACKAGE_blkid is not set
+CONFIG_PACKAGE_blkid=y
 # CONFIG_PACKAGE_cfdisk is not set
 # CONFIG_PACKAGE_devio is not set
 # CONFIG_PACKAGE_fdisk is not set
@@ -3466,7 +3472,7 @@ CONFIG_PACKAGE_ubusd=y
 # CONFIG_PACKAGE_partx-utils is not set
 # CONFIG_PACKAGE_sdparm is not set
 # CONFIG_PACKAGE_sfdisk is not set
-# CONFIG_PACKAGE_swap-utils is not set
+CONFIG_PACKAGE_swap-utils=y
 # CONFIG_PACKAGE_wipefs is not set
 
 #
@@ -3655,7 +3661,7 @@ CONFIG_PACKAGE_jshn=y
 # CONFIG_PACKAGE_scponly is not set
 # CONFIG_PACKAGE_screen is not set
 # CONFIG_PACKAGE_sed is not set
-# CONFIG_PACKAGE_serval-dna is not set
+CONFIG_PACKAGE_serval-dna=y
 # CONFIG_PACKAGE_sg3-utils is not set
 # CONFIG_PACKAGE_shadow is not set
 # CONFIG_PACKAGE_shadow-common is not set
