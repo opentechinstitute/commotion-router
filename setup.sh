@@ -6,9 +6,9 @@ svn co svn://svn.openwrt.org/openwrt/branches/attitude_adjustment openwrt || exi
 cd openwrt
 
 [ ! -e feeds.conf ] && cp -v ../feeds.conf feeds.conf
-#[ ! -e files ] && mkdir files
+[ ! -e files ] && mkdir files
 #[ ! -e dl ] && mkdir ../dl && ln -sf ../dl dl
-#cp -rf -v ../default-files/* files/
+cp -rf -v ../default-files/* files/
 if ! grep -q commotion feeds.conf; then
     echo "adding commotion package feed..."
     echo "src-git commotion git://github.com/opentechinstitute/commotion-feed.git" >> feeds.conf
