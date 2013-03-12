@@ -1,0 +1,112 @@
+#DEBUG="echo"
+
+#===  FUNCTION  ================================================================
+#          NAME:  unset_dnsmasq_if
+#   DESCRIPTION:  Unset dnsmasq DHCP settings
+#    PARAMETERS:  config name of network
+#       RETURNS:  0 on success
+#===============================================================================
+
+unset_dnsmasq_if() {
+  local config="$1"
+ 
+  config_cb() {
+    local type="$1"
+    local name="$2"
+    local interface=
+  
+    case "$type" in
+      dhcp) 
+        case "$(uci_get dhcp "$name" interface)" in
+          "$config")
+            uci_remove dhcp "$name"
+            ;; 
+        esac
+        ;;
+    esac
+  }
+  config_load dhcp
+  
+  uci_add dhcp dhcp 
+  uci_set dhcp @dhcp[-1] interface "$config"
+  uci_set dhcp @dhcp[-1] ignore "1"
+  return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_dnsmasq_if
+#   DESCRIPTION:  Set dnsmasq DHCP settings
+#    PARAMETERS:  config name of network
+#       RETURNS:  0 on success
+#===============================================================================
+
+set_dnsmasq_if() {
+  local config="$1"
+  
+  config_cb() {
+    local type="$1"
+    local name="$2"
+    local interface=
+  
+    case "$type" in
+      dhcp) 
+        case "$(uci_get dhcp "$name" interface)" in
+          "$config")
+            uci_set dhcp "$name" interface "$config"
+            uci_set dhcp "$name" start "2"
+            uci_set dhcp "$name" limit "150"
+            uci_set dhcp "$name" leasetime "12h"
+            uci_set dhcp "$name" ignore "0"
+            ;; 
+        esac
+    esac
+  }
+  config_load dhcp
+      
+  return 0
+}
+
+case $PROTO in
+  meshif)
+    [ "$RESET" = 1 ] && {
+      case $ACTION in
+        postup)
+          $DEBUG unset_dnsmasq_if $INTERFACE
+          $DEBUG uci_commit dhcp
+        ;;
+      esac
+    }
+   ;;
+  apif)
+    [ "$RESET" = 1 ] && {
+      case $ACTION in
+        postup)
+          $DEBUG unset_dnsmasq_if $INTERFACE
+          $DEBUG set_dnsmasq_if $INTERFACE
+          $DEBUG uci_commit dhcp
+        ;;
+      esac
+    }
+  ;;
+  plugif)
+    case $ACTION in
+      postup)
+        case $(uci_get_state network "$INTERFACE" plug) in
+          0)
+            $DEBUG unset_dnsmasq_if $INTERFACE
+            $DEBUG uci_commit dhcp
+          ;;  
+          1)
+            $DEBUG unset_dnsmasq_if $INTERFACE
+            $DEBUG set_dnsmasq_if $INTERFACE
+            $DEBUG uci_commit dhcp
+          ;;  
+        esac
+      ;;
+      predown)
+          $DEBUG unset_dnsmasq_if $INTERFACE
+          $DEBUG uci_commit dhcp
+      ;; 
+    esac
+  ;;
+esac
