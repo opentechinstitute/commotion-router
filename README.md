@@ -6,6 +6,8 @@ This repoencompasses the development of the OpenWRT router firmware component of
 
 ###The Commotion Daemon
 
+https://github.com/opentechinstitute/commotiond.git
+
 The commotion daemon is an embedded daemon and library that provides a common interface for manging wireless mesh networks. 
 
 ###Commotion Quick-Start
