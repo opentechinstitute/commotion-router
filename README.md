@@ -61,11 +61,14 @@ Run the following commands: (the $ signify the command line. Do not type the $)
 
 "you will find a folder with the name of your wireless chip here. Within this folder lies images you can install on your wireless router"
 
-Installation Instructions: (Ubiquity Devices)
+####Installation Instructions: (Ubiquity Devices)
+
 https://code.commotionwireless.net/projects/commotion-manual/wiki/Installing_Commotion_on_Wireless_Nodes
 
-Detailed Installation Instructions: (Ubiquity Devices)
+####Detailed Installation Instructions: (Ubiquity Devices)
+
 https://code.commotionwireless.net/projects/commotion-manual/wiki/Detailed_TFTP_Instructions
 
-How to Update an existing Commotion node:
+####How to Update an existing Commotion node:
+
 https://code.commotionwireless.net/projects/commotion-manual/wiki/Updating_the_Commotion_software_on_your_router
