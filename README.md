@@ -39,6 +39,7 @@ The debuggin helper creates custom, downloadable informational debugging documen
                                                          
 
 How to create a Commotion image from source: (the really really quick guide)
+
 Run the following commands: (the $ signify the command line. Do not type the $)
 
 `$ git clone https://github.com/opentechinstitute/commotion-openwrt.git`
