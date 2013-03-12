@@ -1,5 +1,9 @@
 ##Commotion-OpenWRT
 
+Commotion is an open source “device-as-infrastructure” communication platform that integrates users’ existing cell phones, Wi-Fi enabled computers, and other wireless-capable devices to create community- and metro-scale, peer-to-peer communications networks.
+
+This repoencompasses the development of the OpenWRT router firmware component of the Commotion Wireless project. This repo, installs the following other Commotion projects in order to become a fully configured Commotion Node.
+
 ###The Commotion Daemon
 
 The commotion daemon is an embedded daemon and library that provides a common interface for manging wireless mesh networks. 
