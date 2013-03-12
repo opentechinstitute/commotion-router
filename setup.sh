@@ -22,8 +22,7 @@ scripts/feeds install -p commotion olsrd libldns
 
 # Copy in Commotion-specific patches
 cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
-#cp -v ../config .config
-cp -v ../config-known-good .config
+cp -v ../config .config
 
 # Remove outdated patch
 #    echo "Removing outdated AR933X_WMAC_reset_code patch ..."
