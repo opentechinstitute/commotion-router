@@ -9,6 +9,7 @@
 
 unset_dnsmasq_if() {
   local config="$1"
+  logger -t commotion.hotplug.dnsmasq -s "unset_dnsmasq_if $1"
  
   config_cb() {
     local type="$1"
@@ -41,6 +42,7 @@ unset_dnsmasq_if() {
 #===============================================================================
 
 set_dnsmasq_if() {
+  logger -t commotion.hotplug.dnsmasq -s "set_dnsmasq_if $1"
   local config="$1"
   
   config_cb() {
@@ -66,32 +68,30 @@ set_dnsmasq_if() {
   return 0
 }
 
-case $PROTO in
-  meshif)
-    [ "$RESET" = 1 ] && {
+TYPE=$(commotion state "$DEVICE" type)
+logger -s -t commotion.dnsmasq.hotplug "Action: $ACTION, Interface: $INTERFACE, Type: $TYPE"
+case $TYPE in
+  mesh)
       case $ACTION in
-        postup)
+        ifup)
           $DEBUG unset_dnsmasq_if $INTERFACE
           $DEBUG uci_commit dhcp
         ;;
       esac
-    }
    ;;
-  apif)
-    [ "$RESET" = 1 ] && {
+  ap)
       case $ACTION in
-        postup)
+        ifup)
           $DEBUG unset_dnsmasq_if $INTERFACE
           $DEBUG set_dnsmasq_if $INTERFACE
           $DEBUG uci_commit dhcp
         ;;
       esac
-    }
   ;;
-  plugif)
+  plug)
     case $ACTION in
-      postup)
-        case $(uci_get_state network "$INTERFACE" plug) in
+      ifup)
+        case $(uci_get_state network "$INTERFACE" lease) in
           0)
             $DEBUG unset_dnsmasq_if $INTERFACE
             $DEBUG uci_commit dhcp
@@ -103,7 +103,7 @@ case $PROTO in
           ;;  
         esac
       ;;
-      predown)
+      ifdown)
           $DEBUG unset_dnsmasq_if $INTERFACE
           $DEBUG uci_commit dhcp
       ;; 

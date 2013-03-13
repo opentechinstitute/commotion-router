@@ -2,6 +2,7 @@ include /lib/network
 
 #DEBUG="echo"
 
+logger -s -t hotplug.olsrd "Action: $ACTION, Proto: $PROTO, Iface: $INTERFACE, Type: $TYPE" 
 
 #===  FUNCTION  ================================================================
 #          NAME:  remove_olsrd_plugin
@@ -134,7 +135,7 @@ set_olsrd_if() {
 #       RETURNS:  0 on success
 #===============================================================================
 
-unset_olsrd_p2pif() {
+unset_olsrd_dnssd() {
   local config="$1"
   
   config_cb() {
@@ -144,7 +145,7 @@ unset_olsrd_p2pif() {
     case $type in
       LoadPlugin)
         case "$(uci_get olsrd "$name" library)" in
-          olsrd_p2pd.so.*)
+          olsrd_dnssd.so.*)
             local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf "")"
             local newconfigs=
             for dev in $(sort_list "$oldconfigs" "$config"); do
@@ -168,10 +169,10 @@ unset_olsrd_p2pif() {
 #       RETURNS:  0 on success
 #===============================================================================
 
-set_olsrd_p2pif() {
+set_olsrd_dnssd() {
   local config="$1"
   
-  local name="$(add_olsrd_plugin "p2pd")"
+  local name="$(add_olsrd_plugin "dnssd")"
   local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf "")"
   local newconfigs=
   for dev in $(sort_list "$oldconfigs" "$config"); do
@@ -267,7 +268,7 @@ set_olsrd_hna4() {
 #       RETURNS:  0 on success
 #===============================================================================
 
-set_olsrd_secure() {
+set_olsrd_servald() {
 
   local name="$(add_olsrd_plugin "secure")"
   $DEBUG uci_set olsrd "$name" Keyfile "/etc/olsrd.d/olsrd_secure_key"
@@ -275,62 +276,54 @@ set_olsrd_secure() {
   return 0
 } 
 
-[ -f "/etc/config/olsrd" ] && [ "$(uci_get network "$INTERFACE" routing)" = "olsrd" ] && {
-case $PROTO in
-  meshif)
-    [ "$RESET" = 1 ] && {
-      case $ACTION in
-        postup)
-          $DEBUG set_olsrd_if $INTERFACE
-          #$DEBUG set_olsrd_dnssrv "$(uci_get_state network "$INTERFACE" ipaddr)"
-          case "$(uci_get network "$INTERFACE" secure 0)" in
-            0)
-              $DEBUG remove_olsrd_plugin "secure"
-              ;;
-            1)
-              $DEBUG set_olsrd_secure
-              ;;
-          esac
-        ;;
-        predown)
-          $DEBUG unset_olsrd_if $INTERFACE
-          ;;
-      esac
+logger -t commotion.hotplug.olsrd "proto: $(uci_get_state network "$INTERFACE" proto)"
+logger -t commotion.hotplug.olsrd "type: $(commotion state "$DEVICE" type)"
 
-      uci_commit olsrd
-    }
-   ;;
-  apif)
-    [ "$RESET" = 1 ] && {
+#[ -f "/etc/config/olsrd" ] && [ "$(uci_get_state network "$INTERFACE" proto)" = "commotion" ] && {
+[ "$(uci_get_state network "$INTERFACE" proto)" = "commotion" ] && {
+case "$(commotion state "$DEVICE" type)" in
+  mesh)
+    case $ACTION in
+      ifup)
+        $DEBUG set_olsrd_if $INTERFACE
+        #$DEBUG set_olsrd_dnssrv "$(uci_get_state network "$INTERFACE" ipaddr)"
+      ;;
+      ifdown)
+        $DEBUG unset_olsrd_if $INTERFACE
+        ;;
+    esac
+
+    uci_commit olsrd
+  ;;
+  ap)
       case $ACTION in
-        postup)
+        ifup)
           eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
           $DEBUG set_olsrd_hna4  $NETWORK $NETMASK $INTERFACE
-          $DEBUG set_olsrd_p2pif $INTERFACE
+          $DEBUG set_olsrd_dnssd $INTERFACE
         ;;
       esac
 
       uci_commit olsrd
-    }
   ;;
-  plugif)
+  plug)
     case $ACTION in
-      postup)
-        case "$(uci_get_state network "$INTERFACE" plug)" in
-          0)
+      ifup)
+        case "$(uci_get_state network "$INTERFACE" lease)" in
+          1)
             eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
             $DEBUG set_olsrd_hna4  $NETWORK $NETMASK $INTERFACE
-            $DEBUG set_olsrd_p2pif $INTERFACE
+            $DEBUG set_olsrd_dnssd $INTERFACE
             ;;
-          1)
-            [ "$(uci_get network "$INTERFACE" meshable 0)" = 1 ] && $DEBUG unset_olsrd_hna4 $INTERFACE && $DEBUG set_olsrd_if $INTERFACE
+          0)
+            $DEBUG unset_olsrd_hna4 $INTERFACE && $DEBUG set_olsrd_if $INTERFACE
             ;;
         esac
       ;;
-      predown)
+      ifdown)
         $DEBUG unset_olsrd_if $INTERFACE
         $DEBUG unset_olsrd_hna4 $INTERFACE
-        $DEBUG unset_olsrd_p2pif $INTERFACE
+        $DEBUG unset_olsrd_dnssd $INTERFACE
       ;; 
     esac
 
