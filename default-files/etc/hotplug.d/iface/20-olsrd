@@ -4,6 +4,16 @@ include /lib/network
 
 logger -s -t hotplug.olsrd "Action: $ACTION, Proto: $PROTO, Iface: $INTERFACE, Type: $TYPE" 
 
+sort_list() {
+  local arg="$*"
+  (
+    for item in $arg; do
+      echo "$item"
+    done
+  ) | sort -u
+}
+
+
 #===  FUNCTION  ================================================================
 #          NAME:  remove_olsrd_plugin
 #   DESCRIPTION:  Remove the specified OLSRd plugin
@@ -312,11 +322,14 @@ case "$(commotion state "$DEVICE" type)" in
         case "$(uci_get_state network "$INTERFACE" lease)" in
           1)
             eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
-            $DEBUG set_olsrd_hna4  $NETWORK $NETMASK $INTERFACE
+            $DEBUG unset_olsrd_if $INTERFACE
+            $DEBUG set_olsrd_hna4 $NETWORK $NETMASK $INTERFACE
             $DEBUG set_olsrd_dnssd $INTERFACE
             ;;
           0)
-            $DEBUG unset_olsrd_hna4 $INTERFACE && $DEBUG set_olsrd_if $INTERFACE
+            $DEBUG unset_olsrd_hna4 $INTERFACE
+            $DEBUG unset_olsrd_dnssd $INTERFACE
+            $DEBUG set_olsrd_if $INTERFACE
             ;;
         esac
       ;;
@@ -330,4 +343,5 @@ case "$(commotion state "$DEVICE" type)" in
     uci_commit olsrd
   ;;
 esac
+/etc/init.d/olsrd restart
 }
