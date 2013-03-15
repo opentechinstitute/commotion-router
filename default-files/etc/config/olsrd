@@ -42,7 +42,3 @@ config LoadPlugin
 	option accept '0.0.0.0'
 	option 'UUIDFile' '/etc/olsrd.d/olsrd.uuid'
 
-config LoadPlugin
-	option library 'olsrd_mdp.so.0.1'
-	option 'sid' 'A6D29C35D0409F176B22AEF2FAC447572540F39D8AEB8C48C107F9A11D224B06'
-	option 'servalpath' '/etc/commotion/keys.d/mdp'
