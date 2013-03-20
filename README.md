@@ -54,7 +54,7 @@ Run the following commands: (the $ signify the command line. Do not type the $)
 
 `$ git checkout DR1-testing`
 
-`$ ./setup`
+`$ ./setup.sh`
 
 `$ cd openwrt/`
 
