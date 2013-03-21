@@ -1,9 +1,0 @@
-case $PROTO in
-  meshif)
-      case $ACTION in
-        postup)
-          /etc/init.d/firewall restart
-        ;;
-      esac
-  ;;
-esac
