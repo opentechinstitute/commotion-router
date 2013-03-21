@@ -1,3 +1,0 @@
-[ "$ACTION" = "ifup" ] && [ "$PROTO" = "meshif" -o "$PROTO" = "apif" -o "$PROTO" = "plugif" ] && {
-  ACTION="postup" /sbin/hotplug-call "services" &
-}
