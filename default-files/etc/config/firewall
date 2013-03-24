@@ -1,9 +1,9 @@
 
 config defaults
 	option syn_flood '1'
-	option input 'DROP'
+	option input 'ACCEPT'
 	option output 'ACCEPT'
-	option forward 'DROP'
+	option forward 'ACCEPT'
 
 config zone
 	option name 'lan'
