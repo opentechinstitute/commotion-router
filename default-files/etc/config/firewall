@@ -1,37 +1,37 @@
 
 config defaults
 	option syn_flood '1'
-	option input 'ACCEPT'
+	option input 'DROP'
 	option output 'ACCEPT'
-	option forward 'ACCEPT'
+	option forward 'DROP'
 
 config zone
 	option name 'lan'
 	option input 'ACCEPT'
 	option output 'ACCEPT'
 	option forward 'DROP'
-	option network 'plug'
+	list network 'plug'
 
 config zone
 	option name 'ap'
 	option input 'ACCEPT'
 	option output 'ACCEPT'
 	option forward 'DROP'
-	option network 'ap'
+	list network 'ap'
 
 config zone
 	option name 'secAp'
 	option input 'ACCEPT'
 	option output 'ACCEPT'
 	option forward 'DROP'
-	option network 'secAp'
+	list network 'secAp'
 
 config zone
 	option name 'mesh'
 	option input 'ACCEPT'
 	option output 'ACCEPT'
 	option forward 'DROP'
-	option network 'mesh'
+	list network 'mesh'
 
 config zone
 	option name 'wan'
@@ -39,14 +39,14 @@ config zone
 	option output 'ACCEPT'
 	option forward 'DROP'
 	option masq '1'
-	option network 'wan'
+	list network 'wan'
 
 config zone
 	option name 'vpn'
 	option input 'DROP'
 	option output 'ACCEPT'
 	option forward 'DROP'
-	option network 'vpn'
+	list network 'vpn'
 
 config forwarding
 	option src 'ap'
