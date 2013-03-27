@@ -88,6 +88,30 @@ config forwarding
 	option src 'lan'
 	option dest 'wan'
 
+config forwarding
+	option src 'lan'
+	option dest 'ap'
+
+config forwarding
+	option src 'ap'
+	option dest 'lan'
+
+config forwarding
+	option src 'lan'
+	option dest 'secAp'
+
+config forwarding
+	option src 'secAp'
+	option dest 'lan'
+
+config forwarding
+	option src 'ap'
+	option dest 'secAp'
+
+config forwarding
+	option src 'secAp'
+	option dest 'ap'
+
 config rule
 	option src 'wan'
 	option dest_port '22'
