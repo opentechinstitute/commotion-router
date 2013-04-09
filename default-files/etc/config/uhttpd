@@ -11,8 +11,6 @@ config uhttpd 'main'
 	option script_timeout '60'
 	option network_timeout '30'
 	option tcp_keepalive '1'
-	option lua_prefix '/luci'
-	option lua_handler '/usr/lib/lua/luci/sgi/uhttpd.lua'
 
 config cert 'px5g'
 	option days '730'
