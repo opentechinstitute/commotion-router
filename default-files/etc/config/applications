@@ -1,6 +1,5 @@
 config settings 'settings'
 	list category 'Community'
-	list category 'Circumvention'
 	list category 'Collaboration'
 	list category 'Fun'
 	option autoapprove '1'
