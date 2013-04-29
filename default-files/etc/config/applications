@@ -6,4 +6,4 @@ config settings 'settings'
 	option checkconnect '1'
 	option expiration '86400'
 	option allowpermanent '1'
-
+	option disabled '0'
