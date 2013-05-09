@@ -3,6 +3,7 @@
 git clone git://git.openwrt.org/12.09/openwrt.git
 
 cd openwrt
+patch -p1 < ../patches/unifi.patch
 
 [ ! -e feeds.conf ] && cp -v ../feeds.conf feeds.conf
 [ ! -e files ] && mkdir files
