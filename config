@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Attitude Adjustment (r36557)
-# Wed May  8 10:18:26 2013
+# Thu May  9 11:35:47 2013
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -1570,7 +1570,7 @@ CONFIG_PACKAGE_freifunk-gwcheck=y
 # CONFIG_PACKAGE_freifunk-mapupdate is not set
 CONFIG_PACKAGE_freifunk-p2pblock=y
 CONFIG_PACKAGE_freifunk-policyrouting=y
-CONFIG_PACKAGE_freifunk-watchdog=y
+# CONFIG_PACKAGE_freifunk-watchdog is not set
 # CONFIG_PACKAGE_luci-mod-freifunk-community is not set
 # CONFIG_PACKAGE_meshwizard is not set
 CONFIG_PACKAGE_remote-update=y
