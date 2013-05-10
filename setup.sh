@@ -3,6 +3,7 @@
 svn co -r 31639 svn://svn.openwrt.org/openwrt/trunk openwrt || exit 1
 
 cd openwrt
+svn patch ../patches/unifi.patch
 
 [ ! -e feeds.conf ] && cp -v ../feeds.conf feeds.conf
 [ ! -e files ] && mkdir files

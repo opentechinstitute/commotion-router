@@ -1,0 +1,13 @@
+Index: target/linux/ar71xx/image/Makefile
+===================================================================
+--- target/linux/ar71xx/image/Makefile	(revision 31639)
++++ target/linux/ar71xx/image/Makefile	(working copy)
+@@ -834,7 +834,7 @@
+ 
+ ubntunifi_cmdline=board=UBNT-UF console=ttyS0,115200
+ define Image/Build/Profile/UBNTUNIFI
+-	$(call Image/Build/Template/$(fs_64k)/$(1),UBNTXM,ubnt-unifi,$(ubntunifi_cmdline),XM,XM,ar7240)
++	$(call Image/Build/Template/$(fs_64k)/$(1),UBNTXM,ubnt-unifi,$(ubntunifi_cmdline),XM,BZ,ar7240)
+ endef
+ 
+ define Image/Build/Profile/UBNT
