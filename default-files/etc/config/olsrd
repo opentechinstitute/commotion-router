@@ -1,36 +1,39 @@
+config olsrd
+	# uncomment the following line to use a custom config file instead:
+	#option config_file '/etc/olsrd.conf'
 
-config 'olsrd'
-  option 'IpVersion' '4'
-  option 'LinkQualityLevel' '2'
-  option 'LinkQualityAlgorithm' 'etx_ffeth'
-  option 'SmartGateway' 'yes'
+	option IpVersion '4'
+	option 'LinkQualityLevel' '2'
+	option 'LinkQualityAlgorithm' 'etx_ffeth'
+	option 'SmartGateway' 'yes'
 
-config 'LoadPlugin'
-  option 'library' 'olsrd_arprefresh.so.0.1'
+config LoadPlugin
+	option library 'olsrd_arprefresh.so.0.1'
 
-config 'LoadPlugin'
-  option 'library' 'olsrd_dyn_gw_plain.so.0.4'
+config LoadPlugin
+	option library 'olsrd_dyn_gw.so.0.5'
 
-config 'LoadPlugin'
-  option 'library' 'olsrd_secure.so.0.6'
+config LoadPlugin
+	option library 'olsrd_nameservice.so.0.3'
+	option 'sighup_pid_file' '/var/run/dnsmasq.pid'
+	option 'hosts_file' '/var/run/hosts_olsr'
+	option 'suffix' '.mesh.local'
 
-config 'LoadPlugin'
-  option 'library' 'olsrd_httpinfo.so.0.1'
-  option 'port' '1978'
-  list 'Net' '0.0.0.0 0.0.0.0'
+config LoadPlugin
+	option library 'olsrd_txtinfo.so.0.1'
+	option accept '127.0.0.1'
 
-config 'LoadPlugin'
-  option 'library' 'olsrd_nameservice.so.0.3'
-  #option 'resolv_file' '/tmp/resolv.conf.auto'
-  option 'sighup_pid_file' '/var/run/dnsmasq.pid'
-  option 'hosts_file' '/var/run/hosts_olsr'
-  option 'suffix' '.mesh'
+config LoadPlugin 
+	option library 'olsrd_dnssd.so.0.1.2'
+	option 'P2pdTtl' '5'
+	option 'UdpDestPort' '255.255.255.255 1211'
+	option 'UdpDestPort' '224.0.0.251 5353'
+	option 'ServiceFileDir' '/etc/avahi/services'
+	option 'Domain' 'mesh.local'
+	option 'ServiceUpdateInterval' '300'
 
-config 'LoadPlugin'
-  option 'library' 'olsrd_p2pd.so.0.1.0'
-  option 'P2pdTtl' '5'
-  option 'UdpDestPort' '224.0.0.251 5353'
+config LoadPlugin
+	option library 'olsrd_jsoninfo.so.0.0'
+	option accept '127.0.0.1'
+	option 'UUIDFile' '/etc/olsrd.d/olsrd.uuid'
 
-config 'LoadPlugin'
-  option 'library' 'olsrd_txtinfo.so.0.1'
-  option 'accept' '0.0.0.0'

@@ -2,7 +2,7 @@
 
 Commotion is an open source “device-as-infrastructure” communication platform that integrates users’ existing cell phones, Wi-Fi enabled computers, and other wireless-capable devices to create community- and metro-scale, peer-to-peer communications networks.
 
-This repoencompasses the development of the OpenWRT router firmware component of the Commotion Wireless project. This repo, installs the following other Commotion projects in order to become a fully configured Commotion Node.
+Commotion software exists for multiple platforms; this repository contains the build system for the OpenWRT router firmware distribution of the Commotion Wireless project. This repo builds the following other Commotion projects in order to create installation images for turning select wireless routers into Commotion nodes.
 
 ###The Commotion Daemon
 
@@ -20,7 +20,7 @@ The quickstart is a easy to understand interface that allows a new user to quick
 
 https://github.com/opentechinstitute/commotion-openwrt-theme
 
-The Commotion Open-WRT theme for the web-interface on Commotion wireless routers.
+The Commotion OpenWRT theme for the web-interface on Commotion wireless routers.
 
 ###Commotion-Apps
 
@@ -32,18 +32,23 @@ The application suite allows for developers to easily advertise applications ove
 
 https://github.com/opentechinstitute/serval-crypto
 
-Servals key management daemon allows transparent encryption and authentication of messages. 
+Serval's key management daemon allows transparent encryption and authentication of messages.
 
 ###Commotion Debug Helper
 
 https://github.com/opentechinstitute/commotion-bug-info
 
-The debuggin helper creates custom, downloadable informational debugging documents for offline debugging, or to send to network maintainers. Each of these new tools needs testing to find errors as well as to ensure their usability.
+The debugging helper creates custom, downloadable informational debugging documents for offline debugging, or to send to network maintainers. Each of these new tools needs testing to find errors as well as to ensure their usability.
+
+###Commotion Splash
+
+https://github.com/opentechinstitute/commotion-splash
+
+A custom captive portal/splash screen and an interface for customizing it, built around nodogsplash (https://github.com/nodogsplash/nodogsplash).
 
 
 ##Installation
                                                          
-
 How to create a Commotion image from source: (the really really quick guide)
 
 Run the following commands: (the $ signify the command line. Do not type the $)
@@ -52,21 +57,19 @@ Run the following commands: (the $ signify the command line. Do not type the $)
 
 `$ cd commotion-openwrt/`
 
-`$ git checkout DR1-testing`
-
 `$ ./setup.sh`
 
 `$ cd openwrt/`
 
 `$ make menuconfig`
 
-"This will open a menu to allow you to choose your wireless chipset and customize your install"
+This will open a menu to allow you to choose your wireless chipset and customize your install.
 
 `$ make V=99`
 
 `$ cd bin/`
 
-"you will find a folder with the name of your wireless chip here. Within this folder lies images you can install on your wireless router"
+You will find a folder with the name of your wireless chip here. Within this folder lies images you can install on your wireless router.
 
 ####Installation Instructions: (Ubiquity Devices)
 

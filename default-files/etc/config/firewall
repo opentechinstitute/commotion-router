@@ -1,209 +1,294 @@
 
-config 'defaults'
-	option 'syn_flood' '1'
-	option 'input' 'DROP'
-	option 'output' 'ACCEPT'
-	option 'forward' 'DROP'
+config defaults
+	option syn_flood '1'
+	option input 'DROP'
+	option output 'ACCEPT'
+	option forward 'DROP'
 
-config 'zone'
-	option 'name' 'lan'
-	option 'input' 'ACCEPT'
-	option 'output' 'ACCEPT'
-	option 'forward' 'DROP'
+config zone
+	option name 'lan'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'DROP'
+	list network 'plug'
 
-config 'zone'
-	option 'name' 'ap'
-	option 'input' 'ACCEPT'
-	option 'output' 'ACCEPT'
-	option 'forward' 'DROP'
+config zone
+	option name 'ap'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'DROP'
+	list network 'ap'
 
-config 'zone'
-	option 'name' 'mesh'
-	option 'input' 'ACCEPT'
-	option 'output' 'ACCEPT'
-	option 'forward' 'DROP'
+config zone
+	option name 'secAp'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'DROP'
+	list network 'secAp'
 
-config 'zone'
-	option 'name' 'wan'
-	option 'input' 'DROP'
-	option 'output' 'ACCEPT'
-	option 'forward' 'DROP'
-	option 'masq' '1'
+config zone
+	option name 'mesh'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'DROP'
+	list network 'mesh'
 
-config 'zone'
-	option 'name' 'vpn'
-	option 'input' 'DROP'
-	option 'output' 'ACCEPT'
-	option 'forward' 'DROP'
-	list 'network' 'vpn'
+config zone
+	option name 'wan'
+	option input 'DROP'
+	option output 'ACCEPT'
+	option forward 'DROP'
+	option masq '1'
+	list network 'wan'
 
-config 'forwarding'
-	option 'src' 'lan'
-	option 'dest' 'mesh'
+config zone
+	option name 'vpn'
+	option input 'DROP'
+	option output 'ACCEPT'
+	option forward 'DROP'
+	list network 'vpn'
 
-config 'forwarding'
-	option 'src' 'ap'
-	option 'dest' 'mesh'
+config forwarding
+	option src 'ap'
+	option dest 'mesh'
 
-config 'forwarding'
-	option 'src' 'ap'
-	option 'dest' 'ap'
+config forwarding
+	option src 'ap'
+	option dest 'ap'
 
-config 'forwarding'
-	option 'src' 'lan'
-	option 'dest' 'wan'
+config forwarding
+	option src 'secAp'
+	option dest 'mesh'
 
-config 'forwarding'
-	option 'src' 'mesh'
-	option 'dest' 'mesh'
+config forwarding
+	option src 'secAp'
+	option dest 'secAp'
 
-config 'forwarding'
-	option 'src' 'ap'
-	option 'dest' 'wan'
+config forwarding
+	option src 'mesh'
+	option dest 'mesh'
 
-config 'forwarding'
-	option 'src' 'mesh'
-	option 'dest' 'wan'
+config forwarding
+	option src 'lan'
+	option dest 'lan'
 
-config 'rule'
-	option 'src' 'wan'
-	option 'dest_port' '22'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config forwarding
+	option src 'ap'
+	option dest 'wan'
 
-config 'rule'
-	option 'src' 'mesh'
-	option 'dest_port' '22'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config forwarding
+	option src 'secAp'
+	option dest 'wan'
 
-config 'rule'
-	option 'src' 'lan'
-	option 'dest_port' '22'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config forwarding
+	option src 'mesh'
+	option dest 'wan'
 
-config 'rule'
-	option 'src' 'vpn'
-	option 'dest_port' '22'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config forwarding
+	option src 'lan'
+	option dest 'mesh'
 
-config 'rule'
-	option 'src' 'mesh'
-	option 'dest_port' '53'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcpudp'
+config forwarding
+	option src 'lan'
+	option dest 'wan'
 
-config 'rule'
-	option 'src' 'lan'
-	option 'dest_port' '53'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcpudp'
+config forwarding
+	option src 'lan'
+	option dest 'ap'
 
-config 'rule'
-	option 'src' 'ap'
-	option 'dest_port' '53'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcpudp'
+config forwarding
+	option src 'ap'
+	option dest 'lan'
 
-config 'rule'
-	option 'src' 'lan'
-	option 'dest_port' '80'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config forwarding
+	option src 'lan'
+	option dest 'secAp'
 
-config 'rule'
-	option 'src' 'ap'
-	option 'dest_port' '80'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config forwarding
+	option src 'secAp'
+	option dest 'lan'
 
-config 'rule'
-	option 'src' 'vpn'
-	option 'dest_port' '80'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config forwarding
+	option src 'ap'
+	option dest 'secAp'
 
-config 'rule'
-	option 'src' 'ap'
-	option 'dest_port' '443'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config forwarding
+	option src 'secAp'
+	option dest 'ap'
 
-config 'rule'
-	option 'src' 'lan'
-	option 'dest_port' '443'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config rule
+	option src 'wan'
+	option dest_port '22'
+	option target 'ACCEPT'
+	option proto 'tcp'
 
-config 'rule'
-	option 'src' 'vpn'
-	option 'dest_port' '443'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config rule
+	option src 'mesh'
+	option dest_port '22'
+	option target 'ACCEPT'
+	option proto 'tcp'
 
-config 'rule'
-	option 'src' 'ap'
-	option 'dest_port' '22'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config rule
+	option src 'lan'
+	option dest_port '22'
+	option target 'ACCEPT'
+	option proto 'tcp'
 
-config 'rule'
-	option 'src' 'ap'
-	option 'dest_port' '8082'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config rule
+	option src 'vpn'
+	option dest_port '22'
+	option target 'ACCEPT'
+	option proto 'tcp'
 
-config 'rule'
-	option 'src' 'lan'
-	option 'dest_port' '8082'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'tcp'
+config rule
+	option src 'mesh'
+	option dest_port '53'
+	option target 'ACCEPT'
+	option proto 'tcpudp'
 
-config 'rule'
-	option 'src' 'mesh'
-	option 'dest_port' '698'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'udp'
+config rule
+	option src 'lan'
+	option dest_port '53'
+	option target 'ACCEPT'
+	option proto 'tcpudp'
 
-config 'rule'
-	option 'src' 'wan'
-	option 'dest_port' '698'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'udp'
+config rule
+	option src 'ap'
+	option dest_port '53'
+	option target 'ACCEPT'
+	option proto 'tcpudp'
 
-config 'rule'
-	option 'src' 'lan'
-	option 'dest_port' '698'
-	option 'target' 'ACCEPT'
-	option 'protocol' 'udp'
+config rule
+	option src 'secAp'
+	option dest_port '53'
+	option target 'ACCEPT'
+	option proto 'tcpudp'
 
-config 'rule'
-	option 'src' 'mesh'
-	option 'protocol' 'icmp'
-	option 'target' 'ACCEPT'
+config rule
+	option src 'lan'
+	option dest_port '80'
+	option target 'ACCEPT'
+	option proto 'tcp'
 
-config 'rule'
-	option 'src' 'lan'
-	option 'protocol' 'icmp'
-	option 'target' 'ACCEPT'
+config rule
+	option src 'ap'
+	option dest_port '80'
+	option target 'ACCEPT'
+	option proto 'tcp'
 
-config 'rule'
-	option 'src' 'wan'
-	option 'protocol' 'icmp'
-	option 'target' 'ACCEPT'
+config rule
+	option src 'secAp'
+	option dest_port '80'
+	option target 'ACCEPT'
+	option proto 'tcp'
 
-config 'rule'
-	option 'src' 'ap'
-	option 'protocol' 'icmp'
-	option 'target' 'ACCEPT'
+config rule
+	option src 'vpn'
+	option dest_port '80'
+	option target 'ACCEPT'
+	option proto 'tcp'
 
-config 'rule'
-	option 'src' 'vpn'
-	option 'protocol' 'icmp'
-	option 'target' 'ACCEPT'
+config rule
+	option src 'ap'
+	option dest_port '443'
+	option target 'ACCEPT'
+	option proto 'tcp'
 
-config 'include'
-	option 'path' '/etc/firewall.freifunk'
+config rule
+	option src 'secAp'
+	option dest_port '443'
+	option target 'ACCEPT'
+	option proto 'tcp'
 
+config rule
+	option src 'lan'
+	option dest_port '443'
+	option target 'ACCEPT'
+	option proto 'tcp'
+
+config rule
+	option src 'vpn'
+	option dest_port '443'
+	option target 'ACCEPT'
+	option proto 'tcp'
+
+config rule
+	option src 'ap'
+	option dest_port '22'
+	option target 'ACCEPT'
+	option proto 'tcp'
+
+config rule
+	option src 'secAp'
+	option dest_port '22'
+	option target 'ACCEPT'
+	option proto 'tcp'
+
+config rule
+	option src 'ap'
+	option dest_port '8082'
+	option target 'ACCEPT'
+	option proto 'tcp'
+
+config rule
+	option src 'secAp'
+	option dest_port '8082'
+	option target 'ACCEPT'
+	option proto 'tcp'
+
+config rule
+	option src 'lan'
+	option dest_port '8082'
+	option target 'ACCEPT'
+	option proto 'tcp'
+
+config rule
+	option src 'mesh'
+	option dest_port '698'
+	option target 'ACCEPT'
+	option proto 'udp'
+
+config rule
+	option src 'wan'
+	option dest_port '698'
+	option target 'ACCEPT'
+	option proto 'udp'
+
+config rule
+	option src 'lan'
+	option dest_port '698'
+	option target 'ACCEPT'
+	option proto 'udp'
+
+config rule
+	option src 'mesh'
+	option proto 'icmp'
+	option target 'ACCEPT'
+
+config rule
+	option src 'lan'
+	option proto 'icmp'
+	option target 'ACCEPT'
+
+config rule
+	option src 'wan'
+	option proto 'icmp'
+	option target 'ACCEPT'
+
+config rule
+	option src 'ap'
+	option proto 'icmp'
+	option target 'ACCEPT'
+
+config rule
+	option src 'secAp'
+	option proto 'icmp'
+	option target 'ACCEPT'
+
+config rule
+	option src 'vpn'
+	option proto 'icmp'
+	option target 'ACCEPT'
+
+config include
+	option path '/etc/firewall.freifunk'
