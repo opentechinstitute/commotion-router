@@ -1,0 +1,9 @@
+ssid=RHIAP
+channel=5
+ip=101.0.0.0
+ipgeneratemask=255.0.0.0
+ipgenerate=true
+netmask=255.255.255.0
+dns=8.8.8.8
+type=ap
+mode=ap

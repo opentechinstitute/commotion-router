@@ -1,0 +1,26 @@
+#!/bin/sh
+
+[ -f "/usr/bin/patch" ] && { \
+  cd /etc/init.d/
+  patch -p0 < /usr/share/commotion/patches/n2n.patch
+}
+
+[ -f /etc/config/n2n ] || logger -t meshconfig "N2N not installed!"
+grep -qs edge /etc/config/n2n || uci_add n2n edge
+local mac=$(uci_get wireless @wifi-device[0] macaddr 0)
+[ $mac = 0 ] && logger -t add_vpn "Error! Could not get MAC from config file."
+uci_set n2n @edge[0] ipaddr $( echo $mac | \
+      awk -v p=10 -F ':' '{ printf(p".%d.%d.%d","0x"$4,"0x"$5,"0x"$6) }' )
+uci_set n2n @edge[0] netmask "255.0.0.0"
+uci_set n2n @edge[0] supernode "vpn.commotionwireless.net"
+uci_set n2n @edge[0] port 7654
+uci_set n2n @edge[0] community "default"
+uci_set n2n @edge[0] key "c0MM0t10N!r0ckS!"
+uci_set n2n @edge[0] route "0"
+uci_commit n2n
+
+logger -s -t enablevpn "N2N successfully configured! N2N restarting..."
+
+/etc/init.d/n2n restart
+
+exit 0

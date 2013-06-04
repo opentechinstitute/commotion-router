@@ -1,0 +1,20 @@
+Index: n2n
+===================================================================
+--- n2n	(revision 31639)
++++ n2n	(working copy)
+@@ -12,13 +12,14 @@
+ 	  edge)
+ 		config_get ipaddr "$cfg" 'ipaddr'
+ 		[ -n "$ipaddr" ] || return 1
++		config_get netmask "$cfg" 'netmask'
+ 		config_get supernode "$cfg" 'supernode'
+ 		config_get port "$cfg" 'port'
+ 		config_get community "$cfg" 'community'
+ 		config_get key "$cfg" 'key'
+ 		config_get_bool route "$cfg" 'route' '0'
+ 		[ "$route" = "1" ] && args='-r'
+-		service_start /usr/sbin/edge -f $args -a $ipaddr -c $community -k $key -l ${supernode}:${port}
++		service_start /usr/sbin/edge -f $args -b -a $ipaddr -s $netmask -c $community -k $key -l ${supernode}:${port}
+ 		;;
+ 	  supernode)
+ 		config_get port "$cfg" port

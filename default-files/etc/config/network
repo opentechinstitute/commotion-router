@@ -14,3 +14,11 @@ option 'interface' 'plug'
 option 'proto' 'static'
 option 'ipaddr' '192.168.1.20'
 option 'netmask' '255.255.255.0'
+
+config 'interface' 'mesh'
+option 'profile' 'RHIMesh'
+option 'proto' 'commotion'
+
+config 'interface' 'ap'
+option 'profile' 'RHIAP'
+option 'proto' 'commotion'
