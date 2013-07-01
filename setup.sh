@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #git clone git://git.openwrt.org/12.09/openwrt.git
-svn co svn://svn.openwrt.org/openwrt/tags/attitude_adjustment_12.09/
+svn co svn://svn.openwrt.org/openwrt/tags/attitude_adjustment_12.09/ openwrt
 
 cd openwrt
 patch -p1 < ../patches/unifi.patch
@@ -28,5 +28,3 @@ echo " Commotion OpenWrt is prepared. To build the firmware, type:"
 echo " cd openwrt"
 echo " make menuconfig #If you wish to add or change packages."
 echo " make V=99"
-echo " Please make use of the DR1rc wiki page:"
-echo " https://code.commotionwireless.net/projects/commotion/wiki/AttitudeAdjustmentBuild"
