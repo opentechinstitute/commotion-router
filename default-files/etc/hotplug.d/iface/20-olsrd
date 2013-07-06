@@ -324,11 +324,9 @@ case "$(commotion state "$DEVICE" type)" in
             eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
             $DEBUG unset_olsrd_if $INTERFACE
             $DEBUG set_olsrd_hna4 $NETWORK $NETMASK $INTERFACE
-            $DEBUG set_olsrd_dnssd $INTERFACE
             ;;
           0)
             $DEBUG unset_olsrd_hna4 $INTERFACE
-            $DEBUG unset_olsrd_dnssd $INTERFACE
             $DEBUG set_olsrd_if $INTERFACE
             ;;
         esac
@@ -336,7 +334,6 @@ case "$(commotion state "$DEVICE" type)" in
       ifdown)
         $DEBUG unset_olsrd_if $INTERFACE
         $DEBUG unset_olsrd_hna4 $INTERFACE
-        $DEBUG unset_olsrd_dnssd $INTERFACE
       ;; 
     esac
 
