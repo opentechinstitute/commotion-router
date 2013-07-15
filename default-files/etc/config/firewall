@@ -171,6 +171,12 @@ config rule
 	option proto 'tcp'
 
 config rule
+        option src 'wan'
+        option dest_port '80'
+        option target 'ACCEPT'
+        option proto 'tcp'
+
+config rule
 	option src 'ap'
 	option dest_port '80'
 	option target 'ACCEPT'
