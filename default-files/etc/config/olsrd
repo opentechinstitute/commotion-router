@@ -21,10 +21,8 @@ config LoadPlugin
 
 config LoadPlugin
 	option library 'olsrd_txtinfo.so.0.1'
-#Set to accept all connections with 0.0.0.0
-    option accept '0.0.0.0'
-#Hardcoding the port used
-    option port 8080
+#Set to accept local connections
+    option accept '127.0.0.1'
 
 config LoadPlugin 
 	option library 'olsrd_dnssd.so.0.1.2'
@@ -39,9 +37,9 @@ config LoadPlugin
 # pulls some info from txtinfo plugin as well 
 config LoadPlugin
 	option library 'olsrd_jsoninfo.so.0.0'
-#Set to accept all connections with 0.0.0.0
-    option accept '0.0.0.0'
+
+#Set to accept local connections
+    option accept '127.0.0.1'
 #Hardcoding the port used
     option port 9090
 	option 'UUIDFile' '/etc/olsrd.d/olsrd.uuid'
-
