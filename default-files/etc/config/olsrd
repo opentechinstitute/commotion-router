@@ -19,10 +19,6 @@ config LoadPlugin
 	option 'hosts_file' '/var/run/hosts_olsr'
 	option 'suffix' '.mesh.local'
 
-config LoadPlugin
-	option library 'olsrd_txtinfo.so.0.1'
-	option accept '127.0.0.1'
-
 config LoadPlugin 
 	option library 'olsrd_dnssd.so.0.1.2'
 	option 'P2pdTtl' '5'
@@ -32,8 +28,20 @@ config LoadPlugin
 	option 'Domain' 'mesh.local'
 	option 'ServiceUpdateInterval' '300'
 
+# OLSRD TXTINFO
+config LoadPlugin
+    option library 'olsrd_txtinfo.so.0.1'
+#Set to accept local connections
+    option accept '127.0.0.1'
+
+# OLSRD JSON INFO
+# pulls some info from txtinfo plugin as well 
 config LoadPlugin
 	option library 'olsrd_jsoninfo.so.0.0'
-	option accept '127.0.0.1'
+
+#Set to accept local connections
+    option accept '127.0.0.1'
+#Hardcoding the port used
+    option port 9090
 	option 'UUIDFile' '/etc/olsrd.d/olsrd.uuid'
 
