@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 #DEBUG="echo"
 
 if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "ap" ]; then
