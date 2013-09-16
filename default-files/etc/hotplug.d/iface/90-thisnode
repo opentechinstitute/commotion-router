@@ -1,0 +1,14 @@
+#!/bin/sh
+#DEBUG="echo"
+
+if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "ap" ]; then
+	THISNODE=$(/usr/bin/commotion state "$DEVICE" ip)" thisnode"
+	if grep -Fq thisnode /etc/hosts; then
+		sed -ie "s/^.*thisnode$/$THISNODE/" /etc/hosts || \
+			logger -t commotion.hotplug.thisnode -s "Couldn't edit /etc/hosts"
+		logger -t commotion.hotplug.thisnode -s "Updating IP address for 'thisnode' host alias"
+	else
+		echo $THISNODE >> /etc/hosts
+		logger -t commotion.hotplug.thisnode -s "Creating entry for 'thisnode' host alias"
+	fi
+fi
