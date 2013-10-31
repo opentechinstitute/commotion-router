@@ -10,7 +10,7 @@ if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "w
         else                                                                                           
                 echo $THISNODE >> /etc/hosts                                                           
                 logger -t commotion.hotplug.thisnode -s "Creating entry for 'thisnode' host alias"
-                                                                                                  
         fi                                                                                        
+	kill -s HUP `pgrep dnsmasq`
 fi
 
