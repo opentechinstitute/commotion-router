@@ -6,6 +6,7 @@ svn co svn://svn.openwrt.org/openwrt/branches/attitude_adjustment@36682 openwrt
 
 cd openwrt
 patch -p1 < ../patches/unifi.patch
+patch -p1 < ../patches/wpa_supplicant-mini.config.patch
 
 [ ! -e feeds.conf ] && cp -v ../feeds.conf feeds.conf
 [ ! -e files ] && mkdir files
