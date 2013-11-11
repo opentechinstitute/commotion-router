@@ -4,6 +4,8 @@ Commotion is an open source “device-as-infrastructure” communication platfor
 
 Commotion software exists for multiple platforms; this repository contains the build system for the OpenWRT router firmware distribution of the Commotion Wireless project. This repo builds the following other Commotion projects in order to create installation images for turning select wireless routers into Commotion nodes.
 
+If you would like to know more about setting up a mesh network check out the Commotion Construction Kit at https://commotionwireless.net/docs/cck
+
 ###The Commotion Daemon
 
 https://github.com/opentechinstitute/commotiond.git
