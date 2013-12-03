@@ -1,7 +1,5 @@
 #!/bin/sh
 
-#git clone git://git.openwrt.org/12.09/openwrt.git
-#svn co svn://svn.openwrt.org/openwrt/tags/attitude_adjustment_12.09/ openwrt
 svn co svn://svn.openwrt.org/openwrt/branches/attitude_adjustment@36682 openwrt
 
 cd openwrt
