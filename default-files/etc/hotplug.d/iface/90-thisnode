@@ -17,6 +17,7 @@ if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "w
                 echo $THISNODE >> /etc/hosts                                                           
                 logger -t commotion.hotplug.thisnode -s "Creating entry for 'thisnode' host alias"
 
+	fi 
 		ALIAS="thisnode"
 				
 		uci set network.$ALIAS=alias
@@ -28,7 +29,6 @@ if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "w
 		logger -t commotion.hotplug.thisnode -s "Setting 'thisnode' ip address to $localip"
 		uci set network.$ALIAS.netmask=255.255.0.0
 		
-
-        fi                                                                                        
+                                                                                     
 	kill -s HUP `pgrep dnsmasq`
 fi
