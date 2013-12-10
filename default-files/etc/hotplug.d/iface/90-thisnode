@@ -21,11 +21,14 @@ if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "w
 	
 	ALIAS="thisnode"
 	
-	if grep -Fq $ALIAS /etc/config/network; then
-		
-				
+	logger -t commotion.hotplug.thisnode -s "Checking UCI entry for $ALIAS alias"
+	
+	if [ grep -Fq $ALIAS /etc/config/network] && [grep -Fq $localip ]; then
+	      logger -t commotion.hotplug.thisnode -s "$ALIAS alias exists with ip address $localip"
+	
+	else 
 		uci set network.$ALIAS=alias
-		logger -t commotion.hotplug.thisnode -s "Creating uci entry for '$ALIAS' alias"
+		logger -t commotion.hotplug.thisnode -s "Creating UCI entry for '$ALIAS' alias"
 		uci set network.$ALIAS.interface=plug
 		uci set network.$ALIAS.proto=static
 		
