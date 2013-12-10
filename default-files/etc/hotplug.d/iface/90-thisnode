@@ -29,6 +29,8 @@ if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "w
 		logger -t commotion.hotplug.thisnode -s "Setting '$ALIAS' ip address to $localip"
 		uci set network.$ALIAS.netmask=255.255.0.0
 		
+		uci commit network
+		
 		#NOTE: this method of configuring aliases is deprecated in more recent versions of openwrt
 		
                                                                                      
