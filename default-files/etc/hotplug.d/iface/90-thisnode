@@ -18,6 +18,10 @@ if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "w
                 logger -t commotion.hotplug.thisnode -s "Creating entry for 'thisnode' host alias"
 
 	fi 
+	
+	
+	if grep -Fq thisnode /etc/config/network; then
+		
 		ALIAS="thisnode"
 				
 		uci set network.$ALIAS=alias
@@ -30,7 +34,7 @@ if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "w
 		uci set network.$ALIAS.netmask=255.255.0.0
 		
 		uci commit network
-		
+	fi	
 		#NOTE: this method of configuring aliases is deprecated in more recent versions of openwrt
 		
                                                                                      
