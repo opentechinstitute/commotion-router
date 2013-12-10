@@ -19,10 +19,10 @@ if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "w
 
 	fi 
 	
+	ALIAS="thisnode"
 	
-	if grep -Fq thisnode /etc/config/network; then
+	if grep -Fq $ALIAS /etc/config/network; then
 		
-		ALIAS="thisnode"
 				
 		uci set network.$ALIAS=alias
 		logger -t commotion.hotplug.thisnode -s "Creating uci entry for '$ALIAS' alias"
