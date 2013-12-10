@@ -7,23 +7,21 @@
 . /lib/firewall/core_interface.sh
 
 if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "wired" ]; then
-	localip=$(/usr/bin/commotion localipset)
-        THISNODE=$localip" thisnode"                    
+	                    
         if grep -Fq thisnode /etc/hosts; then                                                
-                sed -ie "s/^.*thisnode$/$THISNODE/" /etc/hosts || \      
-                        logger -t commotion.hotplug.thisnode -s "Couldn't edit /etc/hosts"
-                logger -t commotion.hotplug.thisnode -s "Updating IP address for 'thisnode' host alias"
-        else                                                                                           
+		logger -t commotion.hotplug.thisnode -s "Found $THISNODE in /etc/hosts"
+        else
+		localip=$(/usr/bin/commotion localipset)
+		THISNODE=$localip" thisnode"
                 echo $THISNODE >> /etc/hosts                                                           
-                logger -t commotion.hotplug.thisnode -s "Creating entry for 'thisnode' host alias"
-
+                logger -t commotion.hotplug.thisnode -s "Adding $THISNODE to /etc/hosts"
 	fi 
 	
 	ALIAS="thisnode"
 	
-	logger -t commotion.hotplug.thisnode -s "Checking UCI entry for $ALIAS alias"
+	logger -t commotion.hotplug.thisnode -s "Checking for UCI entry for $ALIAS alias"
 	
-	if [ grep -Fq $ALIAS /etc/config/network] && [grep -Fq $localip /etc/config/network]; then
+	if grep -Fq $ALIAS /etc/config/network; then
 	      logger -t commotion.hotplug.thisnode -s "$ALIAS alias exists with ip address $localip"
 	
 	else 
