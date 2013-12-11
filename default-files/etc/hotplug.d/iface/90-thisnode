@@ -6,7 +6,7 @@
 . /lib/config/uci.sh
 . /lib/firewall/core_interface.sh
 
-if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "wired" ]; then
+if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "ap" ]; then
 	                    
         if grep -Fq thisnode /etc/hosts; then                                                
 		logger -t commotion.hotplug.thisnode -s "Found $THISNODE in /etc/hosts"
@@ -27,7 +27,7 @@ if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "w
 	else 
 		logger -t commotion.hotplug.thisnode -s "No entry found. Creating UCI entry for '$ALIAS' alias"
 		uci set network.$ALIAS=alias
-		uci set network.$ALIAS.interface=plug
+		uci set network.$ALIAS.interface=ap
 		uci set network.$ALIAS.proto=static
 		
 		uci set network.$ALIAS.ipaddr=$localip
