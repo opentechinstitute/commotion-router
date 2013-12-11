@@ -7,18 +7,21 @@
 . /lib/firewall/core_interface.sh
 
 if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "ap" ]; then
-	                    
-        if grep -Fq thisnode /etc/hosts; then                                                
+	
+	ALIAS="thisnode"
+	localip=$(/usr/bin/commotion localipset)
+	THISNODE=$localip" $ALIAS"
+        
+        logger -t commotion.hotplug.thisnode -s "Checking for $ALIAS entry in /etc/hosts"
+        
+        if grep -Fq $ALIAS /etc/hosts; then                                                
 		logger -t commotion.hotplug.thisnode -s "Found $THISNODE in /etc/hosts"
         else
-		localip=$(/usr/bin/commotion localipset)
-		THISNODE=$localip" thisnode"
-                echo $THISNODE >> /etc/hosts                                                           
+		echo $THISNODE >> /etc/hosts                                                           
                 logger -t commotion.hotplug.thisnode -s "Adding $THISNODE to /etc/hosts"
 	fi 
 	
-	ALIAS="thisnode"
-	
+		
 	logger -t commotion.hotplug.thisnode -s "Checking for UCI entry for $ALIAS alias"
 	
 	if grep -Fq $ALIAS /etc/config/network; then
