@@ -16,8 +16,8 @@ fi
 
 scripts/feeds update -a
 scripts/feeds install -a
-scripts/feeds uninstall olsrd libldns
-scripts/feeds install -p commotion olsrd libldns
+scripts/feeds uninstall olsrd libldns cyassl
+scripts/feeds install -p commotion olsrd libldns cyassl
 
 # Copy in Commotion-specific patches
 cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
