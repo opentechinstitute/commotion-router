@@ -8,3 +8,9 @@ config 'interface' 'plug'
 option 'ifname' 'eth0'
 option 'proto' 'commotion'
 option 'profile' 'defaultPlug'
+
+config interface 'client'
+option proto 'commotion'
+option type 'bridge'
+
+
