@@ -1,0 +1,32 @@
+# Put your custom commands here that should be executed once
+# the system init finished. By default this file does nothing.
+# Get date/time components of most recent filemod under /etc/update
+
+FILELISTING=`ls -lr -u -e /etc/ | tail -1`
+[ -n "${FILELISTING}" ] && {
+    FILEMOD_YYYY=`echo $FILELISTING | awk '{printf "%d", $10}'`
+    FILEMOD_HHMMSS=`echo $FILELISTING  | awk '{printf "%s", $9}'`
+    FILEMOD_DD=`echo $FILELISTING | awk '{printf "%s", $8}'`
+    FILEMOD_MONTH=`echo $FILELISTING | awk '{printf "%s", $7}'`
+
+    # Convert Month to numerical MM format
+    case "${FILEMOD_MONTH}" in
+        "Jan") FILEMOD_MM="01" ;;
+        "Feb") FILEMOD_MM="02" ;;
+        "Mar") FILEMOD_MM="03" ;;
+        "Apr") FILEMOD_MM="04" ;;
+        "May") FILEMOD_MM="05" ;;
+        "Jun") FILEMOD_MM="06" ;;
+        "Jul") FILEMOD_MM="07" ;;
+        "Aug") FILEMOD_MM="08" ;;
+        "Sep") FILEMOD_MM="09" ;;
+        "Oct") FILEMOD_MM="10" ;;
+        "Nov") FILEMOD_MM="11" ;;
+        "Dec") FILEMOD_MM="12" ;;
+        *) FILEMOD_MM="01" ;;
+    esac
+
+    # Set local date/time, assuming format "YYYY-MM-DD hh:mm:ss"
+    DATE="${FILEMOD_YYYY}-${FILEMOD_MM}-${FILEMOD_DD} $FILEMOD_HHMMSS"
+    date -s "${DATE}"
+}
