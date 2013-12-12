@@ -6,7 +6,7 @@
 . /lib/config/uci.sh
 . /lib/firewall/core_interface.sh
 
-if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "ap" ]; then
+if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "plug" ]; then
 	
 	ALIAS="thisnode"
 	localip=$(/usr/bin/commotion localipset)
