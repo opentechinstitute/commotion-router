@@ -10,7 +10,7 @@ config zone
 	option input 'ACCEPT'
 	option output 'ACCEPT'
 	option forward 'DROP'
-	list network 'plug'
+	list network 'client'
 
 config zone
 	option name 'ap'
