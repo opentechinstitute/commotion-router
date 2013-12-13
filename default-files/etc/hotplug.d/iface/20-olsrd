@@ -281,7 +281,9 @@ set_olsrd_hna4() {
 set_olsrd_servald() {
 
   local name="$(add_olsrd_plugin "secure")"
-  $DEBUG uci_set olsrd "$name" Keyfile "/etc/olsrd.d/olsrd_secure_key"
+
+#  Uncomment if you want to set the default olsrd key to something specific
+#  $DEBUG uci_set olsrd "$name" Keyfile "/etc/olsrd.d/olsrd_secure_key"
 
   return 0
 } 
