@@ -1,8 +1,14 @@
 #!/bin/sh
 #DEBUG="echo"
 
+. /lib/functions.sh
+. /lib/functions/commotion.sh
+. /lib/config/uci.sh
+. /lib/firewall/core_interface.sh
+
 if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "wired" ]; then
-        THISNODE=$(/usr/bin/commotion state "$DEVICE" ip)" thisnode"                    
+	localip=$(/usr/bin/commotion localipset)
+        THISNODE=$localip" thisnode"                    
         if grep -Fq thisnode /etc/hosts; then                                                
                 sed -ie "s/^.*thisnode$/$THISNODE/" /etc/hosts || \      
                         logger -t commotion.hotplug.thisnode -s "Couldn't edit /etc/hosts"
@@ -10,7 +16,21 @@ if [ "$ACTION" == "ifup" ] && [ $(/usr/bin/commotion state "$DEVICE" mode) == "w
         else                                                                                           
                 echo $THISNODE >> /etc/hosts                                                           
                 logger -t commotion.hotplug.thisnode -s "Creating entry for 'thisnode' host alias"
-        fi                                                                                        
+
+	fi 
+		ALIAS="thisnode"
+				
+		uci set network.$ALIAS=alias
+		logger -t commotion.hotplug.thisnode -s "Creating uci entry for '$ALIAS' alias"
+		uci set network.$ALIAS.interface=plug
+		uci set network.$ALIAS.proto=static
+		
+		uci set network.$ALIAS.ipaddr=$localip
+		logger -t commotion.hotplug.thisnode -s "Setting '$ALIAS' ip address to $localip"
+		uci set network.$ALIAS.netmask=255.255.0.0
+		
+		#NOTE: this method of configuring aliases is deprecated in more recent versions of openwrt
+		
+                                                                                     
 	kill -s HUP `pgrep dnsmasq`
 fi
-
