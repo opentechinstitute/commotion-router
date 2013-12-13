@@ -16,8 +16,11 @@ fi
 
 scripts/feeds update -a
 scripts/feeds install -a
-scripts/feeds uninstall olsrd libldns
-scripts/feeds install -p commotion olsrd libldns
+scripts/feeds uninstall olsrd libldns libcyassl
+# cyassl is an openwrt package, not feeds. Temporary solution:
+echo "Removing package/cyassl/ (cyassl-1.6.5)"
+rm -rf package/cyassl/
+scripts/feeds install -p commotion olsrd libldns libcyassl
 
 # Copy in Commotion-specific patches
 cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
