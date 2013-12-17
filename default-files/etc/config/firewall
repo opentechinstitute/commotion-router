@@ -10,21 +10,7 @@ config zone
 	option input 'ACCEPT'
 	option output 'ACCEPT'
 	option forward 'DROP'
-	list network 'plug'
-
-config zone
-	option name 'ap'
-	option input 'ACCEPT'
-	option output 'ACCEPT'
-	option forward 'DROP'
-	list network 'ap'
-
-config zone
-	option name 'secAp'
-	option input 'ACCEPT'
-	option output 'ACCEPT'
-	option forward 'DROP'
-	list network 'secAp'
+	list network 'client'
 
 config zone
 	option name 'mesh'
@@ -49,36 +35,12 @@ config zone
 	list network 'vpn'
 
 config forwarding
-	option src 'ap'
-	option dest 'mesh'
-
-config forwarding
-	option src 'ap'
-	option dest 'ap'
-
-config forwarding
-	option src 'secAp'
-	option dest 'mesh'
-
-config forwarding
-	option src 'secAp'
-	option dest 'secAp'
-
-config forwarding
 	option src 'mesh'
 	option dest 'mesh'
 
 config forwarding
 	option src 'lan'
 	option dest 'lan'
-
-config forwarding
-	option src 'ap'
-	option dest 'wan'
-
-config forwarding
-	option src 'secAp'
-	option dest 'wan'
 
 config forwarding
 	option src 'mesh'
@@ -91,30 +53,6 @@ config forwarding
 config forwarding
 	option src 'lan'
 	option dest 'wan'
-
-config forwarding
-	option src 'lan'
-	option dest 'ap'
-
-config forwarding
-	option src 'ap'
-	option dest 'lan'
-
-config forwarding
-	option src 'lan'
-	option dest 'secAp'
-
-config forwarding
-	option src 'secAp'
-	option dest 'lan'
-
-config forwarding
-	option src 'ap'
-	option dest 'secAp'
-
-config forwarding
-	option src 'secAp'
-	option dest 'ap'
 
 config rule
 	option src 'wan'
@@ -148,18 +86,6 @@ config rule
 
 config rule
 	option src 'lan'
-	option dest_port '53'
-	option target 'ACCEPT'
-	option proto 'tcpudp'
-
-config rule
-	option src 'ap'
-	option dest_port '53'
-	option target 'ACCEPT'
-	option proto 'tcpudp'
-
-config rule
-	option src 'secAp'
 	option dest_port '53'
 	option target 'ACCEPT'
 	option proto 'tcpudp'
@@ -177,32 +103,8 @@ config rule
         option proto 'tcp'
 
 config rule
-	option src 'ap'
-	option dest_port '80'
-	option target 'ACCEPT'
-	option proto 'tcp'
-
-config rule
-	option src 'secAp'
-	option dest_port '80'
-	option target 'ACCEPT'
-	option proto 'tcp'
-
-config rule
 	option src 'vpn'
 	option dest_port '80'
-	option target 'ACCEPT'
-	option proto 'tcp'
-
-config rule
-	option src 'ap'
-	option dest_port '443'
-	option target 'ACCEPT'
-	option proto 'tcp'
-
-config rule
-	option src 'secAp'
-	option dest_port '443'
 	option target 'ACCEPT'
 	option proto 'tcp'
 
@@ -215,30 +117,6 @@ config rule
 config rule
 	option src 'vpn'
 	option dest_port '443'
-	option target 'ACCEPT'
-	option proto 'tcp'
-
-config rule
-	option src 'ap'
-	option dest_port '22'
-	option target 'ACCEPT'
-	option proto 'tcp'
-
-config rule
-	option src 'secAp'
-	option dest_port '22'
-	option target 'ACCEPT'
-	option proto 'tcp'
-
-config rule
-	option src 'ap'
-	option dest_port '8082'
-	option target 'ACCEPT'
-	option proto 'tcp'
-
-config rule
-	option src 'secAp'
-	option dest_port '8082'
 	option target 'ACCEPT'
 	option proto 'tcp'
 
@@ -278,16 +156,6 @@ config rule
 
 config rule
 	option src 'wan'
-	option proto 'icmp'
-	option target 'ACCEPT'
-
-config rule
-	option src 'ap'
-	option proto 'icmp'
-	option target 'ACCEPT'
-
-config rule
-	option src 'secAp'
 	option proto 'icmp'
 	option target 'ACCEPT'
 
