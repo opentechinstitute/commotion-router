@@ -1,49 +1,40 @@
-config olsrd
-	# uncomment the following line to use a custom config file instead:
-	#option config_file '/etc/olsrd.conf'
 
+config olsrd
 	option IpVersion '4'
-	option 'LinkQualityLevel' '2'
-	option 'LinkQualityAlgorithm' 'etx_ffeth'
-	option 'SmartGateway' 'yes'
+	option LinkQualityLevel '2'
+	option LinkQualityAlgorithm 'etx_ffeth'
+	option SmartGateway 'yes'
 
 config LoadPlugin
 	option library 'olsrd_arprefresh.so.0.1'
 
 config LoadPlugin
-	option library 'olsrd_dyn_gw.so.0.5'
+	option library 'olsrd_dyn_gw_plain.so.0.4'
 
 config LoadPlugin
 	option library 'olsrd_nameservice.so.0.3'
-	option 'sighup_pid_file' '/var/run/dnsmasq.pid'
-	option 'hosts_file' '/var/run/hosts_olsr'
-	option 'suffix' '.mesh.local'
+	option sighup_pid_file '/var/run/dnsmasq.pid'
+	option hosts_file '/var/run/hosts_olsr'
+	option suffix '.mesh.local'
 
-config LoadPlugin 
-	option library 'olsrd_dnssd.so.0.1.2'
-	option 'P2pdTtl' '5'
-	option 'UdpDestPort' '255.255.255.255 1211'
-	option 'UdpDestPort' '224.0.0.251 5353'
-	option 'ServiceFileDir' '/etc/avahi/services'
-	option 'Domain' 'mesh.local'
-	option 'ServiceUpdateInterval' '300'
-
-# OLSRD TXTINFO
 config LoadPlugin
-    option library 'olsrd_txtinfo.so.0.1'
-#Set to accept local connections
-    option accept '127.0.0.1'
-    option listen '127.0.0.1'
+	option library 'olsrd_dnssd.so.0.1.2'
+	option P2pdTtl '5'
+	option UdpDestPort '224.0.0.251 5353'
+	option ServiceFileDir '/etc/avahi/services'
+	option Domain 'mesh.local'
+	option ServiceUpdateInterval '300'
+	option NonOlsrIf 'client'
 
-# OLSRD JSON INFO
-# pulls some info from txtinfo plugin as well 
+config LoadPlugin
+	option library 'olsrd_txtinfo.so.0.1'
+	option accept '127.0.0.1'
+	option listen '127.0.0.1'
+
 config LoadPlugin
 	option library 'olsrd_jsoninfo.so.0.0'
-
-#Set to accept local connections
-    option accept '127.0.0.1'
-    option listen '127.0.0.1'
-#Hardcoding the port used
-    option port 9090
-	option 'UUIDFile' '/etc/olsrd.d/olsrd.uuid'
+	option accept '127.0.0.1'
+	option listen '127.0.0.1'
+	option port '9090'
+	option UUIDFile '/etc/olsrd.d/olsrd.uuid'
 

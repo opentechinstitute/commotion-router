@@ -15,7 +15,7 @@ config dnsmasq
         option resolvfile '/tmp/resolv.conf.auto'
 
 config dhcp
-        option interface 'plug'
+        option interface 'client'
         option start '2'
         option limit '150'
         option leasetime '12h'

@@ -1,4 +1,6 @@
-include /lib/network
+. /lib/functions.sh
+. /lib/functions/commotion.sh
+. /lib/config/uci.sh
 
 #DEBUG="echo"
 
@@ -278,69 +280,43 @@ set_olsrd_hna4() {
 #       RETURNS:  0 on success
 #===============================================================================
 
-set_olsrd_servald() {
-
-  local name="$(add_olsrd_plugin "secure")"
-
-#  Uncomment if you want to set the default olsrd key to something specific
-#  $DEBUG uci_set olsrd "$name" Keyfile "/etc/olsrd.d/olsrd_secure_key"
+set_olsrd_mdp() {
+  local sid="$1"
+  local keyring="$2"
+  
+  local name="$(add_olsrd_plugin mdp)"
+  $DEBUG uci_set olsrd "$name" sid "$(commotion_get_sid "$DEVICE")"
+  $DEBUG uci_set olsrd "$name" servalpath "$(commotion_get_keyring "$DEVICE")"
 
   return 0
 } 
 
 logger -t commotion.hotplug.olsrd "proto: $(uci_get_state network "$INTERFACE" proto)"
-logger -t commotion.hotplug.olsrd "type: $(commotion state "$DEVICE" type)"
+logger -t commotion.hotplug.olsrd "interface: $INTERFACE"
+logger -t commotion.hotplug.olsrd "device: $DEVICE"
+
+local sid=
+local keyring=
 
 #[ -f "/etc/config/olsrd" ] && [ "$(uci_get_state network "$INTERFACE" proto)" = "commotion" ] && {
 [ "$(uci_get_state network "$INTERFACE" proto)" = "commotion" ] && {
-case "$(commotion state "$DEVICE" type)" in
-  mesh)
-    case $ACTION in
-      ifup)
-        $DEBUG set_olsrd_if $INTERFACE
-        #$DEBUG set_olsrd_dnssrv "$(uci_get_state network "$INTERFACE" ipaddr)"
-      ;;
+case $ACTION in
+	ifup)
+		[ "$(uci_get network "$INTERFACE" class)"  = "mesh" ] && {
+			logger -t commotion.hotplug.olsrd "Bring OLSRd up!"
+        		$DEBUG set_olsrd_if $INTERFACE
+        		sid="$(commotion_get_sid "$DEVICE")"
+        		keyring="$(commotion_get_keyring "$DEVICE")"
+        		#[ "$sid" != "" ] && [ "$keyring" != "" ] && $DEBUG set_olsrd_mdp "$sid" "$keyring"
+        	}
+      	;;
       ifdown)
-        $DEBUG unset_olsrd_if $INTERFACE
+		[ "$(uci_get network "$INTERFACE" class)"  = "mesh" ] && {
+			logger -t commotion.hotplug.olsrd "Bring OLSRd down!"
+        		$DEBUG unset_olsrd_if $INTERFACE
+        	}
         ;;
-    esac
-
-    uci_commit olsrd
-  ;;
-  ap)
-      case $ACTION in
-        ifup)
-          eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
-          $DEBUG set_olsrd_hna4  $NETWORK $NETMASK $INTERFACE
-          $DEBUG set_olsrd_dnssd $INTERFACE
-        ;;
-      esac
-
-      uci_commit olsrd
-  ;;
-  plug)
-    case $ACTION in
-      ifup)
-        case "$(uci_get_state network "$INTERFACE" lease)" in
-          1)
-            eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
-            $DEBUG unset_olsrd_if $INTERFACE
-            $DEBUG set_olsrd_hna4 $NETWORK $NETMASK $INTERFACE
-            ;;
-          0)
-            $DEBUG unset_olsrd_hna4 $INTERFACE
-            $DEBUG set_olsrd_if $INTERFACE
-            ;;
-        esac
-      ;;
-      ifdown)
-        $DEBUG unset_olsrd_if $INTERFACE
-        $DEBUG unset_olsrd_hna4 $INTERFACE
-      ;; 
-    esac
-
-    uci_commit olsrd
-  ;;
 esac
+uci_commit olsrd
 /etc/init.d/olsrd restart
 }

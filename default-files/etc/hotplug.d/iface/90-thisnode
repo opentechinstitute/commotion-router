@@ -9,7 +9,7 @@
 if [ "$ACTION" == "ifup" ]; then
 	
 	ALIAS="thisnode"
-	localip=$(/usr/bin/commotion localipset)
+	localip="$(commotion_gen_ip 169.254.0.0 255.255.0.0)"
 	THISNODE=$localip" $ALIAS"
         
         logger -t commotion.hotplug.thisnode -s "Checking for $ALIAS entry in /etc/hosts"
@@ -44,3 +44,4 @@ if [ "$ACTION" == "ifup" ]; then
                                                                                      
 	kill -s HUP `pgrep dnsmasq`
 fi
+i
