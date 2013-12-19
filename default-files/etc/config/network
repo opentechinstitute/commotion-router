@@ -14,10 +14,3 @@ config interface 'wired'
 	option ifname 'eth0'
 	option proto 'commotion'
 	option class 'wired'
-
-config alias 'thisnode'
-	option interface 'client'
-	option proto 'static'
-	option ipaddr '169.254.7.130'
-	option netmask '255.255.0.0'
-
