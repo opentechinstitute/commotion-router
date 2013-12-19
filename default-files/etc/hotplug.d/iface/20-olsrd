@@ -4,7 +4,7 @@
 
 #DEBUG="echo"
 
-logger -s -t hotplug.olsrd "Action: $ACTION, Proto: $PROTO, Iface: $INTERFACE, Type: $TYPE" 
+logger -s -t hotplug.olsrd "Action: $ACTION, Interface: $INTERFACE, Device: $DEVICE" 
 
 sort_list() {
   local arg="$*"
@@ -97,7 +97,7 @@ add_olsrd_plugin() {
 
 #===  FUNCTION  ================================================================
 #          NAME:  unset_olsrd_if
-#   DESCRIPTION:  Unsets the interface stanza for the olsrd config
+#   DESCRIPTION:  Unsets all config stanzas named for the interface specified
 #    PARAMETERS:  config name of the interface to remove
 #       RETURNS:  0 on success
 #===============================================================================
@@ -141,8 +141,8 @@ set_olsrd_if() {
 }
 
 #===  FUNCTION  ================================================================
-#          NAME:  unset_olsrd_p2pif
-#   DESCRIPTION:  Unsets the p2p plugin stanza for the olsrd config
+#          NAME:  unset_olsrd_dnssd
+#   DESCRIPTION:  Unsets the dnssd plugin stanza for the olsrd config
 #    PARAMETERS:  config name of the interface to remove
 #       RETURNS:  0 on success
 #===============================================================================
@@ -175,8 +175,8 @@ unset_olsrd_dnssd() {
 }
 
 #===  FUNCTION  ================================================================
-#          NAME:  set_olsrd_p2pif
-#   DESCRIPTION:  Sets the p2p plugin stanza for the olsrd config
+#          NAME:  set_olsrd_dnssd
+#   DESCRIPTION:  Sets the dnssd plugin stanza for the olsrd config
 #    PARAMETERS:  config name of the interface to add
 #       RETURNS:  0 on success
 #===============================================================================
@@ -192,50 +192,6 @@ set_olsrd_dnssd() {
   done
   uci_set olsrd "$name" NonOlsrIf "$newconfigs"
 
-  return 0
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  unset_olsrd_dnssrv
-#   DESCRIPTION:  Unsets the dns-server plugin option for the olsrd config
-#    PARAMETERS:  IP address of the interface to remove
-#       RETURNS:  0 on success
-#===============================================================================
-
-unset_olsrd_dnssrv() {
-  local ip4addr="$1"
-  
-  config_cb() {
-    local type="$1"
-    local name="$2"
-
-    case $type in
-      LoadPlugin)
-        case "$(uci_get olsrd "$name" dns_server "")" in
-          "$ip4addr")
-            uci_remove olsrd "$name" dns_server
-            ;;
-        esac
-      ;;
-    esac
-  }
-  config_load olsrd
-
-  return 0
-}
-
-#===  FUNCTION  ================================================================
-#          NAME:  set_olsrd_dnssrv
-#   DESCRIPTION:  Sets the dns-server plugin option for the olsrd config
-#    PARAMETERS:  IP address of the interface to add
-#       RETURNS:  0 on success
-#===============================================================================
-
-set_olsrd_dnssrv() {
-  local ipv4addr="$1"
-  
-  local name="$(add_olsrd_plugin "nameservice")"
-  $DEBUG uci_set olsrd "$name" dns_server "$ipv4addr"
   return 0
 }
 
@@ -274,8 +230,8 @@ set_olsrd_hna4() {
 } 
 
 #===  FUNCTION  ================================================================
-#          NAME:  set_olsrd_secure
-#   DESCRIPTION:  Set olsrd_secure stanza in olsrd config
+#          NAME:  set_olsrd_mdp
+#   DESCRIPTION:  Set olsrd_mdp stanza in olsrd config
 #    PARAMETERS:  None
 #       RETURNS:  0 on success
 #===============================================================================
@@ -285,8 +241,8 @@ set_olsrd_mdp() {
   local keyring="$2"
   
   local name="$(add_olsrd_plugin mdp)"
-  $DEBUG uci_set olsrd "$name" sid "$(commotion_get_sid "$DEVICE")"
-  $DEBUG uci_set olsrd "$name" servalpath "$(commotion_get_keyring "$DEVICE")"
+  $DEBUG uci_set olsrd "$name" sid "$1"
+  $DEBUG uci_set olsrd "$name" servalpath "$2"
 
   return 0
 } 
@@ -298,25 +254,40 @@ logger -t commotion.hotplug.olsrd "device: $DEVICE"
 local sid=
 local keyring=
 
-#[ -f "/etc/config/olsrd" ] && [ "$(uci_get_state network "$INTERFACE" proto)" = "commotion" ] && {
-[ "$(uci_get_state network "$INTERFACE" proto)" = "commotion" ] && {
+[ -f "/etc/config/olsrd" ] && [ "$(uci_get_state network "$INTERFACE" proto)" = "commotion" ] && {
+
+local meshed="$(uci_get network "$INTERFACE" meshed "$(uci_get_state network "$INTERFACE" meshed)")"
+local announced="$(uci_get network "$INTERFACE" announced "$(uci_get_state network "$INTERFACE" announced)")"
+
+logger -t commotion.hotplug.olsrd "meshed: $meshed"
+logger -t commotion.hotplug.olsrd "announced: $announced"
+
+serval="$(commotion_get_serval "$DEVICE")"
+sid="$(commotion_get_sid "$DEVICE")"
+keyring="$(commotion_get_keyring "$DEVICE")"
+[ "$servald" != "" ] && [ "$sid" != "" ] && [ "$keyring" != "" ] && $DEBUG set_olsrd_mdp "$sid" "$keyring"
+
 case $ACTION in
 	ifup)
-		[ "$(uci_get network "$INTERFACE" class)"  = "mesh" ] && {
-			logger -t commotion.hotplug.olsrd "Bring OLSRd up!"
-        		$DEBUG set_olsrd_if $INTERFACE
-        		sid="$(commotion_get_sid "$DEVICE")"
-        		keyring="$(commotion_get_keyring "$DEVICE")"
-        		#[ "$sid" != "" ] && [ "$keyring" != "" ] && $DEBUG set_olsrd_mdp "$sid" "$keyring"
-        	}
-      	;;
-      ifdown)
-		[ "$(uci_get network "$INTERFACE" class)"  = "mesh" ] && {
-			logger -t commotion.hotplug.olsrd "Bring OLSRd down!"
-        		$DEBUG unset_olsrd_if $INTERFACE
-        	}
-        ;;
+		$DEBUG unset_olsrd_if $INTERFACE
+		$DEBUG unset_olsrd_dnssd $INTERFACE
+		# Is this a mesh interface?
+		if [ "$meshed"  == "1" ]; then
+			$DEBUG set_olsrd_if $INTERFACE
+		fi
+      
+		# Should this interface be announced as a client network?
+		if [ "$announced"  == "1" ]; then
+			eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
+			$DEBUG set_olsrd_hna4 $NETWORK $NETMASK $INTERFACE
+			$DEBUG set_olsrd_dnssd $INTERFACE
+		fi
+	;;
+	ifdown)
+		$DEBUG unset_olsrd_if $INTERFACE
+		$DEBUG unset_olsrd_dnssd $INTERFACE
+	;;
 esac
-uci_commit olsrd
-/etc/init.d/olsrd restart
+#$DEBUG uci_commit olsrd
+$DEBUG /etc/init.d/olsrd restart
 }
