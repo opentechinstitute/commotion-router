@@ -4,7 +4,6 @@
 . /lib/functions.sh
 . /lib/functions/commotion.sh
 . /lib/config/uci.sh
-. /lib/firewall/core_interface.sh
 
 if [ "$ACTION" == "ifup" ]; then
 	
@@ -30,7 +29,7 @@ if [ "$ACTION" == "ifup" ]; then
 	else 
 		logger -t commotion.hotplug.thisnode -s "No entry found. Creating UCI entry for '$ALIAS' alias"
 		uci set network.$ALIAS=alias
-		uci set network.$ALIAS.interface=client
+		uci set network.$ALIAS.interface=lan
 		uci set network.$ALIAS.proto=static
 		
 		uci set network.$ALIAS.ipaddr=$localip
