@@ -1,6 +1,6 @@
 #!/bin/sh
 
-svn co svn://svn.openwrt.org/openwrt/branches/attitude_adjustment@36682 openwrt
+svn co svn://svn.openwrt.org/openwrt/branches/attitude_adjustment openwrt
 
 cd openwrt
 patch -p1 < ../patches/unifi.patch
