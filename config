@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Attitude Adjustment (r38863)
-# Thu Dec 19 08:51:38 2013
+# Thu Dec 19 10:31:22 2013
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -2219,7 +2219,7 @@ CONFIG_PACKAGE_lua-uri=y
 # Collections
 #
 CONFIG_PACKAGE_commotion=y
-# CONFIG_PACKAGE_commotion-gui is not set
+CONFIG_PACKAGE_commotion-gui=y
 
 #
 # Libraries
@@ -2244,7 +2244,7 @@ CONFIG_PACKAGE_luci-commotion-apps=y
 CONFIG_PACKAGE_luci-commotion-dashboard=y
 CONFIG_PACKAGE_luci-commotion-debug=y
 # CONFIG_PACKAGE_luci-commotion-quickstart is not set
-# CONFIG_PACKAGE_luci-commotion-splash is not set
+CONFIG_PACKAGE_luci-commotion-splash=y
 CONFIG_PACKAGE_luci-i18n-commotion=y
 CONFIG_PACKAGE_luci-mod-commotion=y
 CONFIG_PACKAGE_luci-proto-commotion=y
