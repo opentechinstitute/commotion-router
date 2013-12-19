@@ -10,7 +10,7 @@ config zone
 	option input 'ACCEPT'
 	option output 'ACCEPT'
 	option forward 'DROP'
-	list network 'client'
+	list network 'lan'
 
 config zone
 	option name 'mesh'

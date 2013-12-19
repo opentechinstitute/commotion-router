@@ -5,12 +5,7 @@ config interface 'loopback'
 	option ipaddr '127.0.0.1'
 	option netmask '255.0.0.0'
 
-config interface 'mesh'
-	option proto 'commotion'
-	option profile 'example'
-	option class 'mesh'
-	
-config interface 'client'
+config interface 'lan'
 	option proto 'commotion'
 	option class 'client'
 	option type 'bridge'

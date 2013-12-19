@@ -24,7 +24,6 @@ config LoadPlugin
 	option ServiceFileDir '/etc/avahi/services'
 	option Domain 'mesh.local'
 	option ServiceUpdateInterval '300'
-	option NonOlsrIf 'client'
 
 config LoadPlugin
 	option library 'olsrd_txtinfo.so.0.1'
