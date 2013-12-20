@@ -265,7 +265,7 @@ logger -t commotion.hotplug.olsrd "announced: $announced"
 serval="$(commotion_get_serval "$DEVICE")"
 sid="$(commotion_get_sid "$DEVICE")"
 keyring="$(commotion_get_keyring "$DEVICE")"
-[ "$servald" != "" ] && [ "$sid" != "" ] && [ "$keyring" != "" ] && $DEBUG set_olsrd_mdp "$sid" "$keyring"
+[ "$serval" == "true" ] && [ -n "$sid" ] && [ -n "$keyring" ] && $DEBUG set_olsrd_mdp "$sid" "$keyring"
 
 case $ACTION in
 	ifup)
@@ -277,7 +277,7 @@ case $ACTION in
 		fi
       
 		# Should this interface be announced as a client network?
-		if [ "$announced"  == "1" ]; then
+		if [ "$announced"  == "1" -a "$meshed" != "1" ]; then
 			eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
 			$DEBUG set_olsrd_hna4 $NETWORK $NETMASK $INTERFACE
 			$DEBUG set_olsrd_dnssd $INTERFACE
