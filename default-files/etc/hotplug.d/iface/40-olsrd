@@ -288,6 +288,6 @@ case $ACTION in
 		$DEBUG unset_olsrd_dnssd $INTERFACE
 	;;
 esac
-#$DEBUG uci_commit olsrd
+$DEBUG uci_commit olsrd
 $DEBUG /etc/init.d/olsrd restart
 }
