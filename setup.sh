@@ -24,6 +24,7 @@ scripts/feeds install -p commotion olsrd libldns libcyassl
 
 # Copy in Commotion-specific patches
 cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
+cp -v ../patches/010-initialize_vars_fix.patch feeds/packages/libs/avahi/patches/
 cp -v ../config .config
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
