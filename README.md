@@ -1,4 +1,4 @@
-##Commotion-OpenWRT
+##Commotion Router
 
 Commotion is an open source “device-as-infrastructure” communication platform that integrates users’ existing cell phones, Wi-Fi enabled computers, and other wireless-capable devices to create community- and metro-scale, peer-to-peer communications networks.
 
@@ -10,41 +10,53 @@ If you would like to know more about setting up a mesh network check out the Com
 
 https://github.com/opentechinstitute/commotiond.git
 
-The commotion daemon is an embedded daemon and library that provides a common interface for manging wireless mesh networks. 
+The commotion daemon is an embedded daemon and library that provides a common interface for managing wireless mesh networks. 
 
-###Commotion Quick-Start
+###LuCI Commotion
 
-https://github.com/opentechinstitute/commotion-quick-start
+https://github.com/opentechinstitute/luci-commotion
 
-The quickstart is a easy to understand interface that allows a new user to quickly configure a node to their needs. 
+The Commotion LuCI web interface extensions provide an easy to understand interface that allows a new user to quickly configure a node to their needs. 
 
 ###Commotion Theme
 
-https://github.com/opentechinstitute/commotion-openwrt-theme
+https://github.com/opentechinstitute/luci-theme-commotion
 
 The Commotion OpenWRT theme for the web-interface on Commotion wireless routers.
 
-###Commotion-Apps
+###Commotion Application Portal
 
-https://github.com/opentechinstitute/commotion-apps
+https://github.com/opentechinstitute/luci-commotion-apps
 
 The application suite allows for developers to easily advertise applications over a commotion mesh using mdns, users to easily find applications through the router app advertising interface, and node owners to easily manage and customize their application portals to better support community application support. 
 
-###Serval Crypto
+###Commotion Service Manager
 
-https://github.com/opentechinstitute/serval-crypto
+https://github.com/opentechinstitute/commotion-service-manager
 
-Serval's key management daemon allows transparent encryption and authentication of messages.
+The service manager discovers and verifies announcements of applications hosted on the network, and loads them into the apps portal.
+
+###Libserval
+
+https://github.com/opentechinstitute/serval-dna
+
+Serval's key management library allows transparent encryption and authentication of messages.
 
 ###Commotion Debug Helper
 
-https://github.com/opentechinstitute/commotion-bug-info
+https://github.com/opentechinstitute/commotion-debug-helper
 
 The debugging helper creates custom, downloadable informational debugging documents for offline debugging, or to send to network maintainers. Each of these new tools needs testing to find errors as well as to ensure their usability.
 
+###Commotion Dashboard Helper
+
+https://github.com/opentechinstitute/commotion-dashboard-helper
+
+The dashboard helper reports statistics to an external dashboard. 
+
 ###Commotion Splash
 
-https://github.com/opentechinstitute/commotion-splash
+https://github.com/opentechinstitute/luci-commotion-splash
 
 A custom captive portal/splash screen and an interface for customizing it, built around nodogsplash (https://github.com/nodogsplash/nodogsplash).
 
