@@ -1,0 +1,33 @@
+--- a/src/misc.c
++++ b/src/misc.c
+@@ -312,7 +312,6 @@ void netcat_printhelp(char *argv0)
+   printf(_("Mandatory arguments to long options are mandatory for short options too.\n"));
+   printf(_("Options:\n"
+ "  -c, --close                close connection on EOF from stdin\n"
+-"  -e, --exec=PROGRAM         program to exec after connect\n"
+ "  -g, --gateway=LIST         source-routing hop point[s], up to 8\n"
+ "  -G, --pointer=NUM          source-routing pointer: 4, 8, 12, ...\n"
+ "  -h, --help                 display this help and exit\n"
+--- a/src/netcat.c
++++ b/src/netcat.c
+@@ -186,7 +186,6 @@ int main(int argc, char *argv[])
+     static const struct option long_options[] = {
+ 	{ "close",	no_argument,		NULL, 'c' },
+ 	{ "debug",	no_argument,		NULL, 'd' },
+-	{ "exec",	required_argument,	NULL, 'e' },
+ 	{ "gateway",	required_argument,	NULL, 'g' },
+ 	{ "pointer",	required_argument,	NULL, 'G' },
+ 	{ "help",	no_argument,		NULL, 'h' },
+@@ -228,12 +227,6 @@ int main(int argc, char *argv[])
+     case 'd':			/* enable debugging */
+       opt_debug = TRUE;
+       break;
+-    case 'e':			/* prog to exec */
+-      if (opt_exec)
+-	ncprint(NCPRINT_ERROR | NCPRINT_EXIT,
+-		_("Cannot specify `-e' option double"));
+-      opt_exec = strdup(optarg);
+-      break;
+     case 'G':			/* srcrt gateways pointer val */
+       break;
+     case 'g':			/* srcroute hop[s] */
