@@ -13,6 +13,7 @@ config dnsmasq
         option readethers '1'
         option leasefile '/tmp/dhcp.leases'
         option resolvfile '/tmp/resolv.conf.auto'
+        list   addnhosts '/var/run/hosts_olsr'
 
 config dhcp
         option interface 'lan'

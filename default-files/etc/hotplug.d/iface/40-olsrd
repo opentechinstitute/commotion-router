@@ -272,12 +272,12 @@ case $ACTION in
 		$DEBUG unset_olsrd_if $INTERFACE
 		$DEBUG unset_olsrd_dnssd $INTERFACE
 		# Is this a mesh interface?
-		if [ "$meshed"  == "1" ]; then
+		if is_true "$meshed"; then
 			$DEBUG set_olsrd_if $INTERFACE
 		fi
       
 		# Should this interface be announced as a client network?
-		if [ "$announced"  == "1" -a "$meshed" != "1" ]; then
+		if [ "$(is_true "$announced")" == "0" -a "$(is_false "$meshed")" == "0" ]; then
 			eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
 			$DEBUG set_olsrd_hna4 $NETWORK $NETMASK $INTERFACE
 			$DEBUG set_olsrd_dnssd $INTERFACE
