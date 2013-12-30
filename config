@@ -551,10 +551,10 @@ CONFIG_TARGET_INIT_ENV=""
 CONFIG_TARGET_INIT_CMD="/sbin/init"
 CONFIG_TARGET_INIT_SUPPRESS_STDERR=y
 CONFIG_VERSIONOPT=y
-CONFIG_VERSION_DIST="CommotionWRT"
-CONFIG_VERSION_NICK="Release 1"
-CONFIG_VERSION_NUMBER="R1"
-CONFIG_VERSION_REPO="http://downloads.commotionwireless.net/nightly/%S/packages/"
+CONFIG_VERSION_DIST="Commotion Router"
+CONFIG_VERSION_NICK="Grumpy Cat"
+CONFIG_VERSION_NUMBER="1.0"
+CONFIG_VERSION_REPO="http://downloads.commotionwireless.net/router/%V/%S/packages/"
 
 #
 # Package features
