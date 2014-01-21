@@ -44,4 +44,3 @@ if [ "$ACTION" == "ifup" -a "$INTERFACE" == "lan" ]; then
                                                                                      
 	kill -s HUP `pgrep dnsmasq`
 fi
-i
