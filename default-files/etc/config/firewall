@@ -54,6 +54,10 @@ config forwarding
 	option src 'lan'
 	option dest 'wan'
 
+config forwarding
+	option src 'mesh'
+	option dest 'lan'
+
 config rule
 	option src 'wan'
 	option dest_port '22'
