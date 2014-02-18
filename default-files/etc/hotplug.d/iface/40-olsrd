@@ -242,7 +242,7 @@ set_olsrd_mdp() {
   
   local name="$(add_olsrd_plugin mdp)"
   $DEBUG uci_set olsrd "$name" sid "$1"
-  $DEBUG uci_set olsrd "$name" servalpath "$2"
+  $DEBUG uci_set olsrd "$name" keyringpath "$2"
 
   return 0
 } 
