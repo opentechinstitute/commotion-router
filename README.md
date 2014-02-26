@@ -2,7 +2,7 @@
 
 Commotion is an open source “device-as-infrastructure” communication platform that integrates users’ existing cell phones, Wi-Fi enabled computers, and other wireless-capable devices to create community- and metro-scale, peer-to-peer communications networks.
 
-Commotion software exists for multiple platforms; this repository contains the build system for the OpenWRT router firmware distribution of the Commotion Wireless project. This repo builds the following other Commotion projects in order to create installation images for turning select wireless routers into Commotion nodes.
+Commotion software exists for multiple platforms; this repository contains the build system for the OpenWRT router firmware distribution of the Commotion Wireless project. This repo builds the following other Commotion projects in order to create installation images for turning select wireless routers into Commotion nodes. It contains only the scripts and default files needed to download OpenWRT and add Commotion's packages to the OpenWRT build system. Those Commotion packages are defined in the packages directory of the Commotion Feed repo (https://github.com/opentechinstitute/commotion-feed.git). Package source code can be found in the repositories (PKG_SOURCE_URL) and branches (PKG_VERSION) specified in their respective Commotion Feed Makefiles.
 
 If you would like to know more about setting up a mesh network check out the Commotion Construction Kit at https://commotionwireless.net/docs/cck
 
@@ -85,11 +85,11 @@ This will open a menu to allow you to choose your wireless chipset and customize
 
 You will find a folder with the name of your wireless chip here. Within this folder lies images you can install on your wireless router.
 
-####Installation Instructions: (Ubiquity Devices)
+####Installation Instructions: (Ubiquiti Devices)
 
 https://code.commotionwireless.net/projects/commotion-manual/wiki/Installing_Commotion_on_Wireless_Nodes
 
-####Detailed Installation Instructions: (Ubiquity Devices)
+####Detailed Installation Instructions: (Ubiquiti Devices)
 
 https://code.commotionwireless.net/projects/commotion-manual/wiki/Detailed_TFTP_Instructions
 
