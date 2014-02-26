@@ -2,7 +2,7 @@
 
 Commotion is an open source “device-as-infrastructure” communication platform that integrates users’ existing cell phones, Wi-Fi enabled computers, and other wireless-capable devices to create community- and metro-scale, peer-to-peer communications networks.
 
-Commotion software exists for multiple platforms; this repository contains the build system for the OpenWRT router firmware distribution of the Commotion Wireless project. This repo builds the following other Commotion projects in order to create installation images for turning select wireless routers into Commotion nodes.
+Commotion software exists for multiple platforms; this repository contains the build system for the OpenWRT router firmware distribution of the Commotion Wireless project. This repo builds the following other Commotion projects in order to create installation images for turning select wireless routers into Commotion nodes. It contains only the scripts and default files needed to download OpenWRT and add Commotion's packages to the OpenWRT build system. Those Commotion packages are defined in the packages directory of the Commotion Feed repo (https://github.com/opentechinstitute/commotion-feed.git). Package source code can be found in the repositories (PKG_SOURCE_URL) and branches (PKG_VERSION) specified in their respective Commotion Feed Makefiles.
 
 If you would like to know more about setting up a mesh network check out the Commotion Construction Kit at https://commotionwireless.net/docs/cck
 
@@ -61,38 +61,52 @@ https://github.com/opentechinstitute/luci-commotion-splash
 A custom captive portal/splash screen and an interface for customizing it, built around nodogsplash (https://github.com/nodogsplash/nodogsplash).
 
 
-##Installation
+##Build & Install
                                                          
-How to create a Commotion image from source: (the really really quick guide)
+How to create a Commotion image from source (the really really quick guide):
 
-Run the following commands: (the $ signify the command line. Do not type the $)
+In the following commands, `text in this format` should be run from the command line.
 
-`$ git clone https://github.com/opentechinstitute/commotion-openwrt.git`
+Before you begin, you may need to install additional the following software:
+* git
+* svn
+* ncurses
+* zlib
+* awk
+* XML::Parser
 
-`$ cd commotion-openwrt/`
+On a Debian-based system, including Ubuntu or Mint, you can simply type
+`sudo apt-get install subversion build-essential libncurses5-dev zlib1g-dev gawk git ccache gettext libssl-dev xsltproc`. Additional packages may be required if you encounter errors during the build process (e.g., `sudo apt-get install libxml-parser-perl`).
 
-`$ ./setup.sh`
+1. `git clone https://github.com/opentechinstitute/commotion-openwrt.git`
 
-`$ cd openwrt/`
+2. `cd commotion-openwrt/`
 
-`$ make menuconfig`
+3. (Optional) By default, Commotion-Router is configured to include the most recent code, which may not yet be thoroughly tested. To build a specific Commotion release (e.g., Commotion 1.1), you must specify a branch or tag. For example: `git checkout 1.1`.
 
-This will open a menu to allow you to choose your wireless chipset and customize your install.
+4. Run `./setup.sh` to set Commotion's defaults and add Commotion's packages as an OpenWRT feed. This step will require network access.
 
-`$ make V=99`
+5. `cd openwrt/`
 
-`$ cd bin/`
+6. (Optional) By default, Commotion-Router will build images for Ubiquiti devices. To choose a different router or customize your installed packages `make menuconfig`.
 
-You will find a folder with the name of your wireless chip here. Within this folder lies images you can install on your wireless router.
+7. (Optional) To build for a different router, select your device from `Target Profile (Ubiquiti Products)` in menuconfig. You may also choose a different chipset using the `Target System` option, but chipsets other than AR7xxx/AR9xxx are not well supported. If you can't find your router in the list, use the [OpenWRT Table of Hardware](http://wiki.openwrt.org/toh/start) to make sure it is supported by OpenWRT. Note that the default Commotion-Router image is 5.4MB, so your router will need a minimum of 6MB of flash space.
 
-####Installation Instructions: (Ubiquity Devices)
+8. (Optional) To add or remove additional languages, while in menuconfig, select `Commotion` then `Translations` and choose from available options. 
 
-https://code.commotionwireless.net/projects/commotion-manual/wiki/Installing_Commotion_on_Wireless_Nodes
+9. `make V=99`. This step will take a very long time and will require network access.
 
-####Detailed Installation Instructions: (Ubiquity Devices)
+10. `cd bin/`. Your router images will be .bin files stored in a directory named after your wireless chip. For example, a default Commotion build for a Ubiquiti Nanostation would be `ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin`
 
-https://code.commotionwireless.net/projects/commotion-manual/wiki/Detailed_TFTP_Instructions
 
-####How to Update an existing Commotion node:
+####Installation Instructions (Ubiquiti Devices):
 
-https://code.commotionwireless.net/projects/commotion-manual/wiki/Updating_the_Commotion_software_on_your_router
+http://commotionwireless.net/docs/cck/installing-configuring/install-ubiquiti-router
+
+####Install & Recover with TFTP (Ubiquiti Devices):
+
+http://commotionwireless.net/docs/cck/installing-configuring/install-and-recover-tftp
+
+####Installation Instructions (Other Devices):
+
+Specific installation instructions for non-Ubiquiti devices can be found in the [OpenWRT Table of Hardware](http://wiki.openwrt.org/toh/start)
