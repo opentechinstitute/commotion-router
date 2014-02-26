@@ -65,27 +65,38 @@ A custom captive portal/splash screen and an interface for customizing it, built
                                                          
 How to create a Commotion image from source (the really really quick guide):
 
-In the following commands, `text in this format` should be run from the command line. The `$` signifies the command prompt. Do not type the $.
+In the following commands, `text in this format` should be run from the command line.
 
-1. `$ git clone https://github.com/opentechinstitute/commotion-openwrt.git`
+Before you begin, you may need to install additional the following software:
+* git
+* svn
+* ncurses
+* zlib
+* awk
+* XML::Parser
 
-2. `$ cd commotion-openwrt/`
+On a Debian-based system, including Ubuntu or Mint, you can simply type
+`sudo apt-get install subversion build-essential libncurses5-dev zlib1g-dev gawk git ccache gettext libssl-dev xsltproc`. Additional packages may be required if you encounter errors during the build process (e.g., `sudo apt-get install libxml-parser-perl`).
 
-3. (Optional) By default, Commotion-Router is configured to include the most recent code, which may not yet be thoroughly tested. To build a specific Commotion release (e.g., Commotion 1.1), you must specify a branch or tag. For example: `$ git checkout 1.1`.
+1. `git clone https://github.com/opentechinstitute/commotion-openwrt.git`
 
-4. Run `$ ./setup.sh` to set Commotion's defaults and add Commotion's packages as an OpenWRT feed. This step will require network access.
+2. `cd commotion-openwrt/`
 
-5. `$ cd openwrt/`
+3. (Optional) By default, Commotion-Router is configured to include the most recent code, which may not yet be thoroughly tested. To build a specific Commotion release (e.g., Commotion 1.1), you must specify a branch or tag. For example: `git checkout 1.1`.
 
-6. (Optional) By default, Commotion-Router will build images for Ubiquiti devices. To choose a different router or customize your installed packages `$ make menuconfig`.
+4. Run `./setup.sh` to set Commotion's defaults and add Commotion's packages as an OpenWRT feed. This step will require network access.
+
+5. `cd openwrt/`
+
+6. (Optional) By default, Commotion-Router will build images for Ubiquiti devices. To choose a different router or customize your installed packages `make menuconfig`.
 
 7. (Optional) To build for a different router, select your device from `Target Profile (Ubiquiti Products)` in menuconfig. You may also choose a different chipset using the `Target System` option, but chipsets other than AR7xxx/AR9xxx are not well supported. If you can't find your router in the list, use the [OpenWRT Table of Hardware](http://wiki.openwrt.org/toh/start) to make sure it is supported by OpenWRT. Note that the default Commotion-Router image is 5.4MB, so your router will need a minimum of 6MB of flash space.
 
 8. (Optional) To add or remove additional languages, while in menuconfig, select `Commotion` then `Translations` and choose from available options. 
 
-9. `$ make V=99`. This step will take a very long time and will require network access.
+9. `make V=99`. This step will take a very long time and will require network access.
 
-10. `$ cd bin/`. Your router images will be .bin files stored in a directory named after your wireless chip. For example, a default Commotion build for a Ubiquiti Nanostation would be `ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin`
+10. `cd bin/`. Your router images will be .bin files stored in a directory named after your wireless chip. For example, a default Commotion build for a Ubiquiti Nanostation would be `ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin`
 
 
 ####Installation Instructions (Ubiquiti Devices):
