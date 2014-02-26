@@ -79,7 +79,7 @@ In the following commands, `text in this format` should be run from the command 
 
 6. (Optional) By default, Commotion-Router will build images for Ubiquiti devices. To choose a different router or customize your installed packages `$ make menuconfig`.
 
-7. (Optional) To build for a different router, select your device from `Target Profile (Ubiquiti Products)` in menuconfig. You may also choose a different chipset using the `Target System` option, but chipsets other than AR7xxx/AR9xxx are not well supported.
+7. (Optional) To build for a different router, select your device from `Target Profile (Ubiquiti Products)` in menuconfig. You may also choose a different chipset using the `Target System` option, but chipsets other than AR7xxx/AR9xxx are not well supported. If you can't find your router in the list, use the [OpenWRT Table of Hardware](http://wiki.openwrt.org/toh/start) to make sure it is supported by OpenWRT. Note that the default Commotion-Router image is 5.4MB, so your router will need a minimum of 6MB of flash space.
 
 8. (Optional) To add or remove additional languages, while in menuconfig, select `Commotion` then `Translations` and choose from available options. 
 
@@ -88,14 +88,14 @@ In the following commands, `text in this format` should be run from the command 
 10. `$ cd bin/`. Your router images will be .bin files stored in a directory named after your wireless chip. For example, a default Commotion build for a Ubiquiti Nanostation would be `ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin`
 
 
-####Installation Instructions: (Ubiquiti Devices)
+####Installation Instructions (Ubiquiti Devices):
 
-https://code.commotionwireless.net/projects/commotion-manual/wiki/Installing_Commotion_on_Wireless_Nodes
+http://commotionwireless.net/docs/cck/installing-configuring/install-ubiquiti-router
 
-####Detailed Installation Instructions: (Ubiquiti Devices)
+####Install & Recover with TFTP (Ubiquiti Devices):
 
-https://code.commotionwireless.net/projects/commotion-manual/wiki/Detailed_TFTP_Instructions
+http://commotionwireless.net/docs/cck/installing-configuring/install-and-recover-tftp
 
-####How to Update an existing Commotion node:
+####Installation Instructions (Other Devices):
 
-https://code.commotionwireless.net/projects/commotion-manual/wiki/Updating_the_Commotion_software_on_your_router
+Specific installation instructions for non-Ubiquiti devices can be found in the [OpenWRT Table of Hardware](http://wiki.openwrt.org/toh/start)
