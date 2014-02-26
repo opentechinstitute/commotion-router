@@ -61,29 +61,32 @@ https://github.com/opentechinstitute/luci-commotion-splash
 A custom captive portal/splash screen and an interface for customizing it, built around nodogsplash (https://github.com/nodogsplash/nodogsplash).
 
 
-##Installation
+##Build & Install
                                                          
-How to create a Commotion image from source: (the really really quick guide)
+How to create a Commotion image from source (the really really quick guide):
 
-Run the following commands: (the $ signify the command line. Do not type the $)
+In the following commands, `text in this format` should be run from the command line. The `$` signifies the command prompt. Do not type the $.
 
-`$ git clone https://github.com/opentechinstitute/commotion-openwrt.git`
+1. `$ git clone https://github.com/opentechinstitute/commotion-openwrt.git`
 
-`$ cd commotion-openwrt/`
+2. `$ cd commotion-openwrt/`
 
-`$ ./setup.sh`
+3. (Optional) By default, Commotion-Router is configured to include the most recent code, which may not yet be thoroughly tested. To build a specific Commotion release (e.g., Commotion 1.1), you must specify a branch or tag. For example: `$ git checkout 1.1`.
 
-`$ cd openwrt/`
+4. Run `$ ./setup.sh` to set Commotion's defaults and add Commotion's packages as an OpenWRT feed. This step will require network access.
 
-`$ make menuconfig`
+5. `$ cd openwrt/`
 
-This will open a menu to allow you to choose your wireless chipset and customize your install.
+6. (Optional) By default, Commotion-Router will build images for Ubiquiti devices. To choose a different router or customize your installed packages `$ make menuconfig`.
 
-`$ make V=99`
+7. (Optional) To build for a different router, select your device from `Target Profile (Ubiquiti Products)` in menuconfig. You may also choose a different chipset using the `Target System` option, but chipsets other than AR7xxx/AR9xxx are not well supported.
 
-`$ cd bin/`
+8. (Optional) To add or remove additional languages, while in menuconfig, select `Commotion` then `Translations` and choose from available options. 
 
-You will find a folder with the name of your wireless chip here. Within this folder lies images you can install on your wireless router.
+9. `$ make V=99`. This step will take a very long time and will require network access.
+
+10. `$ cd bin/`. Your router images will be .bin files stored in a directory named after your wireless chip. For example, a default Commotion build for a Ubiquiti Nanostation would be `ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin`
+
 
 ####Installation Instructions: (Ubiquiti Devices)
 
