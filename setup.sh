@@ -26,6 +26,9 @@ scripts/feeds install -p commotion olsrd libldns libcyassl
 cp -v ../patches/910-fix-out-of-bounds-index.patch feeds/packages/utils/collectd/patches/
 cp -v ../patches/010-remove_exec.patch feeds/packages/net/netcat/patches/
 cp -v ../patches/010-initialize_vars_fix.patch feeds/packages/libs/avahi/patches/
+cp -v ../patches/640-store_freq_ibss.patch package/hostapd/patches/
+cp -v ../patches/650-ibss_rsn_send_auth.patch package/hostapd/patches/
+cp -v ../patches/660-ibss_auth_register.patch package/hostapd/patches/
 mkdir -p package/netifd/patches
 cp -v ../patches/010-iface_name_len.patch package/netifd/patches/
 cp -v ../config .config
