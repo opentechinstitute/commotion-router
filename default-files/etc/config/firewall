@@ -1,4 +1,3 @@
-
 config defaults
 	option syn_flood '1'
 	option input 'DROP'
@@ -167,3 +166,15 @@ config rule
 	option src 'vpn'
 	option proto 'icmp'
 	option target 'ACCEPT'
+
+#just a test to block certain IP !
+config rule
+	option name 'block'
+	option src '*'
+	option src_port '22'
+	option dest '*'
+	option dest_ip '192.168.1.2'
+	option target 'DROP'
+
+config include
+	option path '/etc/firewall.user'
