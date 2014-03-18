@@ -2,7 +2,7 @@ Index: hostapd-20130405/src/drivers/driver_nl80211.c
 ===================================================================
 --- hostapd-20130405.orig/src/drivers/driver_nl80211.c	2014-03-11 16:11:18.581197118 -0400
 +++ hostapd-20130405/src/drivers/driver_nl80211.c	2014-03-11 16:20:19.057196699 -0400
-@@ -1583,12 +1583,21 @@
+@@ -1583,13 +1583,22 @@
  static void mlme_event_join_ibss(struct wpa_driver_nl80211_data *drv,
  				 struct nlattr *tb[])
  {
@@ -10,7 +10,7 @@ Index: hostapd-20130405/src/drivers/driver_nl80211.c
 +	int ifidx = -1;
 +
 +	ifidx = nla_get_u32(tb[NL80211_ATTR_IFINDEX]);
-+	for (bss = &drv->first_bss; bss; bss = bss->next) {
++	for (bss = drv->first_bss; bss; bss = bss->next) {
 +		if (bss->ifindex == ifidx)
 +			break;
 +	}
@@ -20,6 +20,7 @@ Index: hostapd-20130405/src/drivers/driver_nl80211.c
  		return;
  	}
  	os_memcpy(drv->bssid, nla_data(tb[NL80211_ATTR_MAC]), ETH_ALEN);
+
 +	bss->freq = drv->assoc_freq;
  	drv->associated = 1;
  	wpa_printf(MSG_DEBUG, "nl80211: IBSS " MACSTR " joined",
