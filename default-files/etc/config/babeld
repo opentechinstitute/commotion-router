@@ -1,0 +1,18 @@
+package babeld
+
+config general
+    option 'hello_interval' '4'
+    option 'wired_hello_interval' '10'
+    option 'local_server' '33123'
+    option 'conf_file' '/etc/babeld.conf'
+    option 'log_file' '/var/log/babeld.log'
+    # option 'debug' '0'
+    
+# Add interfaces on which babel will do it's thing
+# ex: config interface lan
+
+
+# We use /etc/babeld.conf to filter routing, not this one. That's why ignore is set to true here
+config filter
+    option type 'redistribute'
+    option proto '2'  # redistribute kernel routes
