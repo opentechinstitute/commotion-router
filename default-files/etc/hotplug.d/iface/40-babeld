@@ -170,7 +170,6 @@ set_babeld_lan_if() {
 		uci set radvd.@prefix[0].ignore=0
 		uci set radvd.@interface[0].ignore=0
 		uci commit radvd
-		/etc/init.d/radvd restart
 	fi
 
 	# Check if IPv4 address exists for LAN, if not assign one the commotion way
@@ -186,6 +185,7 @@ set_babeld_lan_if() {
 	uci set network.lan.proto=static
 	uci commit network
 	/etc/init.d/network reload
+	/etc/init.d/radvd restart
 	
 	return 0
 }
