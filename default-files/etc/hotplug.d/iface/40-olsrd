@@ -270,6 +270,7 @@ set_olsrd_lan_if() {
 
 	uci set radvd.@prefix[0].ignore=1
 	uci set radvd.@interface[0].ignore=1
+	uci set radvd.@prefix[0].AdvRouterAddr=0
 	uci commit radvd
 	/etc/init.d/radvd stop
 
