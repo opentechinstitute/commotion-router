@@ -168,6 +168,7 @@ set_babeld_lan_if() {
 		
 		uci set radvd.@prefix[0].prefix=$UNIQUE_LOCAL_PREFIX
 		uci set radvd.@prefix[0].ignore=0
+		uci set radvd.@prefix[0].AdvRouterAddr=1
 		uci set radvd.@interface[0].ignore=0
 		uci commit radvd
 	fi
