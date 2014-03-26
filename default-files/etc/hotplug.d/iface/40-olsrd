@@ -159,11 +159,8 @@ unset_olsrd_dnssd() {
         case "$(uci_get olsrd "$name" library)" in
           olsrd_dnssd.so.*)
             local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf "")"
-            local newconfigs=
-            for dev in $(sort_list "$oldconfigs" "$config"); do
-              list_remove newconfigs "$dev"
-            done
-            uci_set olsrd "$name" NonOlsrIf "$newconfigs"
+            list_remove oldconfigs "$config"
+            uci_set olsrd "$name" NonOlsrIf "$oldconfigs"
             ;;
         esac
       ;;
