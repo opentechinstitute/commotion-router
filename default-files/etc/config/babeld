@@ -4,7 +4,7 @@ config general
     option 'hello_interval' '4'
     option 'wired_hello_interval' '10'
     option 'local_server' '33123'
-    option 'conf_file' '/etc/babeld.conf'
+    option 'conf_file' '/etc/babeld.conf' # We use /etc/babeld.conf to filter routing
     option 'log_file' '/var/log/babeld.log'
     # option 'debug' '0'
     
@@ -12,7 +12,3 @@ config general
 # ex: config interface lan
 
 
-# We use /etc/babeld.conf to filter routing, not this one. That's why ignore is set to true here
-config filter
-    option type 'redistribute'
-    option proto '2'  # redistribute kernel routes
