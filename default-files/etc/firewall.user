@@ -1,0 +1,15 @@
+# This file is interpreted as shell script.
+# Put your custom iptables rules here, they will
+# be executed with each firewall (re-)start.
+
+#to restart the fire wall use /etc/init.d/firewall restart;
+
+#for debugging added rules ues FW_TRACE=1 fw reload
+
+#more details http://wiki.openwrt.org/doc/uci/firewall
+
+#if it didn't work remove "-i br-lan" to accept any interface
+
+iptables -I INPUT -i br-lan -p tcp -m tcp --dport 22  -m recent --set --name DEFAULT --rsource
+
+iptables -I INPUT -i br-lan-p tcp -m tcp --dport 22  -m recent --update --seconds 180 --hitcount 4 --name DEFAULT --rsource -j DROP
