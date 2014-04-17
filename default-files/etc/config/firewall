@@ -60,6 +60,17 @@ config forwarding
 config rule
 	option src 'wan'
 	option dest_port '22'
+	option proto 'tcp'
+	option state 'NEW'
+	option limit '3/min'
+	option limit_burst '2'
+	option target 'LOG'
+
+config rule
+	option src 'wan'
+	option dest_port '22'
+	option state 'RELATED'
+	option state 'ESTABLISHED'
 	option target 'ACCEPT'
 	option proto 'tcp'
 
