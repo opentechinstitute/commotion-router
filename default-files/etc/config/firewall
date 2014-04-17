@@ -1,4 +1,3 @@
-
 config defaults
 	option syn_flood '1'
 	option input 'DROP'
@@ -167,3 +166,6 @@ config rule
 	option src 'vpn'
 	option proto 'icmp'
 	option target 'ACCEPT'
+
+config include
+	option path '/etc/firewall.user'
