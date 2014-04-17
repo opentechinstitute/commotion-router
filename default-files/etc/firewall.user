@@ -12,4 +12,4 @@
 
 iptables -I INPUT -i br-lan -p tcp -m tcp --dport 22  -m recent --set --name DEFAULT --rsource
 
-iptables -I INPUT -i br-lan-p tcp -m tcp --dport 22  -m recent --update --seconds 180 --hitcount 4 --name DEFAULT --rsource -j DROP
+iptables -I INPUT -i br-lan -p tcp -m tcp --dport 22  -m recent --update --seconds 180 --hitcount 4 --name DEFAULT --rsource -j DROP
