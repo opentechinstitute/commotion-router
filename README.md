@@ -100,7 +100,9 @@ On a Debian-based system, including Ubuntu or Mint, you can simply type
 
 ####Commotion Package Customization
 
-An individual package may be customized prior to building by editing the package Makefile in feeds/commotion/packages/<package-name>/. For instance, packages may be compiled with Stack Smashing Protection by adding `-O0 -fstack-protector-all` to the line beginning `TARGET_CFLAGS +=`.
+An individual package may be customized prior to building by editing the package Makefile in feeds/commotion/packages/package-name/. 
+
+Packages may be compiled with Stack Smashing Protection by adding `-O0 -fstack-protector-all` to the line beginning `TARGET_CFLAGS +=` and `-lssp` to the line beginning `LDFLAGS +=`. See <a href="http://commotionwireless.net/developer/resources/">for more details</a>.
 
 ####Installation Instructions (Ubiquiti Devices):
 
