@@ -25,7 +25,7 @@ config zone
 	option output 'ACCEPT'
 	option forward 'DROP'
 	option masq '1'
-	list network 'wired'
+	list network 'wan'
 
 config zone
 	option name 'vpn'
