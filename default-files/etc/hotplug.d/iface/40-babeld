@@ -1,0 +1,227 @@
+. /lib/functions.sh
+. /lib/functions/commotion.sh
+. /lib/config/uci.sh
+
+#DEBUG="echo"
+
+logger -s -t hotplug.babeld "Action: $ACTION, Interface: $INTERFACE, Device: $DEVICE"
+
+sort_list() {
+  local arg="$*"
+  (
+    for item in $arg; do
+      echo "$item"
+    done
+  ) | sort -u
+}
+
+
+#===  FUNCTION  ================================================================
+#          NAME:  remove_babeld_plugin
+#   DESCRIPTION:  Remove the specified babeld plugin
+#    PARAMETERS:  name of the plugin to remove
+#       RETURNS:  0 on success, 1 on failure
+#===============================================================================
+remove_babeld_plugin() {
+  local pname="$1"
+  local r=1
+
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      LoadPlugin)
+        case "$(uci_get babeld "$name" library "")" in
+          babeld_"$pname"\.so\.*)
+            uci_remove babeld "$name" && r=0
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load babeld
+
+  return $r
+}
+
+
+#===  FUNCTION  ================================================================
+#          NAME:  add_babeld_plugin
+#   DESCRIPTION:  Add the specified babeld plugin to config
+#    PARAMETERS:  name of the plugin to add
+#       RETURNS:  0 on success, 1 on plugin nonexistance, 2 on failure
+#===============================================================================
+add_babeld_plugin() {
+  local pname="$1"
+  local LIB=/usr/lib
+  local set=0
+
+  ls $LIB/babeld_"$pname"\.so\.* &>/dev/null
+
+  case $? in
+    1)
+      return 1
+    ;;
+    0)
+      cd $LIB
+      local plugin="$(ls babeld_"$pname"\.so\.* 2>/dev/null)"
+      config_cb() {
+        local type="$1"
+        local name="$2"
+
+        case $type in
+          LoadPlugin)
+            case "$(uci_get babeld "$name" library)" in
+              "$plugin")
+                  echo "$name"
+                  set=1
+                  return 0
+                ;;
+            esac
+          ;;
+          "")
+            [ $set = 0 ] && {
+              $DEBUG uci_add babeld LoadPlugin "$pname"
+              $DEBUG uci_set babeld @LoadPlugin[-1] library "$plugin"
+              echo "$pname" && return 0
+            }
+          ;;
+        esac
+      }
+      config_load babeld
+    ;;
+  esac
+
+  return 2
+}
+
+
+#===  FUNCTION  ================================================================
+#          NAME:  unset_babeld_if
+#   DESCRIPTION:  Unsets all config stanzas named for the interface specified
+#    PARAMETERS:  config name of the interface to remove
+#       RETURNS:  0 on success
+#===============================================================================
+
+unset_babeld_if() {
+  local config=$1
+
+  uci_remove babeld "$config"
+
+  return 0
+}
+
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_babeld_if
+#   DESCRIPTION:  Sets the interface stanza for the babeld config
+#    PARAMETERS:  config name of the interface to add
+#       RETURNS:  0 on success
+#===============================================================================
+
+set_babeld_if() {
+  local config="$1"
+  local mode="ether"
+  
+  $DEBUG uci_add babeld interface "$config"
+
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      wifi-iface)
+        [ "$(uci_get wireless "$name" network)" = "$config" ] && mode="mesh"
+        ;;
+    esac
+  }
+  config_load wireless
+
+  return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_babeld_lan_if
+#   DESCRIPTION:  configure lan interface for babel including ipv4 & ipv6 & proto & radvd 
+#    PARAMETERS:  
+#       RETURNS:  0 on success
+#===============================================================================
+
+set_babeld_lan_if() {
+	DEFAULT_CLIENT_SUBNET="10.0.0.0"
+	DEFAULT_CLIENT_IPGENMASK="255.0.0.0"
+	IPV6="ip6addr"
+	IPV4="ipaddr"
+	LOCALIP4="$(commotion_gen_ip $DEFAULT_CLIENT_SUBNET $DEFAULT_CLIENT_IPGENMASK gw)"
+	
+	# Check if IPv6 address exists for LAN, if not assign one with a generated prefix
+	if grep -Fq $IPV6 /etc/config/network; then
+		logger -t commotion.hotplug.babeld -s "$IPV6 address already exists."
+
+	else 
+		UNIQUE_LOCAL_PREFIX="$(head -c 5 /dev/random |hexdump -e '5/1 "%02x"'|sed -r -e 's_^_fd_' -e 's_(....)_\1:_g' -e 's_$_0001::1/64\n_')"
+		
+		logger -t commotion.hotplug.babeld -s "No entry found. Creating UCI entry for '$IPV6' unique local prefix."
+		uci set network.lan.$IPV6=$UNIQUE_LOCAL_PREFIX
+		uci commit network
+		
+		uci set radvd.@prefix[0].prefix=$UNIQUE_LOCAL_PREFIX
+		uci set radvd.@prefix[0].ignore=0
+		uci set radvd.@prefix[0].AdvRouterAddr=1
+		uci set radvd.@interface[0].ignore=0
+		uci commit radvd
+	fi
+
+	# Check if IPv4 address exists for LAN, if not assign one the commotion way
+	if [ "$(uci_get_state network "$INTERFACE" ipaddr)" == $LOCALIP4 ]; then
+		logger -t commotion.hotplug.babeld -s "$IPV4 exists with  $LOCALIP4 address"
+
+	else 
+		logger -t commotion.hotplug.babeld -s "No entry found. Creating UCI entry for '$IPV4' version 4"
+		uci set network.lan.$IPV4=$LOCALIP4
+		uci set network.lan.netmask=255.255.255.0
+	fi
+	
+	uci set network.lan.proto=static
+	uci commit network
+	/etc/init.d/network reload
+	/etc/init.d/radvd restart
+	
+	return 0
+}
+
+
+
+logger -t commotion.hotplug.babeld "proto: $(uci_get_state network "$INTERFACE" proto)"
+logger -t commotion.hotplug.babeld "interface: $INTERFACE"
+logger -t commotion.hotplug.babeld "device: $DEVICE"
+
+if [ $ACTION == "ifdown" ]; then
+    $DEBUG unset_babeld_if $INTERFACE
+fi
+
+[ -f "/etc/config/babeld" ] && [ "$(uci_get_state network "$INTERFACE" proto)" = "babel" ] && {
+
+local announced="$(uci_get network "$INTERFACE" announced "$(uci_get_state network "$INTERFACE" announced)")"
+logger -t commotion.hotplug.babeld "announced: $announced"
+
+case $ACTION in
+	ifup)
+		# Remove all interface entries and add a new one
+		$DEBUG unset_babeld_if $INTERFACE
+		$DEBUG set_babeld_if $INTERFACE
+		$DEBUG set_babeld_lan_if
+      
+		# Should this interface be announced as a client network?
+		if [ "$(is_true "$announced")" == "0" ]; then
+			eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
+		fi
+	;;
+	ifdown)
+		$DEBUG unset_babeld_if $INTERFACE
+	;;
+esac
+}
+$DEBUG uci_commit babeld
+$DEBUG /etc/init.d/babeld restart
