@@ -8,8 +8,5 @@
 
 #more details http://wiki.openwrt.org/doc/uci/firewall
 
-#if it didn't work remove "-i br-lan" to accept any interface
-
-iptables -I INPUT -i br-lan -p tcp -m tcp --dport 22  -m recent --set --name DEFAULT --rsource
-
-iptables -I INPUT -i br-lan -p tcp -m tcp --dport 22  -m recent --update --seconds 180 --hitcount 4 --name DEFAULT --rsource -j DROP
+iptables -I INPUT -i br-lan -p tcp --dport 22 -m state --state NEW -m recent --set
+iptables -I INPUT -i br-lan -p tcp --dport 22 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j DROP
