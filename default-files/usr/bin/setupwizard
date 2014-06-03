@@ -26,11 +26,18 @@ echo "Please enter an administrator password: "
 passwd
 
 echo "Thank you."
-echo "Please enter node name: "
+echo "Please enter new profile name: "
 
-read NODE_NAME
+read PROFILE_NAME
 
-commotion
+commotion new $PROFILE_NAME
+
+
+
+# commit profile changes
+commotion save $PROFILE_NAME
+
+
 
 
 
