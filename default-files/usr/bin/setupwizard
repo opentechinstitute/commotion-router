@@ -21,23 +21,48 @@ COMMENT
 
 echo "Welcome to the configuration wizard."
 
-echo "Please enter an administrator password: "
+echo "Please choose an administrator password: "
 
 passwd
 
-echo "Thank you."
+
+
+
 echo "Please enter new profile name: "
 
 read PROFILE_NAME
 
 commotion new $PROFILE_NAME
 
+echo "Please enter mesh network name: "
+
+read MESH_NAME
+
+commotion set $PROFILE_NAME ssid $MESH_NAME
+
+echo "Please select a valid channel: "
+
+read MESH_CHANNEL
+
+commotion set $PROFILE_NAME channel $MESH_CHANNEL
+
+
+echo "Would you like to use encryption for the mesh network?"
+  read answer                                                
+  case $answer in                                            
+    [Yy]*  ) echo "Please choose an encryption password: ";  
+          read MESH_PASSWORD;                                
+          commotion set $PROFILE_NAME key $MESH_PASSWORD;    
+          break;;                                            
+                                                             
+    [Nn]* ) break;;                                          
+    * ) echo "Please answer yes[y] or no[n]";;               
+  esac 
+
 
 
 # commit profile changes
 commotion save $PROFILE_NAME
-
-
 
 
 
