@@ -1,0 +1,92 @@
+#!/bin/ash
+
+<<COMMENT
+
+User workflow
+* flash router
+* telnet in
+* enter password
+* new profile name
+* mesh network name
+* channel
+* mesh encryption?
+--> mesh encryption password
+* access point name
+* channel
+* require a password?
+--> AP password
+
+COMMENT
+
+
+echo "Welcome to the configuration wizard."
+
+echo "Please enter an administrator password: "
+
+passwd
+
+echo "Thank you."
+echo "Please enter node name: "
+
+read NODE_NAME
+
+commotion
+
+
+
+<<COMMENT
+function set_admin_pass {
+
+echo "Please enter an administrator password: "
+
+read PASSWORD
+
+echo "Password is: $PASSWORD"
+}
+
+function set_node_name 
+{
+
+echo "set_node_name"
+
+}
+
+function set_mesh_network 
+{
+
+echo "set_mesh_network"
+
+}
+
+function set_mesh_channel 
+{
+
+echo "set_mesh_channel"
+
+}
+
+function set_mesh_encryption 
+{
+
+echo "set_mesh_encryption"
+
+}
+
+function set_ap_name {
+
+echo "set_ap_name"
+
+}
+
+function set_ap_channel {
+
+echo "set_ap_channel"
+
+}
+
+function set_ap_pass {
+
+echo "set_ap_pass"
+
+}
+COMMENT

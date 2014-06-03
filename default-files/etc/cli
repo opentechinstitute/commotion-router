@@ -1,0 +1,11 @@
+#!/bin/sh
+
+<<'COMMENT'
+
+Plan of Attack:
+* Stub out required functions
+* Set up 'main' interface
+* Set up helper functions
+
+COMMENT
+
