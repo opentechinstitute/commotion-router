@@ -36,87 +36,85 @@ echo "Please enter mesh network name: "
 
 read MESH_NAME
 
-commotion set $PROFILE_NAME ssid $MESH_NAME
-
 echo "Please select a valid channel: "
+
+commotion set $PROFILE_NAME ssid $MESH_NAME
 
 read MESH_CHANNEL
 
 commotion set $PROFILE_NAME channel $MESH_CHANNEL
 
+# generate bssid
+BSSID=`commotion genbssid $MESH_NAME $MESH_CHANNEL`
 
-echo "Would you like to use encryption for the mesh network?"
+# write changes to uci
+MESH_CONFIG=`uci add wireless wifi-iface`
+
+uci rename wireless.$MESH_CONFIG=$MESH_NAME
+uci set wireless.$MESH_NAME.mode=adhoc
+uci set wireless.$MESH_NAME.device=radio0
+uci set wireless.$MESH_NAME.network=$MESH_NAME
+uci set wireless.$MESH_NAME.ssid=$MESH_NAME
+uci set wireless.$MESH_NAME.bssid=$BSSID
+
+
+echo "Does this mesh network use encryption?"
   read answer                                                
   case $answer in                                            
     [Yy]*  ) echo "Please choose an encryption password: ";  
           read MESH_PASSWORD;                                
-          commotion set $PROFILE_NAME key $MESH_PASSWORD;    
+          commotion set $PROFILE_NAME key $MESH_PASSWORD; 
+          uci set wireless.$MESH_NAME.encryption=psk2;
+          uci set wireless.$MESH_NAME.key=$MESH_PASSWORD;
           break;;                                            
                                                              
     [Nn]* ) break;;                                          
     * ) echo "Please answer yes[y] or no[n]";;               
   esac 
 
-
-
 # commit profile changes
 commotion save $PROFILE_NAME
 
+# commit uci changes
+uci commit
 
 
-<<COMMENT
-function set_admin_pass {
 
-echo "Please enter an administrator password: "
+<<DESIGN
 
-read PASSWORD
+# Get AP name
+read AP_NAME
 
-echo "Password is: $PASSWORD"
-}
+# Create new wifi-iface and get resulting string
+AP_CONFIG=`uci add wireless wifi-iface`
 
-function set_node_name 
-{
+# Rename string to interface name
+uci rename wireless.$AP_CONFIG=$AP_NAME
 
-echo "set_node_name"
+# Set default values
+uci set wireless.$AP_NAME.network=lan
+uci set wireless.$AP_NAME.mode=ap
+uci set wireless.$AP_NAME.ssid=$AP_NAME
+uci set wireless.$AP_NAME.device=radio0
 
-}
+# access point encryption
 
-function set_mesh_network 
-{
+echo "Would you like to use encryption for the access point?"
+  read answer                                                
+  case $answer in                                            
+    [Yy]*  ) echo "Please choose an encryption password for the AP: ";  
+          read AP_PASSWORD;                                
+             uci set wireless.$AP_NAME.encryption=psk2
+             uci set wireless.$AP_NAME.key=$AP_PASSWORD
+          break;;                                            
+                                                             
+    [Nn]* ) break;;  
+            
+    * ) echo "Please answer yes[y] or no[n]";;               
+  esac 
 
-echo "set_mesh_network"
 
-}
+# Commit changes
+uci commit
 
-function set_mesh_channel 
-{
-
-echo "set_mesh_channel"
-
-}
-
-function set_mesh_encryption 
-{
-
-echo "set_mesh_encryption"
-
-}
-
-function set_ap_name {
-
-echo "set_ap_name"
-
-}
-
-function set_ap_channel {
-
-echo "set_ap_channel"
-
-}
-
-function set_ap_pass {
-
-echo "set_ap_pass"
-
-}
-COMMENT
+DESIGN
