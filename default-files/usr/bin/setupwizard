@@ -19,14 +19,12 @@ User workflow
 COMMENT
 
 
-echo "Welcome to the configuration wizard."
+echo -e "\n\nWelcome to the configuration wizard.\n"
 
-echo "Please choose an administrator password: "
-
-passwd
-
-
-
+if [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]; then
+  echo "Please choose an administrator password: "
+  passwd
+fi
 
 echo "Please enter new profile name: "
 
