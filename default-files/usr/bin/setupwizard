@@ -7,7 +7,7 @@ if [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]; then
   passwd
 fi
 
-if [ `grep \'commotion\' /etc/config/system ]; then
+if [ `grep \'commotion\' /etc/config/system` ]; then
   echo -e "Set the hostname for this device?"
   read answer
   case $answer in                                            
@@ -19,6 +19,7 @@ if [ `grep \'commotion\' /etc/config/system ]; then
     [Nn]* ) break;;                                          
     * ) echo "Please answer yes[y] or no[n]";;               
   esac 
+fi
 
 echo "Please enter new Commotion profile name: "
 
