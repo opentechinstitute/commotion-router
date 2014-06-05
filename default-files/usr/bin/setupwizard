@@ -7,7 +7,7 @@ if [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]; then
   passwd
 fi
 
-echo "Please enter new profile name: "
+echo "Please enter new Commotion profile name: "
 
 read PROFILE_NAME
 
@@ -56,7 +56,6 @@ uci set wireless.commotionMesh.ssid=$MESH_NAME
 
 uci set wireless.radio0.channel=$MESH_CHANNEL
 uci set wireless.radio0.disabled=0
-
 
 
 # set network config
