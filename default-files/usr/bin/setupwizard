@@ -2,23 +2,26 @@
 
 echo -e "\n\nWelcome to the configuration wizard.\n"
 
+# if password not set, require password set
 if [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]; then
   echo "Please choose an administrator password: "
   passwd
 fi
 
-if [ !`grep -q \'commotion\' /etc/config/system`]; then
-  echo -e "Set the hostname for this device?"
-  read answer
-  case $answer in                                            
-    [Yy]*  ) echo "Enter new hostname: ";  
-          read HOSTNAME;                                
-          uci set system.@system[0].hostname=$HOSTNAME;
-          break;;                                            
-                                                             
-    [Nn]* ) break;;                                          
-    * ) echo "Please answer yes[y] or no[n]";;               
-  esac 
+# if hostname not changed, allow option to set hostname
+if [ !`grep -q \'commotion\' /etc/config/system` ]; then
+  while true; do
+    echo -e "Set the hostname for this device?"
+    read answer
+    case $answer in                                            
+      [Yy]*  ) echo "Enter new hostname: ";  
+            read HOSTNAME;                                
+            uci set system.@system[0].hostname=$HOSTNAME;
+            break;;                                                                                              
+      [Nn]* ) break;;                                          
+      * ) echo "Please answer yes[y] or no[n]";;               
+    esac 
+  done
 fi
 
 echo "Please enter new Commotion profile name: "
@@ -70,11 +73,7 @@ uci set network.$MESH_NAME.class=mesh
 uci set network.$MESH_NAME.profile=$MESH_NAME
 uci set network.$MESH_NAME.proto=commotion
 
-# set hostname
-
-
 # set firewall
-
 
 
 
@@ -89,6 +88,17 @@ uci commit system
 
 
 <<DESIGN
+
+echo -e "Set up an access point?"
+  read answer                                                
+  case $answer in                                            
+    [Yy]*  ) 
+          break;;                                            
+                                                             
+    [Nn]* ) exit 0;;
+    * ) echo "Please answer yes[y] or no[n]";;               
+  esac 
+
 
 # Get AP name
 read AP_NAME
