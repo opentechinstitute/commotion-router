@@ -1,24 +1,5 @@
 #!/bin/ash
 
-<<COMMENT
-
-User workflow
-* flash router
-* telnet in
-* enter password
-* new profile name
-* mesh network name
-* channel
-* mesh encryption?
---> mesh encryption password
-* access point name
-* channel
-* require a password?
---> AP password
-
-COMMENT
-
-
 echo -e "\n\nWelcome to the configuration wizard.\n"
 
 if [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]; then
@@ -38,9 +19,9 @@ read MESH_NAME
 
 echo "Please select a valid channel: "
 
-commotion set $PROFILE_NAME ssid $MESH_NAME
-
 read MESH_CHANNEL
+
+commotion set $PROFILE_NAME ssid $MESH_NAME
 
 commotion set $PROFILE_NAME channel $MESH_CHANNEL
 
@@ -49,14 +30,7 @@ BSSID=`commotion genbssid $MESH_NAME $MESH_CHANNEL`
 
 # write changes to uci
 MESH_CONFIG=`uci add wireless wifi-iface`
-
 uci rename wireless.$MESH_CONFIG=$MESH_NAME
-uci set wireless.$MESH_NAME.mode=adhoc
-uci set wireless.$MESH_NAME.device=radio0
-uci set wireless.$MESH_NAME.network=$MESH_NAME
-uci set wireless.$MESH_NAME.ssid=$MESH_NAME
-uci set wireless.$MESH_NAME.bssid=$BSSID
-
 
 echo "Does this mesh network use encryption?"
   read answer                                                
@@ -71,6 +45,33 @@ echo "Does this mesh network use encryption?"
     [Nn]* ) break;;                                          
     * ) echo "Please answer yes[y] or no[n]";;               
   esac 
+
+# set wireless config
+uci set wireless.$MESH_NAME.mode=adhoc
+uci set wireless.$MESH_NAME.device=radio0
+uci set wireless.$MESH_NAME.network=$MESH_NAME
+uci set wireless.$MESH_NAME.ssid=$MESH_NAME
+
+#uci set wireless.$MESH_NAME.bssid=$BSSID
+
+uci set wireless.radio0.channel=$MESH_CHANNEL
+uci set wireless.radio0.disabled=0
+
+
+# set network config
+uci set network.$MESH_NAME=interface
+uci set network.$MESH_NAME.class=mesh
+uci set network.$MESH_NAME.profile=$MESH_NAME
+uci set network.$MESH_NAME.proto=commotion
+
+
+# set hostname
+
+
+# set firewall
+
+
+
 
 # commit profile changes
 commotion save $PROFILE_NAME
