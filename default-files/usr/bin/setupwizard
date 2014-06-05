@@ -38,9 +38,6 @@ commotion set $PROFILE_NAME ssid $MESH_NAME
 
 commotion set $PROFILE_NAME channel $MESH_CHANNEL
 
-# generate bssid
-BSSID=`commotion genbssid $MESH_NAME $MESH_CHANNEL`
-
 # write changes to uci
 WIRELESS_CONFIG=`uci add wireless wifi-iface`
 uci rename wireless.$WIRELESS_CONFIG=commotionMesh
