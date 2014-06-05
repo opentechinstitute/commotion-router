@@ -7,6 +7,19 @@ if [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]; then
   passwd
 fi
 
+if [ `grep \'commotion\' /etc/config/system ]; then
+  echo -e "Set the hostname for this device?"
+  read answer
+  case $answer in                                            
+    [Yy]*  ) echo "Enter new hostname: ";  
+          read HOSTNAME;                                
+          uci set system.hostname
+          break;;                                            
+                                                             
+    [Nn]* ) break;;                                          
+    * ) echo "Please answer yes[y] or no[n]";;               
+  esac 
+
 echo "Please enter new Commotion profile name: "
 
 read PROFILE_NAME
@@ -51,19 +64,14 @@ uci set wireless.commotionMesh.mode=adhoc
 uci set wireless.commotionMesh.device=radio0
 uci set wireless.commotionMesh.network=$MESH_NAME
 uci set wireless.commotionMesh.ssid=$MESH_NAME
-
-#uci set wireless.$MESH_NAME.bssid=$BSSID
-
 uci set wireless.radio0.channel=$MESH_CHANNEL
 uci set wireless.radio0.disabled=0
-
 
 # set network config
 uci set network.$MESH_NAME=interface
 uci set network.$MESH_NAME.class=mesh
 uci set network.$MESH_NAME.profile=$MESH_NAME
 uci set network.$MESH_NAME.proto=commotion
-
 
 # set hostname
 
@@ -77,7 +85,9 @@ uci set network.$MESH_NAME.proto=commotion
 commotion save $PROFILE_NAME
 
 # commit uci changes
-uci commit
+uci commit wireless
+uci commit network
+uci commit system
 
 
 
