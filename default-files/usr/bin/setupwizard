@@ -13,7 +13,7 @@ if [ `grep \'commotion\' /etc/config/system ]; then
   case $answer in                                            
     [Yy]*  ) echo "Enter new hostname: ";  
           read HOSTNAME;                                
-          uci set system.hostname
+          uci set system.@system[0].hostname=$HOSTNAME
           break;;                                            
                                                              
     [Nn]* ) break;;                                          
