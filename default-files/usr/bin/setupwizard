@@ -60,7 +60,6 @@ echo "Does this mesh network use encryption?"
 # set wireless config
 uci set wireless.commotionMesh.mode=adhoc
 uci set wireless.commotionMesh.device=radio0
-uci set wireless.commotionMesh.network=$MESH_NAME
 uci set wireless.commotionMesh.ssid=$MESH_NAME
 uci set wireless.radio0.channel=$MESH_CHANNEL
 uci set wireless.radio0.disabled=0
