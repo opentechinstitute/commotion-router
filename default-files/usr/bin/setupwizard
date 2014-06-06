@@ -1,4 +1,5 @@
 #!/bin/ash
+. /lib/functions.sh
 
 echo -e "\n\nWelcome to the configuration wizard.\n"
 
@@ -47,23 +48,25 @@ WIRELESS_CONFIG=`uci add wireless wifi-iface`
 uci rename wireless.$WIRELESS_CONFIG=commotionMesh
 
 echo "Does this mesh network use encryption?"
-  read answer                                                
-  case $answer in                                            
-    [Yy]*  ) echo "Please choose an encryption password: ";  
-          read MESH_PASSWORD;                                
-          commotion set $PROFILE_NAME key $MESH_PASSWORD; 
-          uci set wireless.commotionMesh.encryption=psk2;
-          uci set wireless.commotionMesh.key=$MESH_PASSWORD;
-          break;;                                            
-                                                             
-    [Nn]* ) break;;                                          
-    * ) echo "Please answer yes[y] or no[n]";;               
-  esac 
-
+  while true; do
+    read answer                                                
+    case $answer in                                            
+      [Yy]*  ) echo "Please choose an encryption password: ";  
+            read MESH_PASSWORD;                                
+            commotion set $PROFILE_NAME key $MESH_PASSWORD; 
+            uci set wireless.commotionMesh.encryption=psk2;
+            uci set wireless.commotionMesh.key=$MESH_PASSWORD;
+            break;;                                                                                          
+      [Nn]* ) break;;                                          
+      * ) echo "Please answer yes[y] or no[n]";;               
+    esac 
+  done
+  
 # set wireless config
 uci set wireless.commotionMesh.mode=adhoc
 uci set wireless.commotionMesh.device=radio0
 uci set wireless.commotionMesh.ssid=$MESH_NAME
+uci set wireless.commotionMesh.network=$MESH_NAME
 uci set wireless.radio0.channel=$MESH_CHANNEL
 uci set wireless.radio0.disabled=0
 
@@ -74,7 +77,15 @@ uci set network.$MESH_NAME.profile=$MESH_NAME
 uci set network.$MESH_NAME.proto=commotion
 
 # set firewall
+uci add_list firewall.@zone[1].network=$MESH_NAME
 
+
+
+
+
+
+
+# may have to set network in wireless (equal to $MESH_NAME)
 
 
 # commit profile changes
@@ -84,7 +95,10 @@ commotion save $PROFILE_NAME
 uci commit wireless
 uci commit network
 uci commit system
+uci commit firewall
 
+# restart networking
+/etc/init.d/network restart
 
 
 <<DESIGN
@@ -134,5 +148,41 @@ echo "Would you like to use encryption for the access point?"
 
 # Commit changes
 uci commit
+
+
+
+<<SCRATCH
+
+# call reset_cb first
+
+# then define config_cb() like so:
+# loop through all the firewall zones
+# find the one with option name 'mesh'
+# uci set.cfgstring.network+=mesh
+# uci set.cfgstring.network+=$MESH_NAME
+# see http://wiik.openwrt.org/doc/devel/config-scripting?s[]=config&s[]=cb
+
+reset_cb
+
+config_cb() {
+  local CONFIG_TYPE="$1"
+  local CONFIG_NAME="$2"
+  
+  if [ "$CONFIG_TYPE" == "zone" ]; then
+        logger -t setupwizard "Searching config section $CONFIG_TYPE"
+    option_cb() {
+      local OPTION_NAME="$1"
+      local OPTION_VALUE="$2"
+        if [ "$OPTION_NAME" == "name" ] && [ "$OPTION_VALUE" == "mesh" ]; then
+                logger -t setupwizard "Found mesh zone."
+          uci set firewall.$CONFIG_SECTION.network+=$MESH_NAME
+          uci set firewall.$CONFIG_SECTION.network+=mesh
+        fi
+      }
+  fi
+}
+config_load firewall
+
+SCRATCH
 
 DESIGN
