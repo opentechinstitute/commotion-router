@@ -94,7 +94,8 @@ uci commit system
 uci commit firewall
 
 # restart networking
-/etc/init.d/network restart
+/etc/init.d/commotiond restart
+/etc/init.d/network reload
 
 
 <<DESIGN
