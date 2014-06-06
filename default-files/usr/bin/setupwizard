@@ -35,9 +35,9 @@ echo "Please select a valid channel: "
 
 read MESH_CHANNEL
 
-commotion set $PROFILE_NAME ssid $MESH_NAME
+commotion set $MESH_NAME ssid $MESH_NAME
 
-commotion set $PROFILE_NAME channel $MESH_CHANNEL
+commotion set $MESH_NAME channel $MESH_CHANNEL
 
 # write changes to uci
 WIRELESS_CONFIG=`uci add wireless wifi-iface`
@@ -49,7 +49,7 @@ echo "Does this mesh network use encryption?"
     case $answer in                                            
       [Yy]*  ) echo "Please choose an encryption password: ";  
             read MESH_PASSWORD;                                
-            commotion set $PROFILE_NAME key $MESH_PASSWORD; 
+            commotion set $MESH_NAME key $MESH_PASSWORD; 
             uci set wireless.commotionMesh.encryption=psk2;
             uci set wireless.commotionMesh.key=$MESH_PASSWORD;
             break;;                                                                                          
@@ -74,15 +74,6 @@ uci set network.$MESH_NAME.proto=commotion
 
 # set firewall
 uci add_list firewall.@zone[1].network=$MESH_NAME
-
-
-
-
-
-
-
-# may have to set network in wireless (equal to $MESH_NAME)
-
 
 # commit profile changes
 commotion save $MESH_NAME
