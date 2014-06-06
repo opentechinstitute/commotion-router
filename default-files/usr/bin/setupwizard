@@ -54,7 +54,7 @@ echo "Does this mesh network use encryption?"
             uci set wireless.commotionMesh.key=$MESH_PASSWORD;
             break;;                                                                                          
       [Nn]* ) 
-            uci set wireless.commotionMesh.key=none
+            uci set wireless.commotionMesh.encryption=none
             break;;                                          
       * ) echo "Please answer yes[y] or no[n]";;               
     esac 
@@ -81,9 +81,9 @@ uci set network.$MESH_NAME.proto=commotion
 uci add_list firewall.@zone[1].network=$MESH_NAME
 
 
-
 # SET COMMOTION PROFILE VALUES
 commotion set channel $CHANNEL
+commotion set ssid $MESH_SSID
 
 
 # commit profile changes
@@ -100,6 +100,10 @@ echo -e "\n\nSettings saved. Restarting networking.\n\n"
 # restart networking
 /etc/init.d/commotiond restart
 /etc/init.d/network reload
+
+
+
+
 
 
 <<DESIGN
