@@ -53,7 +53,9 @@ echo "Does this mesh network use encryption?"
             uci set wireless.commotionMesh.encryption=psk2;
             uci set wireless.commotionMesh.key=$MESH_PASSWORD;
             break;;                                                                                          
-      [Nn]* ) break;;                                          
+      [Nn]* ) 
+            uci set wireless.commotionMesh.key=none
+            break;;                                          
       * ) echo "Please answer yes[y] or no[n]";;               
     esac 
   done
@@ -83,6 +85,8 @@ uci commit wireless
 uci commit network
 uci commit system
 uci commit firewall
+
+echo -e "\n\nSettings saved. Restarting networking.\n\n"
 
 # restart networking
 /etc/init.d/commotiond restart
