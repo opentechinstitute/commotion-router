@@ -33,11 +33,11 @@ commotion new $MESH_NAME
 
 echo "Please select a valid channel: "
 
-read MESH_CHANNEL
+read CHANNEL
 
 commotion set $MESH_NAME ssid $MESH_NAME
 
-commotion set $MESH_NAME channel $MESH_CHANNEL
+commotion set $MESH_NAME channel $CHANNEL
 
 # write changes to uci
 WIRELESS_CONFIG=`uci add wireless wifi-iface`
@@ -60,12 +60,15 @@ echo "Does this mesh network use encryption?"
     esac 
   done
   
+
+# SET UCI VALUES
+  
 # set wireless config
 uci set wireless.commotionMesh.mode=adhoc
 uci set wireless.commotionMesh.device=radio0
 uci set wireless.commotionMesh.ssid=$MESH_NAME
 uci set wireless.commotionMesh.network=$MESH_NAME
-uci set wireless.radio0.channel=$MESH_CHANNEL
+uci set wireless.radio0.channel=$CHANNEL
 uci set wireless.radio0.disabled=0
 
 # set network config
@@ -76,6 +79,12 @@ uci set network.$MESH_NAME.proto=commotion
 
 # set firewall
 uci add_list firewall.@zone[1].network=$MESH_NAME
+
+
+
+# SET COMMOTION PROFILE VALUES
+commotion set channel $CHANNEL
+
 
 # commit profile changes
 commotion save $MESH_NAME
