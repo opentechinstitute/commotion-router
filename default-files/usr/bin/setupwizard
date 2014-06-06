@@ -25,15 +25,11 @@ if [ !`grep -q \'commotion\' /etc/config/system` ]; then
   done
 fi
 
-echo "Please enter new Commotion profile name: "
-
-read PROFILE_NAME
-
-commotion new $PROFILE_NAME
-
 echo "Please enter mesh network name: "
 
 read MESH_NAME
+
+commotion new $MESH_NAME
 
 echo "Please select a valid channel: "
 
@@ -89,7 +85,7 @@ uci add_list firewall.@zone[1].network=$MESH_NAME
 
 
 # commit profile changes
-commotion save $PROFILE_NAME
+commotion save $MESH_NAME
 
 # commit uci changes
 uci commit wireless
