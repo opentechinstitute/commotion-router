@@ -29,19 +29,9 @@ echo "Please enter mesh network name: "
 
 read MESH_NAME
 
-commotion new $MESH_NAME
-
 echo "Please select a valid channel: "
 
 read CHANNEL
-
-commotion set $MESH_NAME ssid $MESH_NAME
-
-commotion set $MESH_NAME channel $CHANNEL
-
-# write changes to uci
-WIRELESS_CONFIG=`uci add wireless wifi-iface`
-uci rename wireless.$WIRELESS_CONFIG=commotionMesh
 
 echo "Does this mesh network use encryption?"
   while true; do
@@ -49,21 +39,20 @@ echo "Does this mesh network use encryption?"
     case $answer in                                            
       [Yy]*  ) echo "Please choose an encryption password: ";  
             read MESH_PASSWORD;                                
-            commotion set $MESH_NAME key $MESH_PASSWORD; 
-            uci set wireless.commotionMesh.encryption=psk2;
-            uci set wireless.commotionMesh.key=$MESH_PASSWORD;
             break;;                                                                                          
       [Nn]* ) 
-            uci set wireless.commotionMesh.encryption=none
             break;;                                          
       * ) echo "Please answer yes[y] or no[n]";;               
     esac 
   done
   
 
-# SET UCI VALUES
-  
-# set wireless config
+# SET MESH UCI VALUES
+
+# wireless settings
+MESH_CONFIG=`uci add wireless wifi-iface`
+uci rename wireless.$MESH_CONFIG=commotionMesh
+
 uci set wireless.commotionMesh.mode=adhoc
 uci set wireless.commotionMesh.device=radio0
 uci set wireless.commotionMesh.ssid=$MESH_NAME
@@ -71,21 +60,78 @@ uci set wireless.commotionMesh.network=$MESH_NAME
 uci set wireless.radio0.channel=$CHANNEL
 uci set wireless.radio0.disabled=0
 
-# set network config
+# network settings
 uci set network.$MESH_NAME=interface
 uci set network.$MESH_NAME.class=mesh
 uci set network.$MESH_NAME.profile=$MESH_NAME
 uci set network.$MESH_NAME.proto=commotion
 
-# set firewall
+# firewall settings
 uci add_list firewall.@zone[1].network=$MESH_NAME
 
 
 # SET COMMOTION PROFILE VALUES
-commotion set channel $CHANNEL
-commotion set ssid $MESH_SSID
+
+commotion new $MESH_NAME
+commotion set $MESH_NAME ssid $MESH_NAME
+commotion set $MESH_NAME channel $CHANNEL
+
+# SET ENCRYPTION (if any)
+
+if [ $MESH_PASSWORD ]; then
+  commotion set $MESH_NAME key $MESH_PASSWORD; 
+  uci set wireless.commotionMesh.encryption=psk2;
+  uci set wireless.commotionMesh.key=$MESH_PASSWORD;
+else
+  commotion set $MESH_NAME encryption none
+  uci set wireless.commotionMesh.encryption=none
+fi
 
 
+# ACCESS POINT
+
+echo -e "Set up an access point?"
+  read answer                                                
+  case $answer in                                            
+    [Yy]*  ) echo -e "\nAccess point name: "
+          read AP_NAME;
+          break;;                                            
+                                                             
+    [Nn]* ) break;;
+    * ) echo "Please answer yes[y] or no[n]";;               
+  esac 
+
+if [ $AP_NAME ]; then
+
+  # access point encryption
+  echo "Would you like to use encryption for the access point?"
+    read answer                                                
+    case $answer in                                            
+      [Yy]*  ) echo "Please choose an encryption password for the AP: ";  
+            read AP_PASSWORD;                                
+            break;;                                                                                                     
+      [Nn]* ) break;;  
+      * ) echo "Please answer yes[y] or no[n]";;               
+    esac 
+
+  # set AP uci values
+  AP_CONFIG=`uci add wireless wifi-iface`
+  uci rename wireless.$AP_CONFIG=$AP_NAME
+
+  uci set wireless.$AP_NAME.network=lan
+  uci set wireless.$AP_NAME.mode=ap
+  uci set wireless.$AP_NAME.ssid=$AP_NAME
+  uci set wireless.$AP_NAME.device=radio0
+  
+  if [ $AP_PASSWORD ]; then
+    uci set wireless.$AP_NAME.encryption=psk2;
+    uci set wireless.$AP_NAME.key=$AP_PASSWORD;
+  else
+    uci set wireless.$AP_NAME.encryption=none
+  fi
+  
+fi
+  
 # commit profile changes
 commotion save $MESH_NAME
 
@@ -100,59 +146,6 @@ echo -e "\n\nSettings saved. Restarting networking.\n\n"
 # restart networking
 /etc/init.d/commotiond restart
 /etc/init.d/network reload
-
-
-
-
-
-
-<<DESIGN
-
-echo -e "Set up an access point?"
-  read answer                                                
-  case $answer in                                            
-    [Yy]*  ) 
-          break;;                                            
-                                                             
-    [Nn]* ) exit 0;;
-    * ) echo "Please answer yes[y] or no[n]";;               
-  esac 
-
-
-# Get AP name
-read AP_NAME
-
-# Create new wifi-iface and get resulting string
-AP_CONFIG=`uci add wireless wifi-iface`
-
-# Rename string to interface name
-uci rename wireless.$AP_CONFIG=$AP_NAME
-
-# Set default values
-uci set wireless.$AP_NAME.network=lan
-uci set wireless.$AP_NAME.mode=ap
-uci set wireless.$AP_NAME.ssid=$AP_NAME
-uci set wireless.$AP_NAME.device=radio0
-
-# access point encryption
-
-echo "Would you like to use encryption for the access point?"
-  read answer                                                
-  case $answer in                                            
-    [Yy]*  ) echo "Please choose an encryption password for the AP: ";  
-          read AP_PASSWORD;                                
-             uci set wireless.$AP_NAME.encryption=psk2
-             uci set wireless.$AP_NAME.key=$AP_PASSWORD
-          break;;                                            
-                                                             
-    [Nn]* ) break;;  
-            
-    * ) echo "Please answer yes[y] or no[n]";;               
-  esac 
-
-
-# Commit changes
-uci commit
 
 
 
@@ -189,5 +182,3 @@ config_cb() {
 config_load firewall
 
 SCRATCH
-
-DESIGN
