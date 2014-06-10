@@ -1,6 +1,23 @@
 #!/bin/ash
 . /lib/functions.sh
 
+# check to see if setupwizard has already been run
+
+# if setup_wizard file does not exist, create it
+if [[ ! -f /etc/config/setup_wizard]]; then
+  touch /etc/config/setup_wizard
+  
+  # indicator for whether setup wizard has already run
+  SETUP_RUN=`uci add setup_wizard settings`
+  uci rename setup_wizard.$SETUP_RUN=settings
+  uci set setup_wizard.settings.enabled=1
+  
+  # indicator for whether password has been set
+  PASSWORD_SET='uci add setup_wizard uci`
+  uci rename setup_wizard.$PASSWORD_SET=passwords
+  uci set setup_wizard.passwords.admin_pass=true
+fi
+
 echo -e "\n\nWelcome to the configuration wizard.\n"
 
 # if password not set, require password set
