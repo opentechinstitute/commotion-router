@@ -147,7 +147,6 @@ if [ $AP_NAME ]; then
   else
     uci set wireless.$AP_NAME.encryption=none
   fi
-  
 fi
   
 # mark changes in setup_wizard config
@@ -163,7 +162,29 @@ uci commit network
 uci commit system
 uci commit firewall
 
-echo -e "\n\nSettings saved. Restarting networking.\n\n"
+echo -e "\n\nSettings saved."
+
+echo -e "\n\nCONFIGURATION
+
+NODE SETTINGS
+Hostname:               $HOSTNAME
+
+MESH SETTINGS
+Mesh name:              $MESH_NAME
+Mesh channel:           $CHANNEL
+`if [ $MESH_PASSWORD ]; then
+  echo -e 
+"Mesh encryption:       yes"
+else
+  echo -e
+"Mesh encryption:       no"
+fi`
+
+ACCESS POINT SETTINGS"
+
+echo -e "\n\nKeep this configuration?\n\n"
+
+echo -e "\n\nRestarting networking.\n\n"
 
 # restart networking
 /etc/init.d/commotiond restart
