@@ -24,7 +24,7 @@ echo -e "\n\nWelcome to the configuration wizard.\n"
 if [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]; then
   echo "Please choose an administrator password: "
   passwd
-  uci set setup_wizard.passwords.admin_pass=true
+  uci set setup_wizard.passwords.admin_pass=changed
 fi
 
 # if hostname not changed, allow option to set hostname
