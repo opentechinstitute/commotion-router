@@ -4,7 +4,7 @@
 # check to see if setupwizard has already been run
 
 # if setup_wizard file does not exist, create it
-if [[ ! -f /etc/config/setup_wizard]]; then
+if [[ ! -f /etc/config/setup_wizard ]]; then
   touch /etc/config/setup_wizard
   
   # indicator for whether setup wizard has already run
