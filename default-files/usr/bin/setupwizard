@@ -13,7 +13,7 @@ if [[ ! -f /etc/config/setup_wizard]]; then
   uci set setup_wizard.settings.enabled=1
   
   # indicator for whether password has been set
-  PASSWORD_SET='uci add setup_wizard uci`
+  PASSWORD_SET=`uci add setup_wizard uci`
   uci rename setup_wizard.$PASSWORD_SET=passwords
   uci set setup_wizard.passwords.admin_pass=false
 fi
