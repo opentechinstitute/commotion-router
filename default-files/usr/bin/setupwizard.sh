@@ -173,14 +173,14 @@ MESH SETTINGS
 Mesh name:              $MESH_NAME
 Mesh channel:           $CHANNEL
 `if [ $MESH_PASSWORD ]; then
-  echo -e 
-"Mesh encryption:       yes"
+  echo -e "Mesh encryption:             yes"
 else
-  echo -e
-"Mesh encryption:       no"
+  echo -e "Mesh encryption:             no"
 fi`
 
-ACCESS POINT SETTINGS"
+`fi [ $AP_NAME ]; then
+
+  ACCESS POINT SETTINGS"
 
 echo -e "\n\nKeep this configuration?\n\n"
 
