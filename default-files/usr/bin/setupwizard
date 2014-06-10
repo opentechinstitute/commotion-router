@@ -24,7 +24,7 @@ echo -e "\n\nWelcome to the configuration wizard.\n"
 if [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]; then
   echo "Please choose an administrator password: "
   passwd
-  uci set setup_wizard.admin_pass=true
+  uci set setup_wizard.passwords.admin_pass=true
 fi
 
 # if hostname not changed, allow option to set hostname
@@ -152,6 +152,7 @@ fi
   
 # mark changes in setup_wizard config
 uci set setup_wizard.settings.enabled=0
+uci commit setup_wizard
 
 # commit profile changes
 commotion save $MESH_NAME
