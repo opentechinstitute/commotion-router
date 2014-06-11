@@ -167,24 +167,50 @@ echo -e "\n\nSettings saved."
 echo -e "\n\nCONFIGURATION
 
 NODE SETTINGS
-Hostname:               $HOSTNAME
+Hostname:          $HOSTNAME
+
 
 MESH SETTINGS
-Mesh name:              $MESH_NAME
-Mesh channel:           $CHANNEL
-`if [ $MESH_PASSWORD ]; then
-  echo -e "Mesh encryption:             yes"
+SSID:              $MESH_NAME
+Channel:           $CHANNEL"
+if [ $MESH_PASSWORD ]; then
+  echo -e "Encryption:        yes
+Password:          $MESH_PASSWORD"
 else
-  echo -e "Mesh encryption:             no"
-fi`
+  echo -e "Encryption:        no"
+fi
 
-`fi [ $AP_NAME ]; then
+if [ $AP_NAME ]; then
 
-  ACCESS POINT SETTINGS"
+echo -e "\n
+ACCESS POINT SETTINGS
+SSID:              $AP_NAME
+Channel:           $CHANNEL"
+fi
 
+if [ $AP_PASSWORD ]; then
+  echo -e "Encryption:        yes
+Password:          $AP_PASSWORD"
+else
+  echo -e "Encryption:        no"
+fi
+
+while true; do
 echo -e "\n\nKeep this configuration?\n\n"
+    read answer
+    case $answer in                                            
+        [Yy]* ) break;;                                                                                              
+        [Nn]* ) echo "Reverting configuration settings.";  
+                # Reset button
+            
+                break;;                                          
+         * )    echo "Please answer yes[y] or no[n]";;               
+    esac 
+  done
 
-echo -e "\n\nRestarting networking.\n\n"
+
+
+echo -e "\n\nSetup Wizard completed. Restarting networking.\n\n"
 
 # restart networking
 /etc/init.d/commotiond restart
