@@ -11,6 +11,7 @@ clear_values() {
   unset MESH_PASSWORD
   unset AP_NAME
   unset AP_PASSWORD
+  commotion delete $MESH_NAME
 }
 
 get_config() {
@@ -94,6 +95,7 @@ if [ $AP_NAME ]; then
 
   # access point encryption
   echo "Would you like to use encryption for the access point?"
+    while true; do
     read answer                                                
     case $answer in                                            
       [Yy]*  ) echo "Please choose an encryption password for the AP: ";  
@@ -102,6 +104,7 @@ if [ $AP_NAME ]; then
       [Nn]* ) break;;  
       * ) echo "Please answer yes[y] or no[n]";;               
     esac 
+    done
 fi
 
 echo -e "\n\nCONFIGURATION
@@ -139,11 +142,11 @@ while true; do
 echo -e "\n\nKeep this configuration?\n\n"
     read answer
     case $answer in                                            
-        [Yy]* ) exit 0;;
+        [Yy]* ) return 0;;
                 #break;;                                                                                              
         [Nn]* ) echo "Reverting configuration settings."; 
                 clear_values;
-                exit 1;;
+                return 1;;
                 #break;;                                          
         * )     echo "Please answer yes[y] or no[n]";;               
     esac 
@@ -192,8 +195,7 @@ else
   commotion set $MESH_NAME encryption none
   uci set wireless.commotionMesh.encryption=none
 fi
-  
-  
+
 
 # SET AP SETTINGS
 if [ $AP_NAME ]; then
@@ -237,47 +239,15 @@ echo -e "\n\nRestarting networking.\n\n"
 /etc/init.d/network reload
 }
 
-# Run setup wizard
-get_config
+# RUN SETUP WIZARD
+get_config 
 
-if [ $? -eq 1 ]; then
-  # didn't keep config
-  get_config
-elif [ $? -wq 0 ]; then
+# if user rejects settings, rerun get_config
+while [ $? -eq 1 ]; do                                                                                                                                
+  get_config                                                                                                                                                                                                                                                                                                                                  
+done 
+
+# if user accepts settings, set the configuration
+if [ $? -eq 0 ]; then
   set_config
-fi 
-
-
-<<SCRATCH
-
-# call reset_cb first
-
-# then define config_cb() like so:
-# loop through all the firewall zones
-# find the one with option name 'mesh'
-# uci set.cfgstring.network+=mesh
-# uci set.cfgstring.network+=$MESH_NAME
-# see http://wiik.openwrt.org/doc/devel/config-scripting?s[]=config&s[]=cb
-
-reset_cb
-
-config_cb() {
-  local CONFIG_TYPE="$1"
-  local CONFIG_NAME="$2"
-  
-  if [ "$CONFIG_TYPE" == "zone" ]; then
-        logger -t setupwizard "Searching config section $CONFIG_TYPE"
-    option_cb() {
-      local OPTION_NAME="$1"
-      local OPTION_VALUE="$2"
-        if [ "$OPTION_NAME" == "name" ] && [ "$OPTION_VALUE" == "mesh" ]; then
-                logger -t setupwizard "Found mesh zone."
-          uci set firewall.$CONFIG_SECTION.network+=$MESH_NAME
-          uci set firewall.$CONFIG_SECTION.network+=mesh
-        fi
-      }
-  fi
-}
-config_load firewall
-
-SCRATCH
+fi
