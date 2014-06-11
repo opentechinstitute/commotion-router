@@ -139,7 +139,7 @@ else
 fi
 
 while true; do
-echo -e "\n\nKeep this configuration?\n\n"
+echo -e "\n\nKeep this configuration?"
     read answer
     case $answer in                                            
         [Yy]* ) return 0;;
