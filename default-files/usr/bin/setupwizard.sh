@@ -1,8 +1,19 @@
 #!/bin/ash
-. /lib/functions.sh
 
 # check to see if setupwizard has already been run
 
+clear_values() {
+  #SETUP_RUN
+  #PASSWORD_SET
+  unset HOSTNAME
+  unset MESH_NAME
+  unset CHANNEL
+  unset MESH_PASSWORD
+  unset AP_NAME
+  unset AP_PASSWORD
+}
+
+get_config() {
 # if setup_wizard file does not exist, create it
 if [[ ! -f /etc/config/setup_wizard ]]; then
   touch /etc/config/setup_wizard
@@ -35,7 +46,7 @@ if [ !`grep -q \'commotion\' /etc/config/system` ]; then
     case $answer in                                            
       [Yy]*  ) echo "Enter new hostname: ";  
             read HOSTNAME;                                
-            uci set system.@system[0].hostname=$HOSTNAME;
+            uci set system.@system[0].hostname="$HOSTNAME";
             break;;                                                                                              
       [Nn]* ) break;;                                          
       * ) echo "Please answer yes[y] or no[n]";;               
@@ -64,6 +75,83 @@ echo "Does this mesh network use encryption?"
     esac 
   done
   
+
+# ACCESS POINT
+
+echo -e "Set up an access point?"
+  while true; do
+  read answer                                                
+  case $answer in                                            
+    [Yy]* ) echo -e "\nAccess point name: ";
+            read AP_NAME;
+            break;;                                                                                        
+    [Nn]* ) break;;
+    * ) echo "Please answer yes[y] or no[n]";;               
+  esac 
+done
+
+if [ $AP_NAME ]; then
+
+  # access point encryption
+  echo "Would you like to use encryption for the access point?"
+    read answer                                                
+    case $answer in                                            
+      [Yy]*  ) echo "Please choose an encryption password for the AP: ";  
+            read AP_PASSWORD;                                
+            break;;                                                                                                     
+      [Nn]* ) break;;  
+      * ) echo "Please answer yes[y] or no[n]";;               
+    esac 
+fi
+
+echo -e "\n\nCONFIGURATION
+
+NODE SETTINGS
+Hostname:          $HOSTNAME
+
+
+MESH SETTINGS
+SSID:              $MESH_NAME
+Channel:           $CHANNEL"
+if [ $MESH_PASSWORD ]; then
+  echo -e "Encryption:        yes
+Password:          $MESH_PASSWORD"
+else
+  echo -e "Encryption:        no"
+fi
+
+if [ $AP_NAME ]; then
+
+echo -e "\n
+ACCESS POINT SETTINGS
+SSID:              $AP_NAME
+Channel:           $CHANNEL"
+fi
+
+if [ $AP_PASSWORD ]; then
+  echo -e "Encryption:        yes
+Password:          $AP_PASSWORD"
+else
+  echo -e "Encryption:        no"
+fi
+
+while true; do
+echo -e "\n\nKeep this configuration?\n\n"
+    read answer
+    case $answer in                                            
+        [Yy]* ) exit 0;;
+                #break;;                                                                                              
+        [Nn]* ) echo "Reverting configuration settings."; 
+                clear_values;
+                exit 1;;
+                #break;;                                          
+        * )     echo "Please answer yes[y] or no[n]";;               
+    esac 
+  done
+}
+
+
+set_config() {
 
 # SET MESH UCI VALUES
 
@@ -104,34 +192,11 @@ else
   commotion set $MESH_NAME encryption none
   uci set wireless.commotionMesh.encryption=none
 fi
+  
+  
 
-
-# ACCESS POINT
-
-echo -e "Set up an access point?"
-  read answer                                                
-  case $answer in                                            
-    [Yy]*  ) echo -e "\nAccess point name: "
-          read AP_NAME;
-          break;;                                            
-                                                             
-    [Nn]* ) break;;
-    * ) echo "Please answer yes[y] or no[n]";;               
-  esac 
-
+# SET AP SETTINGS
 if [ $AP_NAME ]; then
-
-  # access point encryption
-  echo "Would you like to use encryption for the access point?"
-    read answer                                                
-    case $answer in                                            
-      [Yy]*  ) echo "Please choose an encryption password for the AP: ";  
-            read AP_PASSWORD;                                
-            break;;                                                                                                     
-      [Nn]* ) break;;  
-      * ) echo "Please answer yes[y] or no[n]";;               
-    esac 
-
   # set AP uci values
   AP_CONFIG=`uci add wireless wifi-iface`
   uci rename wireless.$AP_CONFIG=$AP_NAME
@@ -148,6 +213,7 @@ if [ $AP_NAME ]; then
     uci set wireless.$AP_NAME.encryption=none
   fi
 fi
+
   
 # mark changes in setup_wizard config
 uci set setup_wizard.settings.enabled=0
@@ -164,58 +230,22 @@ uci commit firewall
 
 echo -e "\n\nSettings saved."
 
-echo -e "\n\nCONFIGURATION
-
-NODE SETTINGS
-Hostname:          $HOSTNAME
-
-
-MESH SETTINGS
-SSID:              $MESH_NAME
-Channel:           $CHANNEL"
-if [ $MESH_PASSWORD ]; then
-  echo -e "Encryption:        yes
-Password:          $MESH_PASSWORD"
-else
-  echo -e "Encryption:        no"
-fi
-
-if [ $AP_NAME ]; then
-
-echo -e "\n
-ACCESS POINT SETTINGS
-SSID:              $AP_NAME
-Channel:           $CHANNEL"
-fi
-
-if [ $AP_PASSWORD ]; then
-  echo -e "Encryption:        yes
-Password:          $AP_PASSWORD"
-else
-  echo -e "Encryption:        no"
-fi
-
-while true; do
-echo -e "\n\nKeep this configuration?\n\n"
-    read answer
-    case $answer in                                            
-        [Yy]* ) break;;                                                                                              
-        [Nn]* ) echo "Reverting configuration settings.";  
-                # Reset button
-            
-                break;;                                          
-         * )    echo "Please answer yes[y] or no[n]";;               
-    esac 
-  done
-
-
-
-echo -e "\n\nSetup Wizard completed. Restarting networking.\n\n"
+echo -e "\n\nRestarting networking.\n\n"
 
 # restart networking
 /etc/init.d/commotiond restart
 /etc/init.d/network reload
+}
 
+# Run setup wizard
+get_config
+
+if [ $? -eq 1 ]; then
+  # didn't keep config
+  get_config
+elif [ $? -wq 0 ]; then
+  set_config
+fi 
 
 
 <<SCRATCH
