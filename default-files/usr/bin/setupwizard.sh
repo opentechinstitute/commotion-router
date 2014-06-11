@@ -3,8 +3,8 @@
 # check to see if setupwizard has already been run
 
 clear_values() {
-  #SETUP_RUN
-  #PASSWORD_SET
+  unset SETUP_RUN
+  unset PASSWORD_SET
   unset HOSTNAME
   unset MESH_NAME
   unset CHANNEL
