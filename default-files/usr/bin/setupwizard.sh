@@ -64,6 +64,8 @@ if [ !`grep -q \'commotion\' /etc/config/system` ]; then
   done
 fi
 
+
+# GET MESH SETTINGS
 echo -e "\n\nPlease enter mesh network name: "
 
 read MESH_NAME
@@ -86,8 +88,7 @@ echo -e "\nDoes this mesh network use encryption?"
   done
   
 
-# ACCESS POINT
-
+# GET ACCESS POINT SETTINGS
 echo -e "\n\nSet up an access point?"
   while true; do
   read answer                                                
@@ -103,11 +104,11 @@ done
 if [ $AP_NAME ]; then
 
   # access point encryption
-  echo -e "\n\nWould you like to use encryption for the access point?"
+  echo -e "\n\nUse encryption for the access point?"
     while true; do
     read answer                                                
     case $answer in                                            
-      [Yy]*  ) echo -e "\nPlease choose an encryption password for the access point: ";  
+      [Yy]*  ) echo -e "\nPlease choose an encryption password: ";  
             read AP_PASSWORD;                                
             break;;                                                                                                     
       [Nn]* ) break;;  
@@ -116,6 +117,7 @@ if [ $AP_NAME ]; then
     done
 fi
 
+  # DISPLAY PROPOSED CONFIGURATION
   echo -e "\n\nCONFIGURATION
 
   NODE SETTINGS
@@ -125,12 +127,13 @@ fi
   MESH SETTINGS
   SSID:              "$MESH_NAME"
   Channel:           "$CHANNEL""
-  if [ $MESH_PASSWORD ]; then
-    echo -e "  Encryption:        yes"
-    echo -e "  Password:          "$MESH_PASSWORD""
-  else
-    echo -e "  Encryption:        no"
-  fi
+  
+if [ $MESH_PASSWORD ]; then
+  echo -e "  Encryption:        yes"
+  echo -e "  Password:          "$MESH_PASSWORD""
+else
+  echo -e "  Encryption:        no"
+fi
 
 if [ $AP_NAME ]; then
   echo -e "\n
@@ -147,6 +150,7 @@ if [ $AP_NAME ]; then
   
 fi
 
+# save or reset configuration
 while true; do
 echo -e "\n\nKeep this configuration?"
     read answer
@@ -186,14 +190,12 @@ uci set network.commotionMesh.proto=commotion
 uci add_list firewall.@zone[1].network="$MESH_NAME"
 
 
-# SET COMMOTION PROFILE VALUES
-
+# set Commotion profile settings
 commotion new "$MESH_NAME"
 commotion set "$MESH_NAME" ssid "$MESH_NAME"
 commotion set "$MESH_NAME" channel "$CHANNEL"
 
-# SET ENCRYPTION (if any)
-
+#set encryption settings
 if [ $MESH_PASSWORD ]; then
   commotion set "$MESH_NAME" key "$MESH_PASSWORD"; 
   uci set wireless.commotionMesh.encryption=psk2;
@@ -215,6 +217,7 @@ if [ $AP_NAME ]; then
   uci set wireless.commotionAP.ssid="$AP_NAME"
   uci set wireless.commotionAP.device=radio0
   
+  # set AP encryption
   if [ $AP_PASSWORD ]; then
     uci set wireless.commotionAP.encryption=psk2;
     uci set wireless.commotionAP.key="$AP_PASSWORD";
@@ -224,11 +227,11 @@ if [ $AP_NAME ]; then
 fi
 
   
-# mark changes in setup_wizard config
+# mark changes in setup_wizard config file
 uci set setup_wizard.settings.enabled=0
 uci commit setup_wizard
 
-# commit profile changes
+# commit Commotion profile changes
 commotion save "$MESH_NAME"
 
 # commit uci changes
@@ -246,6 +249,8 @@ echo -e "\n\nRestarting networking.\n\n"
 /etc/init.d/network reload
 }
 
+
+# SCRIPT BEGINS HERE
 if [ `uci get setup_wizard.settings.enabled` == 0 ]; then
   echo -e "Setup Wizard has already been run."
 while true; do
@@ -255,12 +260,13 @@ echo -e "\n\nSet new configuration?"
         [Yy]* ) echo -e "Reverting previous configuration.";
                 clear_previous_configuration;
                 break;;                                                                                              
-        [Nn]* ) echo "Keeping settings. Closing Setup Wizard."; 
+        [Nn]* ) echo -e "Keeping settings. Closing Setup Wizard."; 
                 exit 0;;                                          
         * )     echo "Please answer yes[y] or no[n]";;               
     esac 
   done
 fi
+
 
 # RUN SETUP WIZARD
 get_config 
@@ -270,7 +276,7 @@ while [ $? -eq 1 ]; do
   get_config                                                                                                                                                                                                                                                                                                                                  
 done 
 
-# if user accepts settings, set the configuration
+# if user accepts settings, run set_config
 if [ $? -eq 0 ]; then
   set_config
 fi
