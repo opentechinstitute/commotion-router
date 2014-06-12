@@ -43,7 +43,7 @@ echo -e "\n\nWelcome to the Setup Wizard.\n"
 # if password not set, require password set
 while [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]
 do
-  echo "Please choose an administrator password: "
+  echo -e "\nPlease choose an administrator password: \n"
   passwd
   uci set setup_wizard.passwords.admin_pass=changed
 done
@@ -51,7 +51,7 @@ done
 # if hostname not changed, allow option to set hostname
 if [ !`grep -q \'commotion\' /etc/config/system` ]; then
   while true; do
-    echo -e "Set the hostname for this device?"
+    echo -e "\n\nSet the hostname for this device?"
     read answer
     case $answer in                                            
       [Yy]*  ) echo "Enter new hostname: ";  
@@ -64,15 +64,15 @@ if [ !`grep -q \'commotion\' /etc/config/system` ]; then
   done
 fi
 
-echo "Please enter mesh network name: "
+echo -e "\n\nPlease enter mesh network name: "
 
 read MESH_NAME
 
-echo "Please select a valid channel: "
+echo -e "\n\nPlease select a valid channel: "
 
 read CHANNEL
 
-echo "Does this mesh network use encryption?"
+echo -e "\nDoes this mesh network use encryption?"
   while true; do
     read answer                                                
     case $answer in                                            
@@ -88,7 +88,7 @@ echo "Does this mesh network use encryption?"
 
 # ACCESS POINT
 
-echo -e "Set up an access point?"
+echo -e "\n\nSet up an access point?"
   while true; do
   read answer                                                
   case $answer in                                            
@@ -103,11 +103,11 @@ done
 if [ $AP_NAME ]; then
 
   # access point encryption
-  echo "Would you like to use encryption for the access point?"
+  echo -e "\n\nWould you like to use encryption for the access point?"
     while true; do
     read answer                                                
     case $answer in                                            
-      [Yy]*  ) echo "Please choose an encryption password for the AP: ";  
+      [Yy]*  ) echo -e "\nPlease choose an encryption password for the access point: ";  
             read AP_PASSWORD;                                
             break;;                                                                                                     
       [Nn]* ) break;;  
@@ -126,10 +126,10 @@ fi
   SSID:              "$MESH_NAME"
   Channel:           "$CHANNEL""
   if [ $MESH_PASSWORD ]; then
-    echo -e "Encryption:        yes
+    echo -e "  Encryption:        yes
   Password:          "$MESH_PASSWORD""
   else
-    echo -e "Encryption:        no"
+    echo -e "  Encryption:        no"
   fi
 
 if [ $AP_NAME ]; then
@@ -139,10 +139,10 @@ if [ $AP_NAME ]; then
   Channel:           "$CHANNEL""
 
   if [ $AP_PASSWORD ]; then
-    echo -e "Encryption:        yes
-    Password:          "$AP_PASSWORD""
+    echo -e "  Encryption:        yes"
+    echo -e "  Password:          "$AP_PASSWORD""
   else
-    echo -e "Encryption:        no"
+    echo -e "  Encryption:        no"
   fi
   
 fi
