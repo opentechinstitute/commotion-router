@@ -241,7 +241,28 @@ echo -e "\n\nRestarting networking.\n\n"
 /etc/init.d/network reload
 }
 
-# Check if settings have already been set
+# # Check if settings have already been set
+# if setup_wizard.settings.enabled=0
+# "Setup Wizard has already run. Set new configuration?"
+# -- could also have 'show settings' option
+# -- if yes, delete all wi-fi interfaces
+# -- run get_config
+# -- else, if keep configuration, exit 0
+
+if [ `uci get setup_wizard.settings.enabled` == 0 ]; then
+  echo -e "Setup Wizard has already been run."
+while true; do
+echo -e "\n\nSet new configuration?"
+    read answer
+    case $answer in                                            
+        [Yy]* ) echo -e "Reverting previous configuration.";
+                break;;                                                                                              
+        [Nn]* ) echo "Keeping settings. Closing Setup Wizard."; 
+                exit 0;;                                          
+        * )     echo "Please answer yes[y] or no[n]";;               
+    esac 
+  done
+fi
 
 # RUN SETUP WIZARD
 get_config 
