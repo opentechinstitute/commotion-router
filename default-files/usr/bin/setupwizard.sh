@@ -126,8 +126,8 @@ fi
   SSID:              "$MESH_NAME"
   Channel:           "$CHANNEL""
   if [ $MESH_PASSWORD ]; then
-    echo -e "  Encryption:        yes
-  Password:          "$MESH_PASSWORD""
+    echo -e "  Encryption:        yes"
+    echo -e "  Password:          "$MESH_PASSWORD""
   else
     echo -e "  Encryption:        no"
   fi
