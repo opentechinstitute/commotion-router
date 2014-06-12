@@ -41,11 +41,12 @@ fi
 echo -e "\n\nWelcome to the Setup Wizard.\n"
 
 # if password not set, require password set
-if [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]; then
+while [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]
+do
   echo "Please choose an administrator password: "
   passwd
   uci set setup_wizard.passwords.admin_pass=changed
-fi
+done
 
 # if hostname not changed, allow option to set hostname
 if [ !`grep -q \'commotion\' /etc/config/system` ]; then
