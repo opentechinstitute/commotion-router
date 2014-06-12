@@ -1,11 +1,10 @@
 #!/bin/ash
 
-# check to see if setupwizard has already been run
-
 clear_previous_configuration() {
   uci delete wireless.commotionMesh
   uci delete wireless.commotionAP
   uci delete network.commotionMesh
+  # commotion delete $profile 
    
   uci commit wireless
 }
@@ -38,7 +37,8 @@ if [[ ! -f /etc/config/setup_wizard ]]; then
   uci set setup_wizard.passwords.admin_pass=false
 fi
 
-echo -e "\n\nWelcome to the configuration wizard.\n"
+# BEGIN USER INTERACTION
+echo -e "\n\nWelcome to the Setup Wizard.\n"
 
 # if password not set, require password set
 if [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]; then
@@ -115,35 +115,35 @@ if [ $AP_NAME ]; then
     done
 fi
 
-echo -e "\n\nCONFIGURATION
+  echo -e "\n\nCONFIGURATION
 
-NODE SETTINGS
-Hostname:          "$HOSTNAME"
+  NODE SETTINGS
+  Hostname:          "$HOSTNAME"
 
 
-MESH SETTINGS
-SSID:              "$MESH_NAME"
-Channel:           "$CHANNEL""
-if [ $MESH_PASSWORD ]; then
-  echo -e "Encryption:        yes
-Password:          "$MESH_PASSWORD""
-else
-  echo -e "Encryption:        no"
-fi
+  MESH SETTINGS
+  SSID:              "$MESH_NAME"
+  Channel:           "$CHANNEL""
+  if [ $MESH_PASSWORD ]; then
+    echo -e "Encryption:        yes
+  Password:          "$MESH_PASSWORD""
+  else
+    echo -e "Encryption:        no"
+  fi
 
 if [ $AP_NAME ]; then
+  echo -e "\n
+  ACCESS POINT SETTINGS
+  SSID:              "$AP_NAME"
+  Channel:           "$CHANNEL""
 
-echo -e "\n
-ACCESS POINT SETTINGS
-SSID:              "$AP_NAME"
-Channel:           "$CHANNEL""
-fi
-
-if [ $AP_PASSWORD ]; then
-  echo -e "Encryption:        yes
-Password:          "$AP_PASSWORD""
-else
-  echo -e "Encryption:        no"
+  if [ $AP_PASSWORD ]; then
+    echo -e "Encryption:        yes
+    Password:          "$AP_PASSWORD""
+  else
+    echo -e "Encryption:        no"
+  fi
+  
 fi
 
 while true; do
