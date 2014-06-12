@@ -2,6 +2,8 @@
 
 # check to see if setupwizard has already been run
 
+
+
 clear_values() {
   unset SETUP_RUN
   unset PASSWORD_SET
@@ -110,15 +112,15 @@ fi
 echo -e "\n\nCONFIGURATION
 
 NODE SETTINGS
-Hostname:          $HOSTNAME
+Hostname:          "$HOSTNAME"
 
 
 MESH SETTINGS
-SSID:              $MESH_NAME
-Channel:           $CHANNEL"
+SSID:              "$MESH_NAME"
+Channel:           "$CHANNEL""
 if [ $MESH_PASSWORD ]; then
   echo -e "Encryption:        yes
-Password:          $MESH_PASSWORD"
+Password:          "$MESH_PASSWORD""
 else
   echo -e "Encryption:        no"
 fi
@@ -127,13 +129,13 @@ if [ $AP_NAME ]; then
 
 echo -e "\n
 ACCESS POINT SETTINGS
-SSID:              $AP_NAME
-Channel:           $CHANNEL"
+SSID:              "$AP_NAME"
+Channel:           "$CHANNEL""
 fi
 
 if [ $AP_PASSWORD ]; then
   echo -e "Encryption:        yes
-Password:          $AP_PASSWORD"
+Password:          "$AP_PASSWORD""
 else
   echo -e "Encryption:        no"
 fi
@@ -160,39 +162,39 @@ set_config() {
 
 # wireless settings
 MESH_CONFIG=`uci add wireless wifi-iface`
-uci rename wireless.$MESH_CONFIG=commotionMesh
+uci rename wireless."$MESH_CONFIG"=commotionMesh
 
 uci set wireless.commotionMesh.mode=adhoc
 uci set wireless.commotionMesh.device=radio0
-uci set wireless.commotionMesh.ssid=$MESH_NAME
-uci set wireless.commotionMesh.network=$MESH_NAME
-uci set wireless.radio0.channel=$CHANNEL
+uci set wireless.commotionMesh.ssid="$MESH_NAME"
+uci set wireless.commotionMesh.network="$MESH_NAME"
+uci set wireless.radio0.channel="$CHANNEL"
 uci set wireless.radio0.disabled=0
 
 # network settings
-uci set network.$MESH_NAME=interface
-uci set network.$MESH_NAME.class=mesh
-uci set network.$MESH_NAME.profile=$MESH_NAME
-uci set network.$MESH_NAME.proto=commotion
+uci set network."$MESH_NAME"=interface
+uci set network."$MESH_NAME".class=mesh
+uci set network."$MESH_NAME".profile="$MESH_NAME"
+uci set network."$MESH_NAME".proto=commotion
 
 # firewall settings
-uci add_list firewall.@zone[1].network=$MESH_NAME
+uci add_list firewall.@zone[1].network="$MESH_NAME"
 
 
 # SET COMMOTION PROFILE VALUES
 
-commotion new $MESH_NAME
-commotion set $MESH_NAME ssid $MESH_NAME
-commotion set $MESH_NAME channel $CHANNEL
+commotion new "$MESH_NAME"
+commotion set "$MESH_NAME" ssid "$MESH_NAME"
+commotion set "$MESH_NAME" channel "$CHANNEL"
 
 # SET ENCRYPTION (if any)
 
 if [ $MESH_PASSWORD ]; then
-  commotion set $MESH_NAME key $MESH_PASSWORD; 
+  commotion set "$MESH_NAME" key "$MESH_PASSWORD"; 
   uci set wireless.commotionMesh.encryption=psk2;
-  uci set wireless.commotionMesh.key=$MESH_PASSWORD;
+  uci set wireless.commotionMesh.key="$MESH_PASSWORD";
 else
-  commotion set $MESH_NAME encryption none
+  commotion set "$MESH_NAME" encryption none
   uci set wireless.commotionMesh.encryption=none
 fi
 
@@ -201,18 +203,18 @@ fi
 if [ $AP_NAME ]; then
   # set AP uci values
   AP_CONFIG=`uci add wireless wifi-iface`
-  uci rename wireless.$AP_CONFIG=$AP_NAME
+  uci rename wireless."$AP_CONFIG"="$AP_NAME"
 
-  uci set wireless.$AP_NAME.network=lan
-  uci set wireless.$AP_NAME.mode=ap
-  uci set wireless.$AP_NAME.ssid=$AP_NAME
-  uci set wireless.$AP_NAME.device=radio0
+  uci set wireless."$AP_NAME".network=lan
+  uci set wireless."$AP_NAME".mode=ap
+  uci set wireless."$AP_NAME".ssid="$AP_NAME"
+  uci set wireless."$AP_NAME".device=radio0
   
   if [ $AP_PASSWORD ]; then
-    uci set wireless.$AP_NAME.encryption=psk2;
-    uci set wireless.$AP_NAME.key=$AP_PASSWORD;
+    uci set wireless."$AP_NAME".encryption=psk2;
+    uci set wireless."$AP_NAME".key="$AP_PASSWORD";
   else
-    uci set wireless.$AP_NAME.encryption=none
+    uci set wireless."$AP_NAME".encryption=none
   fi
 fi
 
@@ -222,7 +224,7 @@ uci set setup_wizard.settings.enabled=0
 uci commit setup_wizard
 
 # commit profile changes
-commotion save $MESH_NAME
+commotion save "$MESH_NAME"
 
 # commit uci changes
 uci commit wireless
@@ -238,6 +240,8 @@ echo -e "\n\nRestarting networking.\n\n"
 /etc/init.d/commotiond restart
 /etc/init.d/network reload
 }
+
+# Check if settings have already been set
 
 # RUN SETUP WIZARD
 get_config 
