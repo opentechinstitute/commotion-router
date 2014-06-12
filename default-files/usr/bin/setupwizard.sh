@@ -2,7 +2,13 @@
 
 # check to see if setupwizard has already been run
 
-
+clear_previous_configuration() {
+  uci delete wireless.commotionMesh
+  uci delete wireless.commotionAP
+  uci delete network.commotionMesh
+   
+  uci commit wireless
+}
 
 clear_values() {
   unset SETUP_RUN
@@ -144,12 +150,10 @@ while true; do
 echo -e "\n\nKeep this configuration?"
     read answer
     case $answer in                                            
-        [Yy]* ) return 0;;
-                #break;;                                                                                              
+        [Yy]* ) return 0;;                                                                                             
         [Nn]* ) echo "Reverting configuration settings."; 
                 clear_values;
-                return 1;;
-                #break;;                                          
+                return 1;;                                         
         * )     echo "Please answer yes[y] or no[n]";;               
     esac 
   done
@@ -172,10 +176,10 @@ uci set wireless.radio0.channel="$CHANNEL"
 uci set wireless.radio0.disabled=0
 
 # network settings
-uci set network."$MESH_NAME"=interface
-uci set network."$MESH_NAME".class=mesh
-uci set network."$MESH_NAME".profile="$MESH_NAME"
-uci set network."$MESH_NAME".proto=commotion
+uci set network.commotionMesh=interface
+uci set network.commotionMesh.class=mesh
+uci set network.commotionMesh.profile="$MESH_NAME"
+uci set network.commotionMesh.proto=commotion
 
 # firewall settings
 uci add_list firewall.@zone[1].network="$MESH_NAME"
@@ -203,18 +207,18 @@ fi
 if [ $AP_NAME ]; then
   # set AP uci values
   AP_CONFIG=`uci add wireless wifi-iface`
-  uci rename wireless."$AP_CONFIG"="$AP_NAME"
+  uci rename wireless."$AP_CONFIG"=commotionAP
 
-  uci set wireless."$AP_NAME".network=lan
-  uci set wireless."$AP_NAME".mode=ap
-  uci set wireless."$AP_NAME".ssid="$AP_NAME"
-  uci set wireless."$AP_NAME".device=radio0
+  uci set wireless.commotionAP.network=lan
+  uci set wireless.commotionAP.mode=ap
+  uci set wireless.commotionAP.ssid="$AP_NAME"
+  uci set wireless.commotionAP.device=radio0
   
   if [ $AP_PASSWORD ]; then
-    uci set wireless."$AP_NAME".encryption=psk2;
-    uci set wireless."$AP_NAME".key="$AP_PASSWORD";
+    uci set wireless.commotionAP.encryption=psk2;
+    uci set wireless.commotionAP.key="$AP_PASSWORD";
   else
-    uci set wireless."$AP_NAME".encryption=none
+    uci set wireless.commotionAP.encryption=none
   fi
 fi
 
@@ -241,14 +245,6 @@ echo -e "\n\nRestarting networking.\n\n"
 /etc/init.d/network reload
 }
 
-# # Check if settings have already been set
-# if setup_wizard.settings.enabled=0
-# "Setup Wizard has already run. Set new configuration?"
-# -- could also have 'show settings' option
-# -- if yes, delete all wi-fi interfaces
-# -- run get_config
-# -- else, if keep configuration, exit 0
-
 if [ `uci get setup_wizard.settings.enabled` == 0 ]; then
   echo -e "Setup Wizard has already been run."
 while true; do
@@ -256,6 +252,7 @@ echo -e "\n\nSet new configuration?"
     read answer
     case $answer in                                            
         [Yy]* ) echo -e "Reverting previous configuration.";
+                clear_previous_configuration;
                 break;;                                                                                              
         [Nn]* ) echo "Keeping settings. Closing Setup Wizard."; 
                 exit 0;;                                          
