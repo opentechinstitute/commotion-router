@@ -5,6 +5,8 @@ SSID_MIN=1
 SSID_MAX=31
 KEY_MIN=8
 KEY_MAX=63
+CHANNEL_MIN=1
+CHANNEL_MAX=12
 
 
 # INPUT VALIDATOR
@@ -116,10 +118,10 @@ done
 while true; do
   echo -e "\n\nPlease select a valid channel: "
   read CHANNEL
-  if [ "$CHANNEL" != "0" ] && [ "$CHANNEL" -lt "13" ]; then
+  if [ "$CHANNEL" -gt "$CHANNEL_MIN" ] && [ "$CHANNEL" -lt "$CHANNEL_MAX" ]; then
     break;
   else
-    echo -e "ERROR: Channel must be between 1-12";
+    echo -e "ERROR: Channel must be between $CHANNEL_MIN and $CHANNEL_MAX";
   fi
 done
 
@@ -171,7 +173,7 @@ if [ $AP_NAME ]; then
       [Yy]* ) while true; do
                 echo -e "\nPlease choose an encryption password: ";  
                 read AP_PASSWORD;                                
-                validate $AP_PASSWORD $SSID_MIN $SSID_MAX;
+                validate $AP_PASSWORD $KEY_MIN $KEY_MAX;
                 if [ $? == "0" ]; then
                   break;
                 fi
