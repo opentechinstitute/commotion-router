@@ -1,16 +1,23 @@
 #!/bin/ash
 
+# PRESET VALUES
+SSID_MIN=1
+SSID_MAX=31
+KEY_MIN=8
+KEY_MAX=63
+
+
+# INPUT VALIDATOR
 validate() {
+  INPUT_STRING="$1"
+  MIN_LENGTH="$2"
+  MAX_LENGTH="$3"
 
-INPUT_STRING="$1"
-MIN_LENGTH="$2"
-MAX_LENGTH="$3"
-
-length=${#INPUT_STRING}
-if [ $length -lt 2 -o $length -gt 63 ] ;then      
-    echo "ERROR: Length invalid."                         
-    return 1;                                                     
-fi                                                            
+  length=${#INPUT_STRING}
+  if [ $length -lt $MIN_LENGTH -o $length -gt $MAX_LENGTH ] ;then      
+    echo "ERROR: Length invalid. Value must be between $MIN_LENGTH and $MAX_LENGTH characters."                         
+    return 1;
+  fi                                                            
                                                         
 case $INPUT_STRING in                                                      
   *[^a-zA-Z0-9]* ) 
@@ -21,6 +28,7 @@ case $INPUT_STRING in
 esac 
 }
 
+# RESET FUNCTION (for saved configurations)
 clear_previous_configuration() {
   uci delete wireless.commotionMesh
   uci delete wireless.commotionAP
@@ -30,6 +38,7 @@ clear_previous_configuration() {
   uci commit wireless
 }
 
+# RESET FUNCTION (for unsaved configurations)
 clear_values() {
   unset SETUP_RUN
   unset PASSWORD_SET
@@ -42,7 +51,9 @@ clear_values() {
   commotion delete $MESH_NAME
 }
 
+# GET CONFIGURATION VALUES FROM USER
 get_config() {
+
 # if setup_wizard file does not exist, create it
 if [[ ! -f /etc/config/setup_wizard ]]; then
   touch /etc/config/setup_wizard
@@ -58,6 +69,7 @@ if [[ ! -f /etc/config/setup_wizard ]]; then
   uci set setup_wizard.passwords.admin_pass=false
 fi
 
+
 # BEGIN USER INTERACTION
 echo -e "\n\nWelcome to the Setup Wizard.\n"
 
@@ -69,34 +81,33 @@ do
   uci set setup_wizard.passwords.admin_pass=changed
 done
 
-# if hostname not changed, allow option to set hostname
-if [ !`grep -q \'commotion\' /etc/config/system` ]; then
-  while true; do
-    echo -e "\n\nSet the hostname for this device?"
-    read answer
-    case $answer in                                            
-      [Yy]* ) while true; do
-                echo "Enter new hostname: ";  
-                read HOSTNAME;                                
-                validate $HOSTNAME;
-                if [ $? == 0 ]; then
-                  uci set system.@system[0].hostname="$HOSTNAME";
-                  break;
-                fi
-                done;
-                break;;    
-      [Nn]* ) break;;                                          
-      * ) echo "Please answer yes[y] or no[n]";;               
-    esac 
-  done
-fi
+
+while true; do
+  echo -e "\n\nSet the hostname for this device?"
+  read answer
+  case $answer in                                            
+    [Yy]* ) while true; do
+              echo "Enter new hostname: ";  
+              read HOSTNAME;                                
+              validate $HOSTNAME 2 24;
+              if [ $? == 0 ]; then
+                uci set system.@system[0].hostname="$HOSTNAME";
+                break;
+              fi
+              done;
+              break;;    
+    [Nn]* ) break;;                                          
+    * ) echo "Please answer yes[y] or no[n]";;               
+  esac 
+done
+
 
 
 # GET MESH SETTINGS
 while true; do
   echo -e "\n\nPlease enter mesh network name: "
   read MESH_NAME
-  validate $MESH_NAME
+  validate $MESH_NAME $SSID_MIN $SSID_MAX
   if [ $? == 0 ]; then
     break;
   fi
@@ -119,11 +130,12 @@ echo -e "\nDoes this mesh network use encryption?"
       [Yy]* ) while true; do
                 echo "Please choose an encryption password: ";  
                 read MESH_PASSWORD;
-                validate $MESH_PASSWORD;
+                validate $MESH_PASSWORD $KEY_MIN $KEY_MAX;
                 if [ $? == "0" ]; then
                   break;
                 fi
-              done;;
+              done;
+              break;;
       [Nn]* ) 
             break;;                                          
       * ) echo "Please answer yes[y] or no[n]";;               
@@ -136,8 +148,14 @@ echo -e "\n\nSet up an access point?"
   while true; do
   read answer                                                
   case $answer in                                            
-    [Yy]* ) echo -e "\nAccess point name: ";
-            read AP_NAME;
+    [Yy]* ) while true; do
+              echo -e "\nAccess point name: ";
+              read AP_NAME;
+              validate $AP_NAME $SSID_MIN $SSID_MAX;
+              if [ $? == "0" ]; then
+                break;
+              fi
+            done;
             break;;                                                                                        
     [Nn]* ) break;;
     * ) echo "Please answer yes[y] or no[n]";;               
@@ -145,15 +163,20 @@ echo -e "\n\nSet up an access point?"
 done
 
 if [ $AP_NAME ]; then
-
   # access point encryption
   echo -e "\n\nUse encryption for the access point?"
     while true; do
     read answer                                                
     case $answer in                                            
-      [Yy]*  ) echo -e "\nPlease choose an encryption password: ";  
-            read AP_PASSWORD;                                
-            break;;                                                                                                     
+      [Yy]* ) while true; do
+                echo -e "\nPlease choose an encryption password: ";  
+                read AP_PASSWORD;                                
+                validate $AP_PASSWORD $SSID_MIN $SSID_MAX;
+                if [ $? == "0" ]; then
+                  break;
+                fi
+              done;
+              break;;                                                                                                     
       [Nn]* ) break;;  
       * ) echo "Please answer yes[y] or no[n]";;               
     esac 
