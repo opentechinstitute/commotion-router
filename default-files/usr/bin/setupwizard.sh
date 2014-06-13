@@ -2,17 +2,22 @@
 
 validate() {
 
-string="$1"
+INPUT_STRING="$1"
+MIN_LENGTH="$2"
+MAX_LENGTH="$3"
 
-length=${#string}
+length=${#INPUT_STRING}
 if [ $length -lt 2 -o $length -gt 63 ] ;then      
     echo "ERROR: Length invalid."                         
     return 1;                                                     
 fi                                                            
                                                         
-case $string in                                                      
-    *[^a-zA-Z0-9]* ) echo "ERROR: Cannot assign non-ASCII characters.";return 1;;
-    * ) return 0;;
+case $INPUT_STRING in                                                      
+  *[^a-zA-Z0-9]* ) 
+    echo "ERROR: Cannot assign non-ASCII characters.";
+    return 1;;
+  * ) 
+    return 0;;
 esac 
 }
 
@@ -78,7 +83,8 @@ if [ !`grep -q \'commotion\' /etc/config/system` ]; then
                   uci set system.@system[0].hostname="$HOSTNAME";
                   break;
                 fi
-                done;;
+                done;
+                break;;    
       [Nn]* ) break;;                                          
       * ) echo "Please answer yes[y] or no[n]";;               
     esac 
