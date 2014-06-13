@@ -1,5 +1,21 @@
 #!/bin/ash
 
+validate() {
+
+string="$1"
+
+length=${#string}
+if [ $length -lt 2 -o $length -gt 63 ] ;then      
+    echo "ERROR: Length invalid."                         
+    return 1;                                                     
+fi                                                            
+                                                        
+case $string in                                                      
+    *[^a-zA-Z0-9]* ) echo "ERROR: Cannot assign non-ASCII characters.";return 1;;
+    * ) return 0;;
+esac 
+}
+
 clear_previous_configuration() {
   uci delete wireless.commotionMesh
   uci delete wireless.commotionAP
@@ -54,10 +70,15 @@ if [ !`grep -q \'commotion\' /etc/config/system` ]; then
     echo -e "\n\nSet the hostname for this device?"
     read answer
     case $answer in                                            
-      [Yy]*  ) echo "Enter new hostname: ";  
-            read HOSTNAME;                                
-            uci set system.@system[0].hostname="$HOSTNAME";
-            break;;                                                                                              
+      [Yy]* ) while true; do
+                echo "Enter new hostname: ";  
+                read HOSTNAME;                                
+                validate $HOSTNAME;
+                if [ $? == 0 ]; then
+                  uci set system.@system[0].hostname="$HOSTNAME";
+                  break;
+                fi
+                done;;
       [Nn]* ) break;;                                          
       * ) echo "Please answer yes[y] or no[n]";;               
     esac 
@@ -66,21 +87,37 @@ fi
 
 
 # GET MESH SETTINGS
-echo -e "\n\nPlease enter mesh network name: "
+while true; do
+  echo -e "\n\nPlease enter mesh network name: "
+  read MESH_NAME
+  validate $MESH_NAME
+  if [ $? == 0 ]; then
+    break;
+  fi
+done
 
-read MESH_NAME
-
-echo -e "\n\nPlease select a valid channel: "
-
-read CHANNEL
+while true; do
+  echo -e "\n\nPlease select a valid channel: "
+  read CHANNEL
+  if [ "$CHANNEL" != "0" ] && [ "$CHANNEL" -lt "13" ]; then
+    break;
+  else
+    echo -e "ERROR: Channel must be between 1-12";
+  fi
+done
 
 echo -e "\nDoes this mesh network use encryption?"
   while true; do
     read answer                                                
     case $answer in                                            
-      [Yy]*  ) echo "Please choose an encryption password: ";  
-            read MESH_PASSWORD;                                
-            break;;                                                                                          
+      [Yy]* ) while true; do
+                echo "Please choose an encryption password: ";  
+                read MESH_PASSWORD;
+                validate $MESH_PASSWORD;
+                if [ $? == "0" ]; then
+                  break;
+                fi
+              done;;
       [Nn]* ) 
             break;;                                          
       * ) echo "Please answer yes[y] or no[n]";;               
