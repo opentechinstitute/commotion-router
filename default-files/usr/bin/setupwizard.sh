@@ -249,10 +249,10 @@ uci set wireless.radio0.channel="$CHANNEL"
 uci set wireless.radio0.disabled=0
 
 # network settings
-uci set network.commotionMesh=interface
-uci set network.commotionMesh.class=mesh
-uci set network.commotionMesh.profile="$MESH_NAME"
-uci set network.commotionMesh.proto=commotion
+uci set network."$MESH_NAME"=interface
+uci set network."$MESH_NAME".class=mesh
+uci set network."$MESH_NAME".profile="$MESH_NAME"
+uci set network."$MESH_NAME".proto=commotion
 
 # firewall settings
 uci add_list firewall.@zone[1].network="$MESH_NAME"
