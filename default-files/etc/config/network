@@ -10,7 +10,7 @@ config interface 'lan'
 	option class 'client'
 	option type 'bridge'
 
-config interface 'wired'
+config interface 'wan'
 	option ifname 'eth0'
 	option proto 'commotion'
 	option class 'wired'
