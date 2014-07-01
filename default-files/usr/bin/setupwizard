@@ -138,11 +138,17 @@ echo -e "\nSet mesh network use encryption? [y/n]"
     read answer                                                
     case $answer in                                            
       [Yy]* ) while true; do
-                echo "Please choose an encryption password: ";  
-                read MESH_PASSWORD;
+                echo -e "\nPlease choose an encryption password: ";  
+                read -s MESH_PASSWORD;
                 validate $MESH_PASSWORD $KEY_MIN $KEY_MAX;
                 if [ $? == "0" ]; then
-                  break;
+                  echo "Repeat password: ";
+                  read -s MESH_CONFIRM;
+                  if [ "$MESH_PASSWORD" == "$MESH_CONFIRM" ]; then
+                    break;
+                  else 
+                    echo -e "Passwords do not match.";
+                  fi
                 fi
               done;
               break;;
@@ -180,13 +186,19 @@ if [ $AP_NAME ]; then
     case $answer in                                            
       [Yy]* ) while true; do
                 echo -e "\nPlease choose an encryption password: ";  
-                read AP_PASSWORD;                                
+                read -s AP_PASSWORD;                                
                 validate $AP_PASSWORD $KEY_MIN $KEY_MAX;
                 if [ $? == "0" ]; then
-                  break;
+                  echo "Repeat password: ";
+                  read -s AP_CONFIRM;
+                  if [ "$AP_PASSWORD" == "$AP_CONFIRM" ]; then
+                    break;
+                  else
+                    echo -e "Passwords do not match.\n";
+                  fi
                 fi
               done;
-              break;;                                                                                                     
+              break;;  
       [Nn]* ) break;;  
       * ) echo "Please answer yes[y] or no[n]";;               
     esac 
@@ -206,7 +218,7 @@ fi
   
 if [ $MESH_PASSWORD ]; then
   echo -e "  Encryption:        yes"
-  echo -e "  Password:          "$MESH_PASSWORD""
+#  echo -e "  Password:          "$MESH_PASSWORD""
 else
   echo -e "  Encryption:        no"
 fi
@@ -219,7 +231,7 @@ if [ $AP_NAME ]; then
 
   if [ $AP_PASSWORD ]; then
     echo -e "  Encryption:        yes"
-    echo -e "  Password:          "$AP_PASSWORD""
+#    echo -e "  Password:          "$AP_PASSWORD""
   else
     echo -e "  Encryption:        no"
   fi
@@ -323,6 +335,9 @@ echo -e "\n\nRestarting networking.\n\n"
 # restart networking
 /etc/init.d/commotiond restart
 /etc/init.d/network reload
+
+# clear all values (precaution)
+clear_values
 }
 
 
