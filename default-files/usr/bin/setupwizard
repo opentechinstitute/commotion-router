@@ -7,7 +7,8 @@ KEY_MIN=8
 KEY_MAX=63
 CHANNEL_MIN=1
 CHANNEL_MAX=12
-
+HOSTNAME_MIN=2
+HOSTNAME_MAX=24
 
 # INPUT VALIDATOR
 validate() {
@@ -92,13 +93,13 @@ done
 
 
 while true; do
-  echo -e "\n\nSet the hostname for this device?"
+  echo -e "\n\nSet the hostname for this device? [y/n]"
   read answer
   case $answer in                                            
     [Yy]* ) while true; do
               echo "Enter new hostname: ";  
               read HOSTNAME;                                
-              validate $HOSTNAME 2 24;
+              validate $HOSTNAME $HOSTNAME_MIN $HOSTNAME_MAX;
               if [ $? == 0 ]; then
                 uci set system.@system[0].hostname="$HOSTNAME";
                 break;
@@ -132,7 +133,7 @@ while true; do
   fi
 done
 
-echo -e "\nDoes this mesh network use encryption?"
+echo -e "\nSet mesh network use encryption? [y/n]"
   while true; do
     read answer                                                
     case $answer in                                            
@@ -153,7 +154,7 @@ echo -e "\nDoes this mesh network use encryption?"
   
 
 # GET ACCESS POINT SETTINGS
-echo -e "\n\nSet up an access point?"
+echo -e "\n\nSet up an access point? [y/n]"
   while true; do
   read answer                                                
   case $answer in                                            
@@ -173,7 +174,7 @@ done
 
 if [ $AP_NAME ]; then
   # access point encryption
-  echo -e "\n\nUse encryption for the access point?"
+  echo -e "\n\nSet encryption for the access point? [y/n]"
     while true; do
     read answer                                                
     case $answer in                                            
@@ -227,7 +228,7 @@ fi
 
 # save or reset configuration
 while true; do
-echo -e "\n\nKeep this configuration?"
+echo -e "\n\nKeep this configuration? [y/n]"
     read answer
     case $answer in                                            
         [Yy]* ) return 0;;                                                                                             
@@ -329,7 +330,7 @@ echo -e "\n\nRestarting networking.\n\n"
 if [ `uci get setup_wizard.settings.enabled` == 0 ]; then
   echo -e "Setup Wizard has already been run."
 while true; do
-echo -e "\n\nSet new configuration?"
+echo -e "\n\nSet new configuration? [y/n]"
     read answer
     case $answer in                                            
         [Yy]* ) echo -e "Reverting previous configuration.";
