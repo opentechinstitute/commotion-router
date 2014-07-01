@@ -11,12 +11,19 @@ CHANNEL_MAX=12
 
 # INPUT VALIDATOR
 validate() {
+
+  # check that user has not input empty string
+  if [ -z "$3" ]; then
+    echo "Invalid option."
+    return 1;
+  fi
+
   INPUT_STRING="$1"
   MIN_LENGTH="$2"
   MAX_LENGTH="$3"
-
+  
   length=${#INPUT_STRING}
-  if [ $length -lt $MIN_LENGTH -o $length -gt $MAX_LENGTH ] ;then      
+  if [ $length -lt $MIN_LENGTH -o $length -gt $MAX_LENGTH ]; then      
     echo "ERROR: Length invalid. Value must be between $MIN_LENGTH and $MAX_LENGTH characters."                         
     return 1;
   fi                                                            
