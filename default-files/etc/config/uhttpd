@@ -8,7 +8,7 @@ config uhttpd 'main'
 	option cert '/etc/uhttpd.crt'
 	option key '/etc/uhttpd.key'
 	option cgi_prefix '/cgi-bin'
-	option script_timeout '60'
+	option script_timeout '300'
 	option network_timeout '30'
 	option tcp_keepalive '1'
 
