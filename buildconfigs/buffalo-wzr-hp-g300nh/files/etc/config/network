@@ -1,0 +1,39 @@
+
+config interface 'loopback'
+	option ifname 'lo'
+	option proto 'static'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+
+config interface 'lan'
+	option proto 'commotion'
+	option class 'client'
+	option type 'bridge'
+	option ipaddr '10.184.221.1'
+	option netmask '255.255.255.0'
+
+config interface 'wired'
+	option ifname 'eth0'
+	option proto 'commotion'
+	option meshed 'false'
+	option class 'wired'
+	option dhcp 'server'
+
+config interface 'wan'
+	option ifname 'eth1'
+	option proto 'commotion'
+	option class 'wired'
+	option meshed 'false'
+	option dhcp 'client'
+
+config switch
+	option name 'eth0switch'
+	option reset '1'
+	option enable '0'
+	option enable_vlan '1'
+
+config alias 'thisnode'
+	option interface 'lan'
+	option proto 'static'
+	option ipaddr '169.254.184.221'
+	option netmask '255.255.0.0'
