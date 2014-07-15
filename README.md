@@ -99,6 +99,11 @@ On a Debian-based system, including Ubuntu or Mint, you can simply type
 
 10. `cd bin/`. Your router images will be .bin files stored in a directory named after your wireless chip. For example, a default Commotion build for a Ubiquiti Nanostation would be `ar71xx/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin`
 
+####Commotion Package Customization
+
+An individual package may be customized prior to building by editing the package Makefile in feeds/commotion/packages/package-name/. 
+
+Packages may be compiled with Stack Smashing Protection by adding `-O0 -fstack-protector-all` to the line beginning `TARGET_CFLAGS +=` and `-lssp` to the line beginning `LDFLAGS +=`. See <a href="https://wiki.commotionwireless.net/doku.php?id=development_resources:router:compiling_packages_with_stack_smashing_protection">Compiling Packages with Stack Smashing Protection</a> on the Commotion wiki for more details.
 
 ####Installation Instructions (Ubiquiti Devices):
 
