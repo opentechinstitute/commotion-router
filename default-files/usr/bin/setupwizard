@@ -101,11 +101,11 @@ while true; do
               read HOSTNAME;                                
               uci set system.@system[0].hostname="$HOSTNAME";
               
-              #validate $HOSTNAME $HOSTNAME_MIN $HOSTNAME_MAX;
-              #if [ $? == 0 ]; then
-              #  uci set system.@system[0].hostname="$HOSTNAME";
-              #  break;
-              #fi
+              validate $HOSTNAME $HOSTNAME_MIN $HOSTNAME_MAX;
+              if [ $? == 0 ]; then
+                uci set system.@system[0].hostname="$HOSTNAME";
+                break;
+              fi
               done;
               break;;    
     [Nn]* ) break;;                                          
