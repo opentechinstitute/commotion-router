@@ -30,7 +30,7 @@ validate() {
   fi                                                            
                                                         
 case $INPUT_STRING in                                                      
-  *[^a-zA-Z0-9]* ) 
+  *[^a-zA-Z0-9-]* ) 
     echo "ERROR: Cannot assign non-ASCII characters.";
     return 1;;
   * ) 
