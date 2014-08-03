@@ -79,6 +79,8 @@ Before you begin, you may need to install additional the following software:
 On a Debian-based system, including Ubuntu or Mint, you can simply type
 `sudo apt-get install subversion build-essential libncurses5-dev zlib1g-dev gawk git ccache gettext libssl-dev xsltproc`. Additional packages may be required if you encounter errors during the build process (e.g., `sudo apt-get install libxml-parser-perl`).
 
+Building on OSX is ill-advised, as such requires a large number of dependencies and, most difficultly, a case-sensitive filesystem. Here is [how to determine if you are](https://apple.stackexchange.com/questions/71357/how-to-check-if-my-hd-is-case-sensitive-or-not), but unless you installed OSX yourself and use no Adobe programs (they require case-insensitive), your filesystem is case-insensitive. It is likely quicker to configure a Linux virtual machine and use that instead. If you do have a case-sensitive filesystem, you can proceed, but [YMMV](https://en.wiktionary.org/wiki/YMMV).
+
 1. `git clone https://github.com/opentechinstitute/commotion-openwrt.git`
 
 2. `cd commotion-openwrt/`
