@@ -244,9 +244,59 @@ set_olsrd_mdp() {
   return 0
 } 
 
+#===  FUNCTION  ================================================================
+#          NAME:  set_olsrd_lan_if
+#   DESCRIPTION:  configure lan interface for olsrd 
+#    PARAMETERS:  
+#       RETURNS:  0 on success
+#===============================================================================
+
+set_olsrd_lan_if() {
+	DEFAULT_CLIENT_SUBNET="10.0.0.0"
+	DEFAULT_CLIENT_IPGENMASK="255.0.0.0"
+	IPV6="ip6addr"
+	IPV4="ipaddr"
+	LOCALIP4="$(commotion_gen_ip $DEFAULT_CLIENT_SUBNET $DEFAULT_CLIENT_IPGENMASK gw)"
+	
+	# Check if IPv6 address exists for LAN if yes remove it
+	if grep -Fq $IPV6 /etc/config/network; then
+		logger -t commotion.hotplug.olsrd -s "$IPV6 address already exists delete it."
+		uci delete network.lan.$IPV6
+		uci commit
+	fi
+
+	uci set radvd.@prefix[0].ignore=1
+	uci set radvd.@interface[0].ignore=1
+	uci set radvd.@prefix[0].AdvRouterAddr=0
+	uci commit radvd
+	/etc/init.d/radvd stop
+
+	# Check if IPv4 address exists for LAN, if not assign one
+	if [ "$(uci_get_state network "$INTERFACE" ipaddr)" == $LOCALIP4 ]; then
+		logger -t commotion.hotplug.olsrd -s "$IPV4 exists with  $LOCALIP4 address"
+
+	else 
+		logger -t commotion.hotplug.olsrd -s "No entry found. Creating UCI entry for '$IPV4' version 4"
+		uci set network.lan.$IPV4=$LOCALIP4
+		uci set network.lan.netmask=255.255.255.0
+	fi
+	
+	uci set network.lan.proto=commotion
+	uci commit network
+	/etc/init.d/network reload
+	
+	return 0
+}
+
+
 logger -t commotion.hotplug.olsrd "proto: $(uci_get_state network "$INTERFACE" proto)"
 logger -t commotion.hotplug.olsrd "interface: $INTERFACE"
 logger -t commotion.hotplug.olsrd "device: $DEVICE"
+
+if [ $ACTION == "ifdown" ]; then
+    $DEBUG unset_olsrd_if $INTERFACE
+	$DEBUG unset_olsrd_dnssd $INTERFACE
+fi
 
 local sid=
 local keyring=
@@ -271,6 +321,7 @@ case $ACTION in
 		# Is this a mesh interface?
 		if is_true "$meshed"; then
 			$DEBUG set_olsrd_if $INTERFACE
+			$DEBUG set_olsrd_lan_if
 		fi
       
 		# Should this interface be announced as a client network?
@@ -285,6 +336,6 @@ case $ACTION in
 		$DEBUG unset_olsrd_dnssd $INTERFACE
 	;;
 esac
+}
 $DEBUG uci_commit olsrd
 $DEBUG /etc/init.d/olsrd restart
-}
