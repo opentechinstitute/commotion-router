@@ -141,6 +141,8 @@ set_babeld_if() {
   return 0
 }
 
+: ' COMMENTED OUT UNTIL WE HAVE IPv6 SUPPORT
+
 #===  FUNCTION  ================================================================
 #          NAME:  set_babeld_lan_if
 #   DESCRIPTION:  configure lan interface for babel including ipv4 & ipv6 & proto & radvd 
@@ -190,8 +192,7 @@ set_babeld_lan_if() {
 	
 	return 0
 }
-
-
+'
 
 logger -t commotion.hotplug.babeld "proto: $(uci_get_state network "$INTERFACE" proto)"
 logger -t commotion.hotplug.babeld "interface: $INTERFACE"
