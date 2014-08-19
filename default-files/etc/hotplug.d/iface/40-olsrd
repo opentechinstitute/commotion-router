@@ -301,7 +301,9 @@ fi
 local sid=
 local keyring=
 
-[ -f "/etc/config/olsrd" ] && [ "$(uci_get_state network "$INTERFACE" proto)" = "commotion" ] && {
+[ -f "/etc/config/olsrd" ] && [ "$(uci_get_state network "$INTERFACE" proto)" = "commotion" ] && [ "$(commotion_get_routing "$DEVICE")" = "olsr" ] && {
+
+logger -t commotion.hotplug.olsrd "Routing using OLSRd"
 
 local meshed="$(uci_get network "$INTERFACE" meshed "$(uci_get_state network "$INTERFACE" meshed)")"
 local announced="$(uci_get network "$INTERFACE" announced "$(uci_get_state network "$INTERFACE" announced)")"
