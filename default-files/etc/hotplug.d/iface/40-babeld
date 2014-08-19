@@ -201,7 +201,9 @@ if [ $ACTION == "ifdown" ]; then
     $DEBUG unset_babeld_if $INTERFACE
 fi
 
-[ -f "/etc/config/babeld" ] && [ "$(uci_get_state network "$INTERFACE" proto)" = "babel" ] && {
+[ -f "/etc/config/babeld" ] && [ "$(uci_get_state network "$INTERFACE" proto)" = "commotion" ]  && [ "$(commotion_get_routing "$DEVICE")" = "babel" ] && {
+
+logger -t commotion.hotplug.babeld "Routing using Babeld"
 
 local announced="$(uci_get network "$INTERFACE" announced "$(uci_get_state network "$INTERFACE" announced)")"
 logger -t commotion.hotplug.babeld "announced: $announced"
