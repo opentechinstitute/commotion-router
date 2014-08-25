@@ -9,8 +9,6 @@ config interface 'lan'
 	option proto 'commotion'
 	option class 'client'
 	option type 'bridge'
-	option ipaddr '10.184.221.1'
-	option netmask '255.255.255.0'
 
 config interface 'wired'
 	option ifname 'eth0'
@@ -31,9 +29,3 @@ config switch
 	option reset '1'
 	option enable '0'
 	option enable_vlan '1'
-
-config alias 'thisnode'
-	option interface 'lan'
-	option proto 'static'
-	option ipaddr '169.254.184.221'
-	option netmask '255.255.0.0'
