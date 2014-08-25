@@ -9,6 +9,7 @@ config interface 'lan'
 	option proto 'commotion'
 	option class 'client'
 	option type 'bridge'
+	option bridge_empty '1'
 
 config interface 'wired'
 	option ifname 'eth0'
