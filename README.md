@@ -83,7 +83,7 @@ Building on OSX is ill-advised, as such requires a large number of dependencies 
 
 1. `git clone https://github.com/opentechinstitute/commotion-router.git`
 
-2. `cd commotion-openwrt/`
+2. `cd commotion-router/`
 
 3. (Optional) By default, Commotion-Router is configured to include the most recent code, which may not yet be thoroughly tested. To build a specific Commotion release (e.g., Commotion 1.1), you must specify a branch or tag. For example: `git checkout 1.1`.
 
