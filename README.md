@@ -81,7 +81,7 @@ On a Debian-based system, including Ubuntu or Mint, you can simply type
 
 Building on OSX is ill-advised, as such requires a large number of dependencies and, most difficultly, a case-sensitive filesystem. Here is [how to determine if you are](https://apple.stackexchange.com/questions/71357/how-to-check-if-my-hd-is-case-sensitive-or-not), but unless you installed OSX yourself and use no Adobe programs (they require case-insensitive), your filesystem is case-insensitive. It is likely quicker to configure a Linux virtual machine and use that instead. If you do have a case-sensitive filesystem, you can proceed, but [YMMV](https://en.wiktionary.org/wiki/YMMV).
 
-1. `git clone https://github.com/opentechinstitute/commotion-openwrt.git`
+1. `git clone https://github.com/opentechinstitute/commotion-router.git`
 
 2. `cd commotion-openwrt/`
 
