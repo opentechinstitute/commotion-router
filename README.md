@@ -17,19 +17,13 @@ The commotion daemon is an embedded daemon and library that provides a common in
 
 https://github.com/opentechinstitute/luci-commotion
 
-The Commotion LuCI web interface extensions provide an easy to understand interface that allows a new user to quickly configure a node to their needs. 
-
-###Commotion Theme
-
-https://github.com/opentechinstitute/luci-theme-commotion
-
-The Commotion OpenWRT theme for the web-interface on Commotion wireless routers.
-
-###Commotion Application Portal
-
-https://github.com/opentechinstitute/luci-commotion-apps
-
-The application suite allows for developers to easily advertise applications over a commotion mesh using mdns, users to easily find applications through the router app advertising interface, and node owners to easily manage and customize their application portals to better support community application support. 
+The Commotion LuCI web interface extensions provide an easy to understand interface that allows a new user to quickly configure a node to their needs. This repository contains multiple components:
+* Commotion basic configuration menus
+* Commotion LuCI theme
+* Commotion local apps portal: The application suite allows for developers to easily advertise applications over a commotion mesh using mdns, users to easily find applications through the router app advertising interface, and node owners to easily manage and customize their application portals to better support community application support.
+* Commotion debug helper: The debugging helper creates custom, downloadable informational debugging documents for offline debugging, or to send to network maintainers. Each of these new tools needs testing to find errors as well as to ensure their usability.
+* Commotion dashboard helper: The dashboard helper reports statistics to an external dashboard.
+* Commotion splash page and settings: A custom captive portal/splash screen and an interface for customizing it, built around nodogsplash (https://github.com/nodogsplash/nodogsplash).
 
 ###Commotion Service Manager
 
@@ -42,24 +36,6 @@ The service manager discovers and verifies announcements of applications hosted 
 https://github.com/opentechinstitute/serval-dna
 
 Serval's key management library allows transparent encryption and authentication of messages.
-
-###Commotion Debug Helper
-
-https://github.com/opentechinstitute/commotion-debug-helper
-
-The debugging helper creates custom, downloadable informational debugging documents for offline debugging, or to send to network maintainers. Each of these new tools needs testing to find errors as well as to ensure their usability.
-
-###Commotion Dashboard Helper
-
-https://github.com/opentechinstitute/commotion-dashboard-helper
-
-The dashboard helper reports statistics to an external dashboard. 
-
-###Commotion Splash
-
-https://github.com/opentechinstitute/luci-commotion-splash
-
-A custom captive portal/splash screen and an interface for customizing it, built around nodogsplash (https://github.com/nodogsplash/nodogsplash).
 
 
 ##Build & Install
