@@ -1,5 +1,17 @@
 #!/bin/sh
 
+if [ -n "$1" ]; then
+  if [ -d buildconfigs/$1 ]; then
+    BUILD="$1"
+    echo "Using buildconfig $1"
+  else
+    echo "Invalid buildconfig parameter"
+    echo "Usage: ./setup.sh [router build]"
+    echo "Check the buildconfigs directory for a list of available builds"
+    exit 1
+  fi
+fi
+
 svn co svn://svn.openwrt.org/openwrt/branches/attitude_adjustment openwrt
 
 cd openwrt
@@ -30,6 +42,12 @@ cp -v ../patches/640-store_freq_ibss.patch package/hostapd/patches/
 mkdir -p package/netifd/patches
 cp -v ../patches/010-iface_name_len.patch package/netifd/patches/
 cp -v ../config .config
+
+if [ -n "$BUILD" ]; then
+  echo "Copying over build-specific files for $BUILD"
+  [ -f ../buildconfigs/$BUILD/config ] && cp -v ../buildconfigs/$BUILD/config .config
+  [ -d ../buildconfigs/$BUILD/files ] && cp -rf -v ../buildconfigs/$BUILD/files/* files/
+fi
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo " Commotion OpenWrt is prepared. To build the firmware, type:"
