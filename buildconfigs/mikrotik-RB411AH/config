@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Attitude Adjustment (r42647)
-# Thu Oct  9 12:39:31 2014
+# Thu Oct  9 12:48:41 2014
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -72,8 +72,8 @@ CONFIG_TARGET_ar71xx=y
 # CONFIG_TARGET_lantiq_vr9 is not set
 # CONFIG_TARGET_lantiq_svip_le is not set
 # CONFIG_TARGET_lantiq_danube is not set
-CONFIG_TARGET_ar71xx_generic=y
-# CONFIG_TARGET_ar71xx_nand is not set
+# CONFIG_TARGET_ar71xx_generic is not set
+CONFIG_TARGET_ar71xx_nand=y
 # CONFIG_TARGET_ramips_rt288x is not set
 # CONFIG_TARGET_ramips_rt305x is not set
 # CONFIG_TARGET_ramips_rt3883 is not set
@@ -181,7 +181,7 @@ CONFIG_TARGET_ar71xx_generic=y
 # CONFIG_TARGET_ar71xx_generic_A02RBW300N is not set
 # CONFIG_TARGET_ar71xx_generic_WZRHPG300NH is not set
 # CONFIG_TARGET_ar71xx_generic_WZRHPG300NH2 is not set
-CONFIG_TARGET_ar71xx_generic_WZRHPAG300H=y
+# CONFIG_TARGET_ar71xx_generic_WZRHPAG300H is not set
 # CONFIG_TARGET_ar71xx_generic_WZRHPG450H is not set
 # CONFIG_TARGET_ar71xx_generic_WHRG301N is not set
 # CONFIG_TARGET_ar71xx_generic_WHRHPG300N is not set
@@ -241,7 +241,7 @@ CONFIG_TARGET_ar71xx_generic_WZRHPAG300H=y
 # CONFIG_TARGET_ar71xx_generic_ZCN1523H516 is not set
 # CONFIG_TARGET_ar71xx_generic_NBG_460N_550N_550NH is not set
 # CONFIG_TARGET_ar71xx_nand_DefaultNoWifi is not set
-# CONFIG_TARGET_ar71xx_nand_Ath5k is not set
+CONFIG_TARGET_ar71xx_nand_Ath5k=y
 # CONFIG_TARGET_ramips_rt288x_Default is not set
 # CONFIG_TARGET_ramips_rt288x_RTN15 is not set
 # CONFIG_TARGET_ramips_rt288x_F5D8235V1 is not set
@@ -390,17 +390,13 @@ CONFIG_DEFAULT_dropbear=y
 CONFIG_DEFAULT_firewall=y
 CONFIG_DEFAULT_hotplug2=y
 CONFIG_DEFAULT_iptables=y
-CONFIG_DEFAULT_kmod-ath9k=y
+CONFIG_DEFAULT_kmod-ath5k=y
 CONFIG_DEFAULT_kmod-gpio-button-hotplug=y
 CONFIG_DEFAULT_kmod-ipt-nathelper=y
 CONFIG_DEFAULT_kmod-leds-gpio=y
 CONFIG_DEFAULT_kmod-ledtrig-default-on=y
 CONFIG_DEFAULT_kmod-ledtrig-netdev=y
 CONFIG_DEFAULT_kmod-ledtrig-timer=y
-CONFIG_DEFAULT_kmod-ledtrig-usbdev=y
-CONFIG_DEFAULT_kmod-usb-core=y
-CONFIG_DEFAULT_kmod-usb-ohci=y
-CONFIG_DEFAULT_kmod-usb2=y
 CONFIG_DEFAULT_kmod-wdt-ath79=y
 CONFIG_DEFAULT_libc=y
 CONFIG_DEFAULT_libgcc=y
@@ -427,7 +423,13 @@ CONFIG_ARCH="mips"
 #
 # Target Images
 #
-# CONFIG_TARGET_ROOTFS_INITRAMFS is not set
+CONFIG_TARGET_ROOTFS_INITRAMFS=y
+# CONFIG_TARGET_INITRAMFS_COMPRESSION_NONE is not set
+# CONFIG_TARGET_INITRAMFS_COMPRESSION_GZIP is not set
+# CONFIG_TARGET_INITRAMFS_COMPRESSION_BZIP2 is not set
+CONFIG_TARGET_INITRAMFS_COMPRESSION_LZMA=y
+# CONFIG_TARGET_INITRAMFS_COMPRESSION_LZO is not set
+# CONFIG_TARGET_INITRAMFS_COMPRESSION_XZ is not set
 CONFIG_EXTERNAL_CPIO=""
 
 #
@@ -439,9 +441,6 @@ CONFIG_TARGET_ROOTFS_TARGZ=y
 #
 # Root filesystem images
 #
-# CONFIG_TARGET_ROOTFS_EXT4FS is not set
-# CONFIG_TARGET_ROOTFS_JFFS2 is not set
-CONFIG_TARGET_ROOTFS_SQUASHFS=y
 
 #
 # Image Options
@@ -533,7 +532,6 @@ CONFIG_UCLIBC_VERSION="0.9.33.2"
 CONFIG_LIBC="uClibc"
 CONFIG_LIBC_VERSION="0.9.33.2"
 CONFIG_TARGET_SUFFIX="uclibc"
-# CONFIG_IB is not set
 # CONFIG_SDK is not set
 # CONFIG_MAKE_TOOLCHAIN is not set
 CONFIG_IMAGEOPT=y
