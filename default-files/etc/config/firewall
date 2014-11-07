@@ -167,3 +167,6 @@ config rule
 	option src 'vpn'
 	option proto 'icmp'
 	option target 'ACCEPT'
+
+config include
+	option path /etc/firewall.user
