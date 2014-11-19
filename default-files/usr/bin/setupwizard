@@ -1,5 +1,7 @@
 ﻿#!/bin/ash
 
+source /lib/functions.sh 
+
 # PRESET VALUES
 SSID_MIN=1
 SSID_MAX=31
@@ -40,17 +42,31 @@ validate() {
 
 # RESET FUNCTION (for saved configurations)
 clear_previous_configuration() {
-    LOOP=0
-    while [ $LOOP -lt $NUM_RADIOS ]; do
 
-    uci delete wireless.commotionMesh$LOOP
-    uci delete wireless.commotionAP$LOOP
-    uci delete network.commotionMesh$LOOP
-    
-    uci commit wireless
-    
-    LOOP=$((LOOP+1))
-    done
+    config_cb() {
+        echo "running config_cb"
+        local TYPE="$1" 
+        local NAME="$2"
+        
+        # if type == iface, delete
+        if [ $TYPE == "wifi-iface" ] ; then
+        
+            # get ssid
+            SSID=$(uci get wireless.$NAME.ssid)
+            
+            # if this is a mesh interface, delete profile and network config
+            if [ $(uci get wireless.$NAME.mode) == "adhoc" ]; then
+                uci delete network.$SSID
+                commotion delete $SSID
+            fi
+            
+            uci delete wireless.$NAME
+        fi
+}
+
+config_load wireless
+uci commit
+config_reset
 }
 
 # RESET FUNCTION (for unsaved configurations)
