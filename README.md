@@ -46,7 +46,7 @@ cd build
 cmake -DCOMMOTION_VERSION:String=1.0 -DCOMMOTION_RELEASE:String=foo -DCONFIG:String=bar -DDEBUG:Bool=True -DSKIP_MD5:Bool=True ..
 make install
 ```
-With the commotion-gui
+With the cmake-gui
 ----------------------
 You can build with the GUI similarly to above, except that all the configuration values will be present in the GUI.
 
