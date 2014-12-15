@@ -118,8 +118,8 @@ endif()
 string(REPLACE ";" " " PACKAGES_STRING "${ALL_PACKAGES}")
 
 #Write version identification files
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/openwrt_version "${COMMOTION_VERSION}")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/openwrt_release "${COMMOTION_RELEASE}")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/etc/openwrt_version "${COMMOTION_VERSION}")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/etc/openwrt_release "${COMMOTION_RELEASE}")
 
 #Add Commotion package repository to repositories.conf
 set(REPO_CONF "${CMAKE_CURRENT_BINARY_DIR}/repositories.conf")
