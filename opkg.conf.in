@@ -1,0 +1,6 @@
+src/gz %{COMMOTION_RELEASE} http://downloads.commotionwireless.net/router/%{COMMOTION_VERSION}/${TARGET}/${SUBTARGET}/packages)
+src/gz %{OPENWRT_RELEASE} http://downloads.openwrt.org/%{OPENWRT_RELEASE}/%{OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages)
+dest root /
+dest ram /tmp
+lists_dir ext /var/opkg-lists
+option overlay_root /overlay

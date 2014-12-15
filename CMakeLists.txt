@@ -121,6 +121,10 @@ string(REPLACE ";" " " PACKAGES_STRING "${ALL_PACKAGES}")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/etc/openwrt_version "${COMMOTION_VERSION}")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/etc/openwrt_release "${COMMOTION_RELEASE}")
 
+#Write opkg.conf
+configure_file("${PROJECT_SOURCE_DIR}/opkg.conf.in" 
+  ${CMAKE_CURRENT_BINARY_DIR}/files/etc/opkg.conf)
+
 #Add Commotion package repository to repositories.conf
 set(REPO_CONF "${CMAKE_CURRENT_BINARY_DIR}/repositories.conf")
 configure_file("${PROJECT_SOURCE_DIR}/repositories.conf.in" "${REPO_CONF}")
