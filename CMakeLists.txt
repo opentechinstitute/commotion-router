@@ -55,6 +55,7 @@ endif()
 #Router default files
 set(CONFIGS_DIR "${PROJECT_SOURCE_DIR}/configs")
 set(FILES_DIR "${PROJECT_SOURCE_DIR}/files")
+set(UPGRADES_DIR "${PROJECT_SOURCE_DIR}/upgrades")
 
 ##################################################################################################
 # MACROS
@@ -137,3 +138,38 @@ imagebuild(RELEASE "${OPENWRT_RELEASE}" VERSION "${OPENWRT_VERSION}" TARGET "${T
   SUBTARGET "${SUBTARGET}" FILES "${CMAKE_CURRENT_BINARY_DIR}/files" 
   PACKAGES "${PACKAGES_STRING}" PROFILE "${PROFILE}" SKIP_MD5 ${OPENWRT_MD5} 
   REPO_CONF "${REPO_CONF}")
+
+##################################################################################################
+# CREATE UPGRADE BUNDLES
+##################################################################################################
+if(IS_DIRECTORY "${UPGRADES_DIR}" AND EXISTS "${UPGRADES_DIR}/manifest")
+  set(SIGN_UPGRADE ON CACHE BOOL "Sign upgrade manifest with a Serval signing key")
+  set(KEYRING "" CACHE STRING "Serval keyring for signing upgrade manifest (optional)")
+  set(PUBLIC_KEY "" CACHE STRING "Public Serval SAS key used to sign upgrade manifest (required)")
+  set(COMMOTIOND_SOCKET "/var/run/commotiond.sock" CACHE STRING "Management socket of commotiond instance")
+
+  file(COPY "${UPGRADES_DIR}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+  
+  # prepare upgrade package
+  if(SIGN_UPGRADE AND PUBLIC_KEY)
+    if(KEYRING)
+      execute_process(
+	COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}" -k "${KEYRING}"
+	RESULT_VARIABLE EXEC_SUCCESS
+      )
+    else()
+      execute_process(
+	COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}"
+	RESULT_VARIABLE EXEC_SUCCESS
+      )
+    endif()
+  else()
+    execute_process(
+      COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz"
+      RESULT_VARIABLE EXEC_SUCCESS
+    )
+  endif()
+  if(NOT EXEC_SUCCESS EQUAL 0)
+    message(FATAL_ERROR "Error: Failed to create upgrade package")
+  endif()
+endif()

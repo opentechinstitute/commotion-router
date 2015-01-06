@@ -100,7 +100,8 @@ function(imagebuild)
       BUILD_IN_SOURCE 1
       BUILD_COMMAND make image ${PROFILE} ${FILES} ${PACKAGES} 
         COMMAND mv ${CMAKE_CURRENT_BINARY_DIR}/src/
-      INSTALL_COMMAND "cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/* ${INSTALL_DIR}/"
+      INSTALL_COMMAND "cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/* ${CMAKE_CURRENT_BINARY_DIR}/bin/"
+	COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin"
     )
   else()
     ExternalProject_Add(image_builder
@@ -114,7 +115,8 @@ function(imagebuild)
       CONFIGURE_COMMAND ""
       BUILD_IN_SOURCE 1
       BUILD_COMMAND make image ${PROFILE} ${FILES} ${PACKAGES}
-      INSTALL_COMMAND "cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/* ${INSTALL_DIR}/"
+      INSTALL_COMMAND "cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/* ${CMAKE_CURRENT_BINARY_DIR}/bin/"
+	COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin"
     )
   endif()
 endfunction()  
