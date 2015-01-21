@@ -69,11 +69,16 @@ build() {
     echo "Directory $IMAGE_DIR does not exist" >&2
     exit 1
   }
+
+  [[ ! -e "$PACKAGE" ]] && {
+    echo "File $PACKAGE does not exist" >&2
+    return
+  }
   
   SIZE=$(ls -l "$PACKAGE" |cut -d' ' -f5)
   BYTE_STRING=$(printf %08X $SIZE |awk 'BEGIN { FIELDWIDTHS="2 2 2 2" } { print "\\x"$1"\\x"$2"\\x"$3"\\x"$4 }')
   
-  for IMAGE in $(ls "$IMAGE_DIR/*.bin"); do
+  for IMAGE in $(ls "$IMAGE_DIR"/*.bin); do
     # append tarball to image
     cat "$PACKAGE" >> "$IMAGE"
 

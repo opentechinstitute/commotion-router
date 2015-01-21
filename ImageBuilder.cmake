@@ -30,7 +30,8 @@ set(OPENWRT_URL "http://downloads.openwrt.org/")
 #Main function for downloading and running the OpenWRT Imagebuilder
 function(imagebuild)
   set(oneValueArgs RELEASE VERSION TARGET SUBTARGET FILES PACKAGES PROFILE DL_DIR REPO_CONF)
-  set(options SKIP_MD5)
+  set(multiValueArgs PACKAGES)
+  set(options SKIP_MD5 USE_LOCAL DEBUG)
   cmake_parse_arguments(IB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   #Set list of files to include in image
@@ -40,7 +41,9 @@ function(imagebuild)
 
   #Set list of packages to include in image
   if(DEFINED IB_PACKAGES)
-    set(PACKAGES "PACKAGES=${IB_PACKAGES}")
+    set(PACKAGES "PACKAGES="${IB_PACKAGES}"")
+    #Convert packages list to string
+    string(REPLACE ";" " " PACKAGES "${PACKAGES}")
   endif()
 
   #Set which build profile to use
@@ -63,9 +66,12 @@ function(imagebuild)
   endif()
 
   #Download and grab md5sums
-  if(NOT SKIP_MD5)
-    file(DOWNLOAD ${OPENWRT_URL}/${IB_RELEASE}/${IB_VERSION}/${IB_TARGET}/${IB_SUBTARGET}/md5sums 
-      "${DL_DIR}/md5sums" INACTIVITY_TIMEOUT 10)
+  if(NOT IB_SKIP_MD5)
+    if(NOT EXISTS "${DL_DIR}/md5sums")
+      message(STATUS "Attempting to download md5sums...")
+      file(DOWNLOAD ${OPENWRT_URL}/${IB_RELEASE}/${IB_VERSION}/${IB_TARGET}/${IB_SUBTARGET}/md5sums 
+        "${DL_DIR}/md5sums" INACTIVITY_TIMEOUT 10)
+    endif()
     execute_process(
       COMMAND grep ${FILENAME} "${DL_DIR}/md5sums"
       COMMAND cut -d " " -f1
@@ -84,10 +90,21 @@ function(imagebuild)
     set(URL ${OPENWRT_URL}/${IB_RELEASE}/${IB_VERSION}/${IB_TARGET}/${IB_SUBTARGET}/${FILENAME})
   endif()
 
+  #If we're using a locally built set of packages, make sure the PackageBuilder runs first.
+  if(IB_USE_LOCAL)
+    set(DEPENDS "package_builder")
+  endif()
+
+  #Set debug verbosity
+  if(IB_DEBUG)
+    set(VERBOSE "V=s")
+  endif()
+
   #Actually download, extract, and run ImageBuilder
   include(ExternalProject)
   if(EXISTS ${IB_REPO_CONF})
     ExternalProject_Add(image_builder
+      DEPENDS "${DEPENDS}"
       URL ${URL}
       URL_MD5 ${MD5SUM}
       PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
@@ -98,13 +115,13 @@ function(imagebuild)
       CONFIGURE_COMMAND cp "${IB_REPO_CONF}" 
         "${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/repositories.conf"
       BUILD_IN_SOURCE 1
-      BUILD_COMMAND make image ${PROFILE} ${FILES} ${PACKAGES} 
-        COMMAND mv ${CMAKE_CURRENT_BINARY_DIR}/src/
-      INSTALL_COMMAND "cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/* ${CMAKE_CURRENT_BINARY_DIR}/bin/"
-	COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin"
+      BUILD_COMMAND make image ${PROFILE} ${FILES} ${PACKAGES} ${VERBOSE} 
+      INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f -exec cp -rf --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  {} \$<SEMICOLON>
+        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}"
     )
   else()
     ExternalProject_Add(image_builder
+      DEPENDS "${DEPENDS}"
       URL ${URL}
       URL_MD5 ${MD5SUM}
       PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
@@ -114,9 +131,9 @@ function(imagebuild)
       UPDATE_COMMAND ""
       CONFIGURE_COMMAND ""
       BUILD_IN_SOURCE 1
-      BUILD_COMMAND make image ${PROFILE} ${FILES} ${PACKAGES}
-      INSTALL_COMMAND "cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/* ${CMAKE_CURRENT_BINARY_DIR}/bin/"
-	COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin"
+      BUILD_COMMAND make image ${PROFILE} ${FILES} ${PACKAGES} ${VERBOSE}
+      INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f -exec cp -rf --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  {} \$<SEMICOLON>
+        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}"
     )
   endif()
 endfunction()  

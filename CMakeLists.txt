@@ -26,6 +26,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 
 include(ImageBuilder.cmake)
+include(PackageBuilder.cmake)
 
 #Hide unnecessary cache variables for cmake-gui
 mark_as_advanced(CMAKE_C_COMPILER)
@@ -40,12 +41,17 @@ project(commotion-build VERSION 1.1.0 LANGUAGES NONE)
 ##################################################################################################
 #Set up variables for cache configuration
 set(DEBUG OFF CACHE BOOL "Create verbose Makefile output")
-set(COMMOTION_VERSION "1.1" CACHE STRING "Commotion version number")
+set(COMMOTION_VERSION "master" CACHE STRING "Commotion version number")
 set(COMMOTION_RELEASE "grumpy_cat" CACHE STRING "Commotion release nickname")
 set(SKIP_MD5 OFF CACHE BOOL "Skip MD5 checking of downloaded ImageBuilder file")
 set(COMMOTION_PACKAGES "commotion;commotion-gui" CACHE INTERNAL "Commotion default packages")
-set(OPENWRT_VERSION "12.09" CACHE INTERNAL "OpenWRT version number")
-set(OPENWRT_RELEASE "attitude_adjustment" CACHE INTERNAL "OpenWRT release nickname")
+set(PACKAGEBUILD_TARGETS "commotion" CACHE INTERNAL "Target packages to Make")
+set(OPENWRT_VERSION "14.07" CACHE INTERNAL "OpenWRT version number")
+set(OPENWRT_RELEASE "barrier_breaker" CACHE INTERNAL "OpenWRT release nickname")
+set(BUILD_IMAGES ON CACHE BOOL "Prepare for building router images")
+set(BUILD_PACKAGES OFF CACHE BOOL "Prepare for building packages")
+set(USE_LOCAL OFF CACHE BOOL "Use the local packages built by the Packagebuilder")
+set(JOBS "2" CACHE STRING "Number of parallel compile jobs") 
 
 #Verbose Makefile
 if(DEBUG)
@@ -97,11 +103,6 @@ endmacro()
 # SETUP
 ##################################################################################################
 
-#Copy default configuration files
-if(IS_DIRECTORY ${FILES_DIR})
-  file(COPY ${FILES_DIR}/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
-endif()
-
 #Get list of available router configs and select one in cache
 config_list(CONFIG_LIST ${CONFIGS_DIR})
 set(CONFIG "ubnt" CACHE STRING "Commotion Router configuration")
@@ -114,30 +115,59 @@ if(DEFINED PACKAGES)
 else()
   set(ALL_PACKAGES "${COMMOTION_PACKAGES}")
 endif()
-
-#Convert packages list to string
-string(REPLACE ";" " " PACKAGES_STRING "${ALL_PACKAGES}")
-
-#Write version identification files
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/etc/openwrt_version "${COMMOTION_VERSION}")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/etc/openwrt_release "${COMMOTION_RELEASE}")
-
-#Write opkg.conf
-configure_file("${PROJECT_SOURCE_DIR}/opkg.conf.in" 
-  ${CMAKE_CURRENT_BINARY_DIR}/files/etc/opkg.conf)
-
-#Add Commotion package repository to repositories.conf
-set(REPO_CONF "${CMAKE_CURRENT_BINARY_DIR}/repositories.conf")
-configure_file("${PROJECT_SOURCE_DIR}/repositories.conf.in" "${REPO_CONF}")
-
+  
 ##################################################################################################
 # BUILD
 ##################################################################################################
+if(NOT BUILD_PACKAGES AND NOT BUILD_IMAGES)
+  message(FATAL_ERROR "Not building images or packages, nothing to do!")
+endif()
+
+#Call Packagebuilder
+if(BUILD_PACKAGES)
+  #Add Commotion package feed to feeds.conf
+  set(FEEDS_CONF "${CMAKE_CURRENT_BINARY_DIR}/feeds.conf")
+  configure_file("${PROJECT_SOURCE_DIR}/feeds.conf.in" "${FEEDS_CONF}")
+
+  packagebuild(RELEASE "${OPENWRT_RELEASE}" VERSION "${OPENWRT_VERSION}" TARGET "${TARGET}" 
+    SUBTARGET "${SUBTARGET}" FEEDS_CONF "${FEEDS_CONF}" PACKAGES ${ALL_PACKAGES} BUILD_TARGETS ${PACKAGEBUILD_TARGETS} JOBS ${JOBS} DEBUG ${DEBUG})
+endif()
+
 #Call Imagebuilder
-imagebuild(RELEASE "${OPENWRT_RELEASE}" VERSION "${OPENWRT_VERSION}" TARGET "${TARGET}" 
-  SUBTARGET "${SUBTARGET}" FILES "${CMAKE_CURRENT_BINARY_DIR}/files" 
-  PACKAGES "${PACKAGES_STRING}" PROFILE "${PROFILE}" SKIP_MD5 ${OPENWRT_MD5} 
-  REPO_CONF "${REPO_CONF}")
+if(BUILD_IMAGES)
+  #Copy default configuration files
+  if(IS_DIRECTORY ${FILES_DIR})
+    file(COPY ${FILES_DIR}/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
+  endif()
+
+  #Write version identification files
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/etc/openwrt_version "${COMMOTION_VERSION}")
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/etc/openwrt_release "${COMMOTION_RELEASE}")
+  
+  #Write opkg.conf
+  configure_file("${PROJECT_SOURCE_DIR}/opkg.conf.in" 
+    ${CMAKE_CURRENT_BINARY_DIR}/files/etc/opkg.conf)
+  
+  #Set repository configuration location
+  set(REPO_CONF "${CMAKE_CURRENT_BINARY_DIR}/repositories.conf")
+
+  #Add Commotion package repository to repositories.conf
+  if(USE_LOCAL)
+    if(BUILD_PACKAGES)
+      configure_file("${PROJECT_SOURCE_DIR}/repositories.conf.local.in" "${REPO_CONF}")
+    else()
+      message(WARNING "BUILD_PACKAGES not set, using remote repository.")
+      configure_file("${PROJECT_SOURCE_DIR}/repositories.conf.remote.in" "${REPO_CONF}")
+    endif()
+  else()
+    configure_file("${PROJECT_SOURCE_DIR}/repositories.conf.remote.in" "${REPO_CONF}")
+  endif()
+
+  imagebuild(RELEASE "${OPENWRT_RELEASE}" VERSION "${OPENWRT_VERSION}" TARGET "${TARGET}" 
+    SUBTARGET "${SUBTARGET}" FILES "${CMAKE_CURRENT_BINARY_DIR}/files" 
+    PACKAGES "${ALL_PACKAGES}" PROFILE "${PROFILE}" SKIP_MD5 ${OPENWRT_MD5} 
+    REPO_CONF "${REPO_CONF}" USE_LOCAL ${USE_LOCAL} DEBUG ${DEBUG})
+endif()
 
 ##################################################################################################
 # CREATE UPGRADE BUNDLES
