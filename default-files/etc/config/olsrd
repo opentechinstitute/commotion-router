@@ -18,10 +18,10 @@ config LoadPlugin
 	option suffix '.mesh.local'
 
 config LoadPlugin
-	option library 'olsrd_dnssd.so.0.1.2'
+	option library 'olsrd_dnssd.so.0.1.3'
 	option P2pdTtl '5'
 	option UdpDestPort '224.0.0.251 5353'
-	option ServiceFileDir '/etc/avahi/services'
+	option CSMSocket '/var/run/commotion-service-manager.sock'
 	option Domain 'mesh.local'
 	option ServiceUpdateInterval '300'
 
