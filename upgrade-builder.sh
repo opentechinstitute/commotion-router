@@ -20,6 +20,7 @@ Prepare options:
 Build options:
     -p <package>	Previously built package file
     -d <dir>		Directory of images to convert into upgrade bundles
+    -r <release>	Release string to add to bundle filename
     
 Run the prepare command on a directory containing upgrade scripts and a manifest, then run
 the build command on the previously created package and an image file to produce an upgrade
@@ -72,13 +73,14 @@ build() {
 
   [[ ! -e "$PACKAGE" ]] && {
     echo "File $PACKAGE does not exist" >&2
-    return
+    exit 1
   }
   
   SIZE=$(ls -l "$PACKAGE" |cut -d' ' -f5)
   BYTE_STRING=$(printf %08X $SIZE |awk 'BEGIN { FIELDWIDTHS="2 2 2 2" } { print "\\x"$1"\\x"$2"\\x"$3"\\x"$4 }')
   
-  for IMAGE in $(ls "$IMAGE_DIR"/*.bin); do
+  cd "$IMAGE_DIR"
+  for IMAGE in $(ls "$IMAGE_DIR"/*-{sysupgrade,factory}.bin); do
     # append tarball to image
     cat "$PACKAGE" >> "$IMAGE"
 
@@ -87,9 +89,12 @@ build() {
 
     # append magic bytes to image
     printf "\xc0\xfe\xba\xbe" >> "$IMAGE"
+
+    # rename image
+    echo `basename $IMAGE` | sed -n "s/\(^openwrt-\)\(.*\)\(\.bin$\)/mv "\\1\\2\\3" "commotion-${RELEASE}-\\2.bundle"/p" | sh
+
+    [[ -n "$VERBOSE" ]] && echo "Image $IMAGE successfully converted into upgrade bundle"
   done
-  
-  [[ -n "$VERBOSE" ]] && echo "Image $IMAGE successfully converted into upgrade bundle"
 }
 
 ACTION="$1"
@@ -114,11 +119,12 @@ if [[ "$ACTION" == "prepare" ]]; then
   done
   prepare
 elif [[ "$ACTION" == "build" ]]; then
-  while getopts ":p:d:v" opt; do
+  while getopts ":p:d:r:v" opt; do
     case $opt in
       v) VERBOSE=1;;
       p) PACKAGE="$OPTARG";;
       d) IMAGE_DIR="$OPTARG";;
+      r) RELEASE="$OPTARG";;
       \?) 
 	echo "Invalid option -$OPTARG" >&2
 	fail

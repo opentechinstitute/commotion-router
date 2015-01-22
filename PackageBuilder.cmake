@@ -29,9 +29,9 @@ set(OPENWRT_URL "http://downloads.openwrt.org/")
 
 #Main function for downloading and running the OpenWRT Imagebuilder
 function(packagebuild)
-  set(oneValueArgs RELEASE VERSION TARGET SUBTARGET FEEDS_CONF DL_DIR JOBS)
+  set(oneValueArgs RELEASE VERSION TARGET SUBTARGET FEEDS_CONF DL_DIR JOBS SKIP_MD5 DEBUG)
   set(multiValueArgs PACKAGES BUILD_TARGETS)
-  set(options SKIP_MD5 DEBUG)
+  set(options )
   cmake_parse_arguments(PB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   #Set list of packages to install into buildsystem
@@ -59,7 +59,7 @@ function(packagebuild)
   endif()
 
   #Optionally set custom download directory
-  if(IS_DIRECTORY PB_DL_DIR)
+  if(IS_DIRECTORY ${PB_DL_DIR})
     set(DL_DIR ${PB_DL_DIR})
   else()
     set(DL_DIR ${CMAKE_CURRENT_BINARY_DIR})
@@ -72,7 +72,7 @@ function(packagebuild)
   if(NOT PB_SKIP_MD5)
     if(NOT EXISTS "${DL_DIR}/md5sums")
       message(STATUS "Attempting to download md5sums...")
-      file(DOWNLOAD ${OPENWRT_URL}/${PB_RELEASE}/${PB_VERSION}/${PB_TARGET}/${PB_SUBTARGET}/md5sums 
+      file(DOWNLOAD "${OPENWRT_URL}/${PB_RELEASE}/${PB_VERSION}/${PB_TARGET}/${PB_SUBTARGET}/md5sums"
         "${DL_DIR}/md5sums" INACTIVITY_TIMEOUT 10)
     endif()
     execute_process(
@@ -87,10 +87,10 @@ function(packagebuild)
   endif()
 
   #Don't download the SDK if we've done it already
-  if(EXISTS ${DL_DIR}/${FILENAME})
+  if(EXISTS "${DL_DIR}/${FILENAME}")
     set(URL "${DL_DIR}/${FILENAME}")
   else()
-    set(URL ${OPENWRT_URL}/${PB_RELEASE}/${PB_VERSION}/${PB_TARGET}/${PB_SUBTARGET}/${FILENAME})
+    set(URL "${OPENWRT_URL}/${PB_RELEASE}/${PB_VERSION}/${PB_TARGET}/${PB_SUBTARGET}/${FILENAME}")
   endif()
 
   #Set number of compile jobs

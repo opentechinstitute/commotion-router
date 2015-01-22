@@ -29,9 +29,9 @@ set(OPENWRT_URL "http://downloads.openwrt.org/")
 
 #Main function for downloading and running the OpenWRT Imagebuilder
 function(imagebuild)
-  set(oneValueArgs RELEASE VERSION TARGET SUBTARGET FILES PACKAGES PROFILE DL_DIR REPO_CONF)
+  set(oneValueArgs RELEASE VERSION TARGET SUBTARGET FILES PACKAGES PROFILE DL_DIR REPO_CONF SKIP_MD5 USE_LOCAL DEBUG)
   set(multiValueArgs PACKAGES)
-  set(options SKIP_MD5 USE_LOCAL DEBUG)
+  set(options ) 
   cmake_parse_arguments(IB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   #Set list of files to include in image
@@ -41,7 +41,7 @@ function(imagebuild)
 
   #Set list of packages to include in image
   if(DEFINED IB_PACKAGES)
-    set(PACKAGES "PACKAGES="${IB_PACKAGES}"")
+    set(PACKAGES "PACKAGES=${IB_PACKAGES}")
     #Convert packages list to string
     string(REPLACE ";" " " PACKAGES "${PACKAGES}")
   endif()
@@ -52,14 +52,14 @@ function(imagebuild)
   endif()
 
   #Optionally set custom download directory
-  if(IS_DIRECTORY IB_DL_DIR)
+  if(IS_DIRECTORY ${IB_DL_DIR})
     set(DL_DIR ${IB_DL_DIR})
   else()
     set(DL_DIR ${CMAKE_CURRENT_BINARY_DIR})
   endif()
 
   #They changed the host architecture for ImageBuilder after 12.09
-  if(${IB_VERSION} VERSION_GREATER 12.09)
+  if("${IB_VERSION}" VERSION_GREATER 12.09)
     set(FILENAME "OpenWrt-ImageBuilder-${IB_TARGET}_${IB_SUBTARGET}-for-linux-x86_64.tar.bz2") 
   else()
     set(FILENAME "OpenWrt-ImageBuilder-${IB_TARGET}_${IB_SUBTARGET}-for-linux-i486.tar.bz2") 
@@ -87,7 +87,7 @@ function(imagebuild)
   if(EXISTS ${DL_DIR}/${FILENAME})
     set(URL "${DL_DIR}/${FILENAME}")
   else()
-    set(URL ${OPENWRT_URL}/${IB_RELEASE}/${IB_VERSION}/${IB_TARGET}/${IB_SUBTARGET}/${FILENAME})
+    set(URL "${OPENWRT_URL}/${IB_RELEASE}/${IB_VERSION}/${IB_TARGET}/${IB_SUBTARGET}/${FILENAME}")
   endif()
 
   #If we're using a locally built set of packages, make sure the PackageBuilder runs first.
@@ -116,8 +116,7 @@ function(imagebuild)
         "${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/repositories.conf"
       BUILD_IN_SOURCE 1
       BUILD_COMMAND make image ${PROFILE} ${FILES} ${PACKAGES} ${VERBOSE} 
-      INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f -exec cp -rf --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  {} \$<SEMICOLON>
-        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}"
+      INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f -exec mv -f --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  {} \$<SEMICOLON>
     )
   else()
     ExternalProject_Add(image_builder
@@ -132,8 +131,7 @@ function(imagebuild)
       CONFIGURE_COMMAND ""
       BUILD_IN_SOURCE 1
       BUILD_COMMAND make image ${PROFILE} ${FILES} ${PACKAGES} ${VERBOSE}
-      INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f -exec cp -rf --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  {} \$<SEMICOLON>
-        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}"
+      INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f -exec mv -f --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  {} \$<SEMICOLON>
     )
   endif()
 endfunction()  

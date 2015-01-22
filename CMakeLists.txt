@@ -52,6 +52,8 @@ set(BUILD_IMAGES ON CACHE BOOL "Prepare for building router images")
 set(BUILD_PACKAGES OFF CACHE BOOL "Prepare for building packages")
 set(USE_LOCAL OFF CACHE BOOL "Use the local packages built by the Packagebuilder")
 set(JOBS "2" CACHE STRING "Number of parallel compile jobs") 
+set(DL_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE FILEPATH "Custom download directory") 
+set(MAKE_BUNDLES ON CACHE BOOL "Turn built images into Commotion upgrade bundles")
 
 #Verbose Makefile
 if(DEBUG)
@@ -130,7 +132,7 @@ if(BUILD_PACKAGES)
   configure_file("${PROJECT_SOURCE_DIR}/feeds.conf.in" "${FEEDS_CONF}")
 
   packagebuild(RELEASE "${OPENWRT_RELEASE}" VERSION "${OPENWRT_VERSION}" TARGET "${TARGET}" 
-    SUBTARGET "${SUBTARGET}" FEEDS_CONF "${FEEDS_CONF}" PACKAGES ${ALL_PACKAGES} BUILD_TARGETS ${PACKAGEBUILD_TARGETS} JOBS ${JOBS} DEBUG ${DEBUG})
+    SUBTARGET "${SUBTARGET}" FEEDS_CONF "${FEEDS_CONF}" PACKAGES ${ALL_PACKAGES} BUILD_TARGETS ${PACKAGEBUILD_TARGETS} JOBS ${JOBS} DEBUG ${DEBUG} DL_DIR ${DL_DIR})
 endif()
 
 #Call Imagebuilder
@@ -152,8 +154,10 @@ if(BUILD_IMAGES)
   set(REPO_CONF "${CMAKE_CURRENT_BINARY_DIR}/repositories.conf")
 
   #Add Commotion package repository to repositories.conf
+  set(LOCAL OFF)
   if(USE_LOCAL)
     if(BUILD_PACKAGES)
+      set(LOCAL ON)
       configure_file("${PROJECT_SOURCE_DIR}/repositories.conf.local.in" "${REPO_CONF}")
     else()
       message(WARNING "BUILD_PACKAGES not set, using remote repository.")
@@ -166,17 +170,17 @@ if(BUILD_IMAGES)
   imagebuild(RELEASE "${OPENWRT_RELEASE}" VERSION "${OPENWRT_VERSION}" TARGET "${TARGET}" 
     SUBTARGET "${SUBTARGET}" FILES "${CMAKE_CURRENT_BINARY_DIR}/files" 
     PACKAGES "${ALL_PACKAGES}" PROFILE "${PROFILE}" SKIP_MD5 ${OPENWRT_MD5} 
-    REPO_CONF "${REPO_CONF}" USE_LOCAL ${USE_LOCAL} DEBUG ${DEBUG})
+    REPO_CONF "${REPO_CONF}" USE_LOCAL ${LOCAL} DEBUG ${DEBUG} DL_DIR ${DL_DIR})
 endif()
 
 ##################################################################################################
 # CREATE UPGRADE BUNDLES
 ##################################################################################################
-if(IS_DIRECTORY "${UPGRADES_DIR}" AND EXISTS "${UPGRADES_DIR}/manifest")
+if(IS_DIRECTORY ${UPGRADES_DIR} AND EXISTS ${UPGRADES_DIR}/manifest AND MAKE_BUNDLES)
   set(SIGN_UPGRADE ON CACHE BOOL "Sign upgrade manifest with a Serval signing key")
-  set(KEYRING "" CACHE STRING "Serval keyring for signing upgrade manifest (optional)")
+  set(KEYRING "" CACHE FILEPATH "Serval keyring for signing upgrade manifest (optional)")
   set(PUBLIC_KEY "" CACHE STRING "Public Serval SAS key used to sign upgrade manifest (required)")
-  set(COMMOTIOND_SOCKET "/var/run/commotiond.sock" CACHE STRING "Management socket of commotiond instance")
+  set(COMMOTIOND_SOCKET "/var/run/commotiond.sock" CACHE FILEPATH "Management socket of commotiond instance")
 
   file(COPY "${UPGRADES_DIR}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
   
@@ -184,13 +188,13 @@ if(IS_DIRECTORY "${UPGRADES_DIR}" AND EXISTS "${UPGRADES_DIR}/manifest")
   if(SIGN_UPGRADE AND PUBLIC_KEY)
     if(KEYRING)
       execute_process(
-	COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}" -k "${KEYRING}"
-	RESULT_VARIABLE EXEC_SUCCESS
+	      COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}" -k "${KEYRING}"
+	      RESULT_VARIABLE EXEC_SUCCESS
       )
     else()
       execute_process(
-	COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}"
-	RESULT_VARIABLE EXEC_SUCCESS
+	      COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}"
+	      RESULT_VARIABLE EXEC_SUCCESS
       )
     endif()
   else()
@@ -201,5 +205,14 @@ if(IS_DIRECTORY "${UPGRADES_DIR}" AND EXISTS "${UPGRADES_DIR}/manifest")
   endif()
   if(NOT EXEC_SUCCESS EQUAL 0)
     message(FATAL_ERROR "Error: Failed to create upgrade package")
+  endif()
+  
+  if(BUILD_IMAGES)
+    add_custom_target(bundle ALL
+      COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}" -r "${COMMOTION_VERSION}"
+      DEPENDS image_builder
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      COMMENT "Bundling release images" VERBATIM
+    )
   endif()
 endif()
