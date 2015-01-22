@@ -1,4 +1,3 @@
-
 config defaults
 	option syn_flood '1'
 	option input 'DROP'
@@ -169,4 +168,4 @@ config rule
 	option target 'ACCEPT'
 
 config include
-	option path /etc/firewall.user
+	option path '/etc/firewall.user'
