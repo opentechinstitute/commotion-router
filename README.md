@@ -1,3 +1,4 @@
+[![alt tag](http://img.shields.io/badge/maintainer-jheretic-red.svg)](https://github.com/jheretic)
 ##Commotion Router
 
 Commotion is an open source “device-as-infrastructure” communication platform that integrates users’ existing cell phones, Wi-Fi enabled computers, and other wireless-capable devices to create community- and metro-scale, peer-to-peer communications networks.
@@ -16,19 +17,13 @@ The commotion daemon is an embedded daemon and library that provides a common in
 
 https://github.com/opentechinstitute/luci-commotion
 
-The Commotion LuCI web interface extensions provide an easy to understand interface that allows a new user to quickly configure a node to their needs. 
-
-###Commotion Theme
-
-https://github.com/opentechinstitute/luci-theme-commotion
-
-The Commotion OpenWRT theme for the web-interface on Commotion wireless routers.
-
-###Commotion Application Portal
-
-https://github.com/opentechinstitute/luci-commotion-apps
-
-The application suite allows for developers to easily advertise applications over a commotion mesh using mdns, users to easily find applications through the router app advertising interface, and node owners to easily manage and customize their application portals to better support community application support. 
+The Commotion LuCI web interface extensions provide an easy to understand interface that allows a new user to quickly configure a node to their needs. This repository contains multiple components:
+* Commotion basic configuration menus
+* Commotion LuCI theme
+* Commotion local apps portal: The application suite allows for developers to easily advertise applications over a commotion mesh using mdns, users to easily find applications through the router app advertising interface, and node owners to easily manage and customize their application portals to better support community application support.
+* Commotion debug helper: The debugging helper creates custom, downloadable informational debugging documents for offline debugging, or to send to network maintainers. Each of these new tools needs testing to find errors as well as to ensure their usability.
+* Commotion dashboard helper: The dashboard helper reports statistics to an external dashboard.
+* Commotion splash page and settings: A custom captive portal/splash screen and an interface for customizing it, built around nodogsplash (https://github.com/nodogsplash/nodogsplash).
 
 ###Commotion Service Manager
 
@@ -41,24 +36,6 @@ The service manager discovers and verifies announcements of applications hosted 
 https://github.com/opentechinstitute/serval-dna
 
 Serval's key management library allows transparent encryption and authentication of messages.
-
-###Commotion Debug Helper
-
-https://github.com/opentechinstitute/commotion-debug-helper
-
-The debugging helper creates custom, downloadable informational debugging documents for offline debugging, or to send to network maintainers. Each of these new tools needs testing to find errors as well as to ensure their usability.
-
-###Commotion Dashboard Helper
-
-https://github.com/opentechinstitute/commotion-dashboard-helper
-
-The dashboard helper reports statistics to an external dashboard. 
-
-###Commotion Splash
-
-https://github.com/opentechinstitute/luci-commotion-splash
-
-A custom captive portal/splash screen and an interface for customizing it, built around nodogsplash (https://github.com/nodogsplash/nodogsplash).
 
 
 ##Build & Install
@@ -78,9 +55,11 @@ Before you begin, you may need to install additional the following software:
 On a Debian-based system, including Ubuntu or Mint, you can simply type
 `sudo apt-get install subversion build-essential libncurses5-dev zlib1g-dev gawk git ccache gettext libssl-dev xsltproc`. Additional packages may be required if you encounter errors during the build process (e.g., `sudo apt-get install libxml-parser-perl`).
 
-1. `git clone https://github.com/opentechinstitute/commotion-openwrt.git`
+Building on OSX is ill-advised, as such requires a large number of dependencies and, most difficultly, a case-sensitive filesystem. Here is [how to determine if you are](https://apple.stackexchange.com/questions/71357/how-to-check-if-my-hd-is-case-sensitive-or-not), but unless you installed OSX yourself and use no Adobe programs (they require case-insensitive), your filesystem is case-insensitive. It is likely quicker to configure a Linux virtual machine and use that instead. If you do have a case-sensitive filesystem, you can proceed, but [YMMV](https://en.wiktionary.org/wiki/YMMV).
 
-2. `cd commotion-openwrt/`
+1. `git clone https://github.com/opentechinstitute/commotion-router.git`
+
+2. `cd commotion-router/`
 
 3. (Optional) By default, Commotion-Router is configured to include the most recent code, which may not yet be thoroughly tested. To build a specific Commotion release (e.g., Commotion 1.1), you must specify a branch or tag. For example: `git checkout 1.1`.
 
