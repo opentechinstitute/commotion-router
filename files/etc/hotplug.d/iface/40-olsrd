@@ -1,0 +1,290 @@
+. /lib/functions.sh
+. /lib/functions/commotion.sh
+. /lib/config/uci.sh
+
+#DEBUG="echo"
+
+logger -s -t hotplug.olsrd "Action: $ACTION, Interface: $INTERFACE, Device: $DEVICE" 
+
+sort_list() {
+  local arg="$*"
+  (
+    for item in $arg; do
+      echo "$item"
+    done
+  ) | sort -u
+}
+
+
+#===  FUNCTION  ================================================================
+#          NAME:  remove_olsrd_plugin
+#   DESCRIPTION:  Remove the specified OLSRd plugin
+#    PARAMETERS:  name of the plugin to remove
+#       RETURNS:  0 on success, 1 on failure
+#===============================================================================
+remove_olsrd_plugin() {
+  local pname="$1"
+  local r=1
+
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      LoadPlugin)
+        case "$(uci_get olsrd "$name" library "")" in
+          olsrd_"$pname"\.so\.*)
+            uci_remove olsrd "$name" && r=0
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load olsrd
+
+  return $r
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  add_olsrd_plugin
+#   DESCRIPTION:  Add the specified OLSRd plugin to config
+#    PARAMETERS:  name of the plugin to add
+#       RETURNS:  0 on success, 1 on plugin nonexistance, 2 on failure
+#===============================================================================
+add_olsrd_plugin() {
+  local pname="$1"
+  local LIB=/usr/lib
+  local set=0
+
+  ls $LIB/olsrd_"$pname"\.so\.* &>/dev/null
+
+  case $? in
+    1)
+      return 1
+    ;;
+    0)
+      cd $LIB
+      local plugin="$(ls olsrd_"$pname"\.so\.* 2>/dev/null)"
+      config_cb() {
+        local type="$1"
+        local name="$2"
+    
+        case $type in
+          LoadPlugin)
+            case "$(uci_get olsrd "$name" library)" in
+              "$plugin")
+                  echo "$name"
+                  set=1
+                  return 0
+                ;;
+            esac
+          ;;
+          "")
+            [ $set = 0 ] && {
+              $DEBUG uci_add olsrd LoadPlugin "$pname"
+              $DEBUG uci_set olsrd @LoadPlugin[-1] library "$plugin"
+              echo "$pname" && return 0
+            }
+          ;;
+        esac
+      }
+      config_load olsrd
+    ;;
+  esac
+
+  return 2
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  unset_olsrd_if
+#   DESCRIPTION:  Unsets all config stanzas named for the interface specified
+#    PARAMETERS:  config name of the interface to remove
+#       RETURNS:  0 on success
+#===============================================================================
+
+unset_olsrd_if() {
+  local config=$1
+  
+  uci_remove olsrd "$config"
+        
+  return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_olsrd_if
+#   DESCRIPTION:  Sets the interface stanza for the olsrd config
+#    PARAMETERS:  config name of the interface to add
+#       RETURNS:  0 on success
+#===============================================================================
+
+set_olsrd_if() {
+  local config="$1"
+  local mode="ether"
+  $DEBUG uci_add olsrd Interface "$config"
+  $DEBUG uci_set olsrd "$config" interface "$config"
+
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      wifi-iface)
+        [ "$(uci_get wireless "$name" network)" = "$config" ] && mode="mesh"
+        ;;
+    esac
+  }
+  config_load wireless
+  $DEBUG uci_set olsrd "$config" Mode "$mode"
+  $DEBUG uci_set olsrd "$config" Ip4Broadcast "255.255.255.255"
+
+  return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  unset_olsrd_dnssd
+#   DESCRIPTION:  Unsets the dnssd plugin stanza for the olsrd config
+#    PARAMETERS:  config name of the interface to remove
+#       RETURNS:  0 on success
+#===============================================================================
+
+unset_olsrd_dnssd() {
+  local config="$1"
+  
+  config_cb() {
+    local type="$1"
+    local name="$2"
+
+    case $type in
+      LoadPlugin)
+        case "$(uci_get olsrd "$name" library)" in
+          olsrd_dnssd.so.*)
+            local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf "")"
+            list_remove oldconfigs "$config"
+            uci_set olsrd "$name" NonOlsrIf "$oldconfigs"
+            ;;
+        esac
+      ;;
+    esac
+  }
+  config_load olsrd
+
+  return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_olsrd_dnssd
+#   DESCRIPTION:  Sets the dnssd plugin stanza for the olsrd config
+#    PARAMETERS:  config name of the interface to add
+#       RETURNS:  0 on success
+#===============================================================================
+
+set_olsrd_dnssd() {
+  local config="$1"
+  
+  local name="$(add_olsrd_plugin "dnssd")"
+  local oldconfigs="$(uci_get olsrd "$name" NonOlsrIf "")"
+  local newconfigs=
+  for dev in $(sort_list "$oldconfigs" "$config"); do
+    append newconfigs "$dev"
+  done
+  uci_set olsrd "$name" NonOlsrIf "$newconfigs"
+
+  return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  unset_olsrd_hna4
+#   DESCRIPTION:  Unset HNA4 stanza in olsrd config
+#    PARAMETERS:  1; config name of interface to unset
+#       RETURNS:  0 on success
+#===============================================================================
+
+unset_olsrd_hna4() {
+  local config=$1
+  
+  uci_remove olsrd "$config"
+        
+  return 0
+}
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_olsrd_hna4
+#   DESCRIPTION:  Set HNA4 stanza in olsrd config
+#    PARAMETERS:  3; IPv4 address, netmask to set, and config
+#       RETURNS:  0 on success
+#===============================================================================
+
+set_olsrd_hna4() {
+  local ipv4addr=$1
+  local netmask=$2
+  local config=$3
+
+  uci_add olsrd Hna4 "$config" 
+  uci_set olsrd "$config" netaddr "$ipv4addr"
+  uci_set olsrd "$config" netmask "$netmask"
+
+  return 0
+} 
+
+#===  FUNCTION  ================================================================
+#          NAME:  set_olsrd_mdp
+#   DESCRIPTION:  Set olsrd_mdp stanza in olsrd config
+#    PARAMETERS:  None
+#       RETURNS:  0 on success
+#===============================================================================
+
+set_olsrd_mdp() {
+  local sid="$1"
+  local keyring="$2"
+  
+  local name="$(add_olsrd_plugin mdp)"
+  $DEBUG uci_set olsrd "$name" sid "$1"
+  $DEBUG uci_set olsrd "$name" keyringpath "$2"
+
+  return 0
+} 
+
+logger -t commotion.hotplug.olsrd "proto: $(uci_get_state network "$INTERFACE" proto)"
+logger -t commotion.hotplug.olsrd "interface: $INTERFACE"
+logger -t commotion.hotplug.olsrd "device: $DEVICE"
+
+local sid=
+local keyring=
+
+[ -f "/etc/config/olsrd" ] && [ "$(uci_get_state network "$INTERFACE" proto)" = "commotion" ] && {
+
+local meshed="$(uci_get network "$INTERFACE" meshed "$(uci_get_state network "$INTERFACE" meshed)")"
+local announced="$(uci_get network "$INTERFACE" announced "$(uci_get_state network "$INTERFACE" announced)")"
+
+logger -t commotion.hotplug.olsrd "meshed: $meshed"
+logger -t commotion.hotplug.olsrd "announced: $announced"
+
+serval="$(commotion_get_serval "$DEVICE")"
+sid="$(commotion_get_sid "$DEVICE")"
+keyring="$(commotion_get_keyring "$DEVICE")"
+[ "$serval" == "true" ] && [ -n "$sid" ] && [ -n "$keyring" ] && $DEBUG set_olsrd_mdp "$sid" "$keyring"
+
+case $ACTION in
+	ifup)
+		$DEBUG unset_olsrd_if $INTERFACE
+		$DEBUG unset_olsrd_dnssd $INTERFACE
+		# Is this a mesh interface?
+		if is_true "$meshed"; then
+			$DEBUG set_olsrd_if $INTERFACE
+		fi
+      
+		# Should this interface be announced as a client network?
+		if [ "$(is_true "$announced")" == "0" -a "$(is_false "$meshed")" == "0" ]; then
+			eval `ipcalc.sh "$(uci_get_state network "$INTERFACE" ipaddr)" "$(uci_get_state network "$INTERFACE" netmask)"`
+			$DEBUG set_olsrd_hna4 $NETWORK $NETMASK $INTERFACE
+			$DEBUG set_olsrd_dnssd $INTERFACE
+		fi
+	;;
+	ifdown)
+		$DEBUG unset_olsrd_if $INTERFACE
+		$DEBUG unset_olsrd_dnssd $INTERFACE
+	;;
+esac
+$DEBUG uci_commit olsrd
+$DEBUG /etc/init.d/olsrd restart
+}

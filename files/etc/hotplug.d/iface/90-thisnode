@@ -1,0 +1,46 @@
+#!/bin/sh
+#DEBUG="echo"
+
+. /lib/functions.sh
+. /lib/functions/commotion.sh
+. /lib/config/uci.sh
+
+if [ "$ACTION" == "ifup" -a "$INTERFACE" == "lan" ]; then
+	
+	ALIAS="thisnode"
+	localip="$(commotion_gen_ip 169.254.0.0 255.255.0.0)"
+	THISNODE=$localip" $ALIAS"
+        
+        logger -t commotion.hotplug.thisnode -s "Checking for $ALIAS entry in /etc/hosts"
+        
+        if grep -Fq $ALIAS /etc/hosts; then                                                
+		logger -t commotion.hotplug.thisnode -s "Found $THISNODE in /etc/hosts"
+        else
+		echo $THISNODE >> /etc/hosts                                                           
+                logger -t commotion.hotplug.thisnode -s "Adding $THISNODE to /etc/hosts"
+	fi 
+	
+		
+	logger -t commotion.hotplug.thisnode -s "Checking for UCI entry for $ALIAS alias"
+	
+	if grep -Fq $ALIAS /etc/config/network; then
+	      logger -t commotion.hotplug.thisnode -s "$ALIAS alias exists with ip address $localip"
+	
+	else 
+		logger -t commotion.hotplug.thisnode -s "No entry found. Creating UCI entry for '$ALIAS' alias"
+		uci set network.$ALIAS=alias
+		uci set network.$ALIAS.interface=lan
+		uci set network.$ALIAS.proto=static
+		
+		uci set network.$ALIAS.ipaddr=$localip
+		logger -t commotion.hotplug.thisnode -s "Setting '$ALIAS' ip address to $localip"
+		uci set network.$ALIAS.netmask=255.255.0.0
+		
+		uci commit network
+    /etc/init.d/network reload
+	fi	
+		#NOTE: this method of configuring aliases is deprecated in more recent versions of openwrt
+		
+                                                                                     
+	kill -s HUP `pgrep dnsmasq`
+fi
