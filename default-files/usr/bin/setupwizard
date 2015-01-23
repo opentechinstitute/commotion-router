@@ -272,11 +272,10 @@ set_config() {
     uci set wireless.radio$iterator.disabled=0
 
     # network settings
-    uci set network.commotionMesh$iterator=interface
-    uci set network.commotionMesh$iterator.class=mesh
-    uci set network.commotionMesh$iterator.profile="$MESH_NAME"
-    uci set network.commotionMesh$iterator.proto=commotion
-    uci set network.commotionMesh$iterator.name="$MESH_NAME"
+    uci set network."$MESH_NAME"=interface
+    uci set network."$MESH_NAME".class=mesh
+    uci set network."$MESH_NAME"="$MESH_NAME"
+    uci set network."$MESH_NAME".proto=commotion
 
     # firewall settings
     uci add_list firewall.@zone[1].network="commotionMesh$iterator"
