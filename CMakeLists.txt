@@ -34,7 +34,7 @@ mark_as_advanced(CMAKE_CXX_COMPILER)
 mark_as_advanced(CMAKE_INSTALL_PREFIX)
 
 #Set up project
-project(commotion-build VERSION 1.1.0 LANGUAGES NONE)
+project(commotion-router VERSION 1.1.0 LANGUAGES NONE)
 
 ##################################################################################################
 # GLOBALS
