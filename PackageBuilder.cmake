@@ -72,7 +72,8 @@ function(packagebuild)
   if(NOT PB_SKIP_MD5)
     if(NOT EXISTS "${DL_DIR}/md5sums")
       message(STATUS "Attempting to download md5sums...")
-      file(DOWNLOAD "${OPENWRT_URL}/${PB_RELEASE}/${PB_VERSION}/${PB_TARGET}/${PB_SUBTARGET}/md5sums"
+      file(DOWNLOAD 
+        "${OPENWRT_URL}/${PB_RELEASE}/${PB_VERSION}/${PB_TARGET}/${PB_SUBTARGET}/md5sums"
         "${DL_DIR}/md5sums" INACTIVITY_TIMEOUT 10)
     endif()
     message(STATUS "Extracting md5sum for ${FILENAME}...")
@@ -122,8 +123,10 @@ function(packagebuild)
       CONFIGURE_COMMAND ./scripts/feeds install ${PACKAGES}
       BUILD_IN_SOURCE 1
       BUILD_COMMAND make package/${BUILD_TARGETS}/compile ${JOBS} ${VERBOSE} 
-      INSTALL_COMMAND cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/package_builder/bin/${TARGET}/packages ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/
-        COMMAND ${PROJECT_SOURCE_DIR}/ipkg-multi-index.sh  ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages
+      INSTALL_COMMAND cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/package_builder/bin/${TARGET}/packages 
+        ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/
+        COMMAND ${PROJECT_SOURCE_DIR}/ipkg-multi-index.sh  
+          ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages
     )
   else()
     ExternalProject_Add(package_builder
@@ -137,8 +140,10 @@ function(packagebuild)
       CONFIGURE_COMMAND ./scripts/feeds install ${PACKAGES}
       BUILD_IN_SOURCE 1
       BUILD_COMMAND make package/${BUILD_TARGETS}/compile ${JOBS} ${VERBOSE}
-      INSTALL_COMMAND cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/package_builder/bin/${TARGET}/packages ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/
-        COMMAND ${PROJECT_SOURCE_DIR}/ipkg-multi-index.sh  ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages
+      INSTALL_COMMAND cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/package_builder/bin/${TARGET}/packages 
+        ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/
+        COMMAND ${PROJECT_SOURCE_DIR}/ipkg-multi-index.sh  
+          ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages
     )
   endif()
 endfunction()  

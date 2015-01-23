@@ -29,7 +29,8 @@ set(OPENWRT_URL "http://downloads.openwrt.org/")
 
 #Main function for downloading and running the OpenWRT Imagebuilder
 function(imagebuild)
-  set(oneValueArgs RELEASE VERSION TARGET SUBTARGET FILES PACKAGES PROFILE DL_DIR REPO_CONF SKIP_MD5 USE_LOCAL DEBUG)
+  set(oneValueArgs RELEASE VERSION TARGET SUBTARGET FILES PACKAGES PROFILE DL_DIR REPO_CONF 
+    SKIP_MD5 USE_LOCAL DEBUG)
   set(multiValueArgs PACKAGES)
   set(options ) 
   cmake_parse_arguments(IB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -120,7 +121,9 @@ function(imagebuild)
         "${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/repositories.conf"
       BUILD_IN_SOURCE 1
       BUILD_COMMAND make image ${PROFILE} ${FILES} ${PACKAGES} ${VERBOSE} 
-      INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f -exec mv -f --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  {} \$<SEMICOLON>
+      INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f 
+        -exec mv -f --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  
+        {} \$<SEMICOLON>
     )
   else()
     ExternalProject_Add(image_builder
@@ -135,7 +138,9 @@ function(imagebuild)
       CONFIGURE_COMMAND ""
       BUILD_IN_SOURCE 1
       BUILD_COMMAND make image ${PROFILE} ${FILES} ${PACKAGES} ${VERBOSE}
-      INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f -exec mv -f --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  {} \$<SEMICOLON>
+      INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f 
+        -exec mv -f --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  
+        {} \$<SEMICOLON>
     )
   endif()
 endfunction()  

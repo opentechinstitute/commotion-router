@@ -132,7 +132,8 @@ if(BUILD_PACKAGES)
   configure_file("${PROJECT_SOURCE_DIR}/feeds.conf.in" "${FEEDS_CONF}")
 
   packagebuild(RELEASE "${OPENWRT_RELEASE}" VERSION "${OPENWRT_VERSION}" TARGET "${TARGET}" 
-    SUBTARGET "${SUBTARGET}" FEEDS_CONF "${FEEDS_CONF}" PACKAGES ${ALL_PACKAGES} BUILD_TARGETS ${PACKAGEBUILD_TARGETS} JOBS ${JOBS} DEBUG ${DEBUG} DL_DIR ${DL_DIR} SKIP_MD5 ${SKIP_MD5})
+    SUBTARGET "${SUBTARGET}" FEEDS_CONF "${FEEDS_CONF}" PACKAGES ${ALL_PACKAGES} BUILD_TARGETS 
+    ${PACKAGEBUILD_TARGETS} JOBS ${JOBS} DEBUG ${DEBUG} DL_DIR ${DL_DIR} SKIP_MD5 ${SKIP_MD5})
 endif()
 
 #Call Imagebuilder
@@ -181,7 +182,8 @@ if(IS_DIRECTORY ${UPGRADES_DIR} AND EXISTS ${UPGRADES_DIR}/manifest)
   set(SIGN_UPGRADE OFF CACHE BOOL "Sign upgrade manifest with a Serval signing key")
   set(KEYRING "" CACHE FILEPATH "Serval keyring for signing upgrade manifest (optional)")
   set(PUBLIC_KEY "" CACHE STRING "Public Serval SAS key used to sign upgrade manifest (required)")
-  set(COMMOTIOND_SOCKET "/var/run/commotiond.sock" CACHE FILEPATH "Management socket of commotiond instance")
+  set(COMMOTIOND_SOCKET "/var/run/commotiond.sock" CACHE FILEPATH "Management socket of commotiond
+    instance")
 
   if(MAKE_BUNDLES)
     file(COPY "${UPGRADES_DIR}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
@@ -189,22 +191,29 @@ if(IS_DIRECTORY ${UPGRADES_DIR} AND EXISTS ${UPGRADES_DIR}/manifest)
     # prepare upgrade package
     if(SIGN_UPGRADE AND PUBLIC_KEY)
       if(KEYRING)
-        message(STATUS "Creating signed upgrade package using key ${PUBLIC_KEY} in keyring ${KEYRING}...")
+        message(STATUS "Creating signed upgrade package using key ${PUBLIC_KEY} in keyring 
+          ${KEYRING}...")
         execute_process(
-	        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}" -k "${KEYRING}"
+	        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d 
+            "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" 
+            -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}" -k "${KEYRING}"
 	        RESULT_VARIABLE EXEC_SUCCESS
         )
       else()
-        message(STATUS "Creating signed upgrade package using key ${PUBLIC_KEY} in default keyring...")
+        message(STATUS "Creating signed upgrade package using key ${PUBLIC_KEY} in default 
+          keyring...")
         execute_process(
-	        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}"
+	        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d 
+            "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" 
+            -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}"
 	        RESULT_VARIABLE EXEC_SUCCESS
         )
       endif()
     else()
       message(STATUS "Creating unsigned upgrade package...")
       execute_process(
-        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz"
+        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d 
+          "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz"
         RESULT_VARIABLE EXEC_SUCCESS
       )
     endif()
@@ -214,7 +223,9 @@ if(IS_DIRECTORY ${UPGRADES_DIR} AND EXISTS ${UPGRADES_DIR}/manifest)
     
     if(BUILD_IMAGES)
       add_custom_target(bundle ALL
-        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}" -r "${COMMOTION_VERSION}"
+        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p 
+          "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d 
+          "${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}" -r "${COMMOTION_VERSION}"
         DEPENDS image_builder
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Bundling release images..." VERBATIM
