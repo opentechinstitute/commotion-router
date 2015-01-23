@@ -274,7 +274,7 @@ set_config() {
     # network settings
     uci set network."$MESH_NAME"=interface
     uci set network."$MESH_NAME".class=mesh
-    uci set network."$MESH_NAME"="$MESH_NAME"
+    uci set network."$MESH_NAME".profile="$MESH_NAME"
     uci set network."$MESH_NAME".proto=commotion
 
     # firewall settings
