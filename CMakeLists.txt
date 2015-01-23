@@ -48,9 +48,9 @@ set(COMMOTION_PACKAGES "commotion;commotion-gui" CACHE INTERNAL "Commotion defau
 set(PACKAGEBUILD_TARGETS "commotion" CACHE INTERNAL "Make targets for PackageBuilder")
 set(OPENWRT_VERSION "14.07" CACHE INTERNAL "OpenWRT version number")
 set(OPENWRT_RELEASE "barrier_breaker" CACHE INTERNAL "OpenWRT release nickname")
-set(BUILD_IMAGES ON CACHE BOOL "Prepare for building router images")
-set(BUILD_PACKAGES OFF CACHE BOOL "Prepare for building packages")
-set(USE_LOCAL OFF CACHE BOOL "Use the local packages built by the Packagebuilder")
+set(BUILD_IMAGES ON CACHE BOOL "Toggle building of images")
+set(BUILD_PACKAGES OFF CACHE BOOL "Toggle building of packages")
+set(USE_LOCAL OFF CACHE BOOL "Use the locally built packages when building images")
 set(JOBS "2" CACHE STRING "Number of parallel compile jobs") 
 set(DL_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE FILEPATH "Custom download directory") 
 
