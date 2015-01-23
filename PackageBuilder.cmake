@@ -75,6 +75,7 @@ function(packagebuild)
       file(DOWNLOAD "${OPENWRT_URL}/${PB_RELEASE}/${PB_VERSION}/${PB_TARGET}/${PB_SUBTARGET}/md5sums"
         "${DL_DIR}/md5sums" INACTIVITY_TIMEOUT 10)
     endif()
+    message(STATUS "Extracting md5sum for ${FILENAME}...")
     execute_process(
       COMMAND grep ${FILENAME} "${DL_DIR}/md5sums"
       COMMAND cut -d " " -f1
@@ -92,15 +93,18 @@ function(packagebuild)
   else()
     set(URL "${OPENWRT_URL}/${PB_RELEASE}/${PB_VERSION}/${PB_TARGET}/${PB_SUBTARGET}/${FILENAME}")
   endif()
+  message(STATUS "Grabbing PackageBuilder from ${URL}")
 
   #Set number of compile jobs
   if(DEFINED PB_JOBS)
     set(JOBS -j ${PB_JOBS})
+    message(STATUS "Setting number of simultaneous PackageBuilder jobs to ${PB_JOBS}")
   endif()
 
   #Set debug verbosity
   if(PB_DEBUG)
     set(VERBOSE "V=s")
+    message(STATUS "Setting PackageBuilder to use verbose output")
   endif()
 
   #Actually download, extract, and run the SDK

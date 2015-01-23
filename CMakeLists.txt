@@ -132,7 +132,7 @@ if(BUILD_PACKAGES)
   configure_file("${PROJECT_SOURCE_DIR}/feeds.conf.in" "${FEEDS_CONF}")
 
   packagebuild(RELEASE "${OPENWRT_RELEASE}" VERSION "${OPENWRT_VERSION}" TARGET "${TARGET}" 
-    SUBTARGET "${SUBTARGET}" FEEDS_CONF "${FEEDS_CONF}" PACKAGES ${ALL_PACKAGES} BUILD_TARGETS ${PACKAGEBUILD_TARGETS} JOBS ${JOBS} DEBUG ${DEBUG} DL_DIR ${DL_DIR})
+    SUBTARGET "${SUBTARGET}" FEEDS_CONF "${FEEDS_CONF}" PACKAGES ${ALL_PACKAGES} BUILD_TARGETS ${PACKAGEBUILD_TARGETS} JOBS ${JOBS} DEBUG ${DEBUG} DL_DIR ${DL_DIR} SKIP_MD5 ${SKIP_MD5})
 endif()
 
 #Call Imagebuilder
@@ -169,50 +169,56 @@ if(BUILD_IMAGES)
 
   imagebuild(RELEASE "${OPENWRT_RELEASE}" VERSION "${OPENWRT_VERSION}" TARGET "${TARGET}" 
     SUBTARGET "${SUBTARGET}" FILES "${CMAKE_CURRENT_BINARY_DIR}/files" 
-    PACKAGES "${ALL_PACKAGES}" PROFILE "${PROFILE}" SKIP_MD5 ${OPENWRT_MD5} 
+    PACKAGES "${ALL_PACKAGES}" PROFILE "${PROFILE}" SKIP_MD5 ${SKIP_MD5} 
     REPO_CONF "${REPO_CONF}" USE_LOCAL ${LOCAL} DEBUG ${DEBUG} DL_DIR ${DL_DIR})
 endif()
 
 ##################################################################################################
 # CREATE UPGRADE BUNDLES
 ##################################################################################################
-if(IS_DIRECTORY ${UPGRADES_DIR} AND EXISTS ${UPGRADES_DIR}/manifest AND MAKE_BUNDLES)
-  set(SIGN_UPGRADE ON CACHE BOOL "Sign upgrade manifest with a Serval signing key")
+if(IS_DIRECTORY ${UPGRADES_DIR} AND EXISTS ${UPGRADES_DIR}/manifest)
+  set(MAKE_BUNDLES ON CACHE BOOL "Turn built images into Commotion upgrade bundles")
+  set(SIGN_UPGRADE OFF CACHE BOOL "Sign upgrade manifest with a Serval signing key")
   set(KEYRING "" CACHE FILEPATH "Serval keyring for signing upgrade manifest (optional)")
   set(PUBLIC_KEY "" CACHE STRING "Public Serval SAS key used to sign upgrade manifest (required)")
   set(COMMOTIOND_SOCKET "/var/run/commotiond.sock" CACHE FILEPATH "Management socket of commotiond instance")
 
-  file(COPY "${UPGRADES_DIR}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-  
-  # prepare upgrade package
-  if(SIGN_UPGRADE AND PUBLIC_KEY)
-    if(KEYRING)
-      execute_process(
-	      COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}" -k "${KEYRING}"
-	      RESULT_VARIABLE EXEC_SUCCESS
-      )
+  if(MAKE_BUNDLES)
+    file(COPY "${UPGRADES_DIR}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+    
+    # prepare upgrade package
+    if(SIGN_UPGRADE AND PUBLIC_KEY)
+      if(KEYRING)
+        message(STATUS "Creating signed upgrade package using key ${PUBLIC_KEY} in keyring ${KEYRING}...")
+        execute_process(
+	        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}" -k "${KEYRING}"
+	        RESULT_VARIABLE EXEC_SUCCESS
+        )
+      else()
+        message(STATUS "Creating signed upgrade package using key ${PUBLIC_KEY} in default keyring...")
+        execute_process(
+	        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}"
+	        RESULT_VARIABLE EXEC_SUCCESS
+        )
+      endif()
     else()
+      message(STATUS "Creating unsigned upgrade package...")
       execute_process(
-	      COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -s "${PUBLIC_KEY}" -b "${COMMOTIOND_SOCKET}"
-	      RESULT_VARIABLE EXEC_SUCCESS
+        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz"
+        RESULT_VARIABLE EXEC_SUCCESS
       )
     endif()
-  else()
-    execute_process(
-      COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" prepare -v -d "${CMAKE_CURRENT_BINARY_DIR}/upgrades" -o "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz"
-      RESULT_VARIABLE EXEC_SUCCESS
-    )
-  endif()
-  if(NOT EXEC_SUCCESS EQUAL 0)
-    message(FATAL_ERROR "Error: Failed to create upgrade package")
-  endif()
-  
-  if(BUILD_IMAGES)
-    add_custom_target(bundle ALL
-      COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}" -r "${COMMOTION_VERSION}"
-      DEPENDS image_builder
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-      COMMENT "Bundling release images" VERBATIM
-    )
+    if(NOT EXEC_SUCCESS EQUAL 0)
+      message(FATAL_ERROR "Error: Failed to create upgrade package!")
+    endif()
+    
+    if(BUILD_IMAGES)
+      add_custom_target(bundle ALL
+        COMMAND "${PROJECT_SOURCE_DIR}/upgrade-builder.sh" build -v -p "${CMAKE_CURRENT_BINARY_DIR}/upgrades.tar.gz" -d "${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}" -r "${COMMOTION_VERSION}"
+        DEPENDS image_builder
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Bundling release images..." VERBATIM
+      )
+    endif()
   endif()
 endif()

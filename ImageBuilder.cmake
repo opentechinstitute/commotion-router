@@ -72,6 +72,7 @@ function(imagebuild)
       file(DOWNLOAD ${OPENWRT_URL}/${IB_RELEASE}/${IB_VERSION}/${IB_TARGET}/${IB_SUBTARGET}/md5sums 
         "${DL_DIR}/md5sums" INACTIVITY_TIMEOUT 10)
     endif()
+    message(STATUS "Extracting md5sum for ${FILENAME}...")
     execute_process(
       COMMAND grep ${FILENAME} "${DL_DIR}/md5sums"
       COMMAND cut -d " " -f1
@@ -89,15 +90,18 @@ function(imagebuild)
   else()
     set(URL "${OPENWRT_URL}/${IB_RELEASE}/${IB_VERSION}/${IB_TARGET}/${IB_SUBTARGET}/${FILENAME}")
   endif()
+  message(STATUS "Grabbing ImageBuilder from ${URL}")
 
   #If we're using a locally built set of packages, make sure the PackageBuilder runs first.
   if(IB_USE_LOCAL)
     set(DEPENDS "package_builder")
+    message(STATUS "ImageBuilder configured to use local packages created by PackageBuilder")
   endif()
 
   #Set debug verbosity
   if(IB_DEBUG)
     set(VERBOSE "V=s")
+    message(STATUS "Setting ImageBuilder to use verbose output")
   endif()
 
   #Actually download, extract, and run ImageBuilder
