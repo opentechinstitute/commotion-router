@@ -53,7 +53,6 @@ set(BUILD_PACKAGES OFF CACHE BOOL "Prepare for building packages")
 set(USE_LOCAL OFF CACHE BOOL "Use the local packages built by the Packagebuilder")
 set(JOBS "2" CACHE STRING "Number of parallel compile jobs") 
 set(DL_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE FILEPATH "Custom download directory") 
-set(MAKE_BUNDLES ON CACHE BOOL "Turn built images into Commotion upgrade bundles")
 
 #Verbose Makefile
 if(DEBUG)
