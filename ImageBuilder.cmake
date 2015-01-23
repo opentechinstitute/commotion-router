@@ -4,20 +4,20 @@
 # 
 # Copyright (c) 2014, Josh King
 #
-# This file is part of Commotion-Build.
+# This file is part of Commotion-Router.
 # 
-# Commotion-Build is free software: you can redistribute it and/or modify
+# Commotion-Router is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 # 
-# Commotion-Build is distributed in the hope that it will be useful,
+# Commotion-Router is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with Commotion-Build.  If not, see <http://www.gnu.org/licenses/>.
+# along with Commotion-Router.  If not, see <http://www.gnu.org/licenses/>.
 ##################################################################################################
 
 cmake_minimum_required(VERSION 2.8)
@@ -29,7 +29,7 @@ set(OPENWRT_URL "http://downloads.openwrt.org/")
 
 #Main function for downloading and running the OpenWRT Imagebuilder
 function(imagebuild)
-  set(oneValueArgs RELEASE VERSION TARGET SUBTARGET FILES PACKAGES PROFILE DL_DIR REPO_CONF 
+  set(oneValueArgs RELEASE VERSION TARGET SUBTARGET FILES PROFILE DL_DIR REPO_CONF 
     SKIP_MD5 USE_LOCAL DEBUG)
   set(multiValueArgs PACKAGES)
   set(options ) 
@@ -72,6 +72,7 @@ function(imagebuild)
       message(STATUS "Attempting to download md5sums...")
       file(DOWNLOAD ${OPENWRT_URL}/${IB_RELEASE}/${IB_VERSION}/${IB_TARGET}/${IB_SUBTARGET}/md5sums 
         "${DL_DIR}/md5sums" INACTIVITY_TIMEOUT 10)
+      message(STATUS "md5sum path: ${DL_DIR}/md5sums")
     endif()
     message(STATUS "Extracting md5sum for ${FILENAME}...")
     execute_process(
@@ -84,6 +85,7 @@ function(imagebuild)
       message(WARNING "Error: md5sum not defined.")
     endif()
   endif()
+  message(STATUS "MD5SUM: ${MD5SUM}")
 
   #Don't download ImageBuilder if we've done it already
   if(EXISTS ${DL_DIR}/${FILENAME})

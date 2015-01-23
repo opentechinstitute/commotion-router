@@ -4,20 +4,20 @@
 # 
 # Copyright (c) 2014, Josh King
 #
-# This file is part of Commotion-Build.
+# This file is part of Commotion-Router.
 # 
-# Commotion-Build is free software: you can redistribute it and/or modify
+# Commotion-Router is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 # 
-# Commotion-Build is distributed in the hope that it will be useful,
+# Commotion-Router is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with Commotion-Build.  If not, see <http://www.gnu.org/licenses/>.
+# along with Commotion-Router.  If not, see <http://www.gnu.org/licenses/>.
 ##################################################################################################
 
 ##################################################################################################
@@ -44,8 +44,8 @@ set(DEBUG OFF CACHE BOOL "Create verbose Makefile output")
 set(COMMOTION_VERSION "master" CACHE STRING "Branch of Commotion to build")
 set(COMMOTION_RELEASE "grumpy_cat" CACHE STRING "Commotion release nickname")
 set(SKIP_MD5 OFF CACHE BOOL "Skip MD5 checking of downloaded ImageBuilder & PackageBuilder files")
-set(COMMOTION_PACKAGES "commotion;commotion-gui" CACHE STRING "Commotion default packages")
-set(PACKAGEBUILD_TARGETS "commotion" CACHE STRING "Make targets for PackageBuilder")
+set(COMMOTION_PACKAGES "commotion;commotion-gui" CACHE INTERNAL "Commotion default packages")
+set(PACKAGEBUILD_TARGETS "commotion" CACHE INTERNAL "Make targets for PackageBuilder")
 set(OPENWRT_VERSION "14.07" CACHE INTERNAL "OpenWRT version number")
 set(OPENWRT_RELEASE "barrier_breaker" CACHE INTERNAL "OpenWRT release nickname")
 set(BUILD_IMAGES ON CACHE BOOL "Prepare for building router images")
@@ -114,7 +114,7 @@ choose_config("${CONFIGS_DIR}/${CONFIG}")
 if(DEFINED PACKAGES)
   list(APPEND ALL_PACKAGES ${COMMOTION_PACKAGES} ${PACKAGES})
 else()
-  set(ALL_PACKAGES "${COMMOTION_PACKAGES}")
+  set(ALL_PACKAGES ${COMMOTION_PACKAGES})
 endif()
   
 ##################################################################################################
@@ -131,7 +131,7 @@ if(BUILD_PACKAGES)
   configure_file("${PROJECT_SOURCE_DIR}/feeds.conf.in" "${FEEDS_CONF}")
 
   packagebuild(RELEASE "${OPENWRT_RELEASE}" VERSION "${OPENWRT_VERSION}" TARGET "${TARGET}" 
-    SUBTARGET "${SUBTARGET}" FEEDS_CONF "${FEEDS_CONF}" PACKAGES ${ALL_PACKAGES} BUILD_TARGETS 
+    SUBTARGET "${SUBTARGET}" FEEDS_CONF "${FEEDS_CONF}" PACKAGES "${ALL_PACKAGES}" BUILD_TARGETS 
     ${PACKAGEBUILD_TARGETS} JOBS ${JOBS} DEBUG ${DEBUG} DL_DIR ${DL_DIR} SKIP_MD5 ${SKIP_MD5})
 endif()
 
