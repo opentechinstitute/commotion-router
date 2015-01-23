@@ -145,6 +145,10 @@ if(BUILD_IMAGES)
   #Write version identification files
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/etc/openwrt_version "${COMMOTION_VERSION}")
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/files/etc/openwrt_release "${COMMOTION_RELEASE}")
+
+  #Write banner
+  configure_file("${PROJECT_SOURCE_DIR}/banner.in" 
+    ${CMAKE_CURRENT_BINARY_DIR}/files/etc/banner)
   
   #Write opkg.conf
   configure_file("${PROJECT_SOURCE_DIR}/opkg.conf.in" 
