@@ -9,7 +9,7 @@
                                                                   
 ==================================================================
   A FOSS community wireless mesh network firmware distribution.   
-                        Version %{COMMOTION_VERSION}
+                        Version ${COMMOTION_VERSION}
 ==================================================================
     Based on technology from the OpenWRT (http://openwrt.org),    
  Freifunk (http://freifunk.net), Funkfeuer (http://funkfeuer.at), 
