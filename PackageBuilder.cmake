@@ -34,16 +34,9 @@ function(packagebuild)
   set(options )
   cmake_parse_arguments(PB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  #Set list of packages to install into buildsystem
-  if(DEFINED PB_PACKAGES)
-    #Convert packages list to comma-delimited string
-    list(LENGTH PB_PACKAGES LEN)
-    if(LEN GREATER 1)
-      string(CONCAT PACKAGES "{" "${PB_PACKAGES}" "}")
-      string(REPLACE ";" "," PACKAGES "${PACKAGES}")
-    else()
-      set(PACKAGES "${PB_PACKAGES}")
-    endif()
+  #Check list of packages to install into buildsystem
+  if(NOT DEFINED PB_PACKAGES)
+    message(FATAL_ERROR "No packages defined.")
   endif()
   
   #Set list of package build targets
@@ -51,11 +44,14 @@ function(packagebuild)
     #Convert packages list to comma-delimited string
     list(LENGTH PB_BUILD_TARGETS LEN)
     if(LEN GREATER 1)
-      string(CONCAT BUILD_TARGETS "{" "${PB_BUILD_TARGETS}" "}")
-      string(REPLACE ";" "," BUILD_TARGETS "${BUILD_TARGETS}")
+      foreach(loop_var IN LISTS PB_BUILD_TARGETS)
+        list(APPEND BUILD_TARGETS "package/${loop_var}/compile")
+      endforeach()
     else()
-      set(BUILD_TARGETS "${PB_BUILD_TARGETS}")
+      set(BUILD_TARGETS "package/${PB_BUILD_TARGETS}/compile")
     endif()
+  else()
+    message(FATAL_ERROR "No build targets defined.")
   endif()
 
   #Optionally set custom download directory
@@ -122,9 +118,9 @@ function(packagebuild)
       PATCH_COMMAND cp "${PB_FEEDS_CONF}" 
         "${CMAKE_CURRENT_BINARY_DIR}/src/package_builder/feeds.conf"
       UPDATE_COMMAND LC_ALL=C ./scripts/feeds update -a
-      CONFIGURE_COMMAND ./scripts/feeds install ${PACKAGES}
+      CONFIGURE_COMMAND ./scripts/feeds install ${PB_PACKAGES}
       BUILD_IN_SOURCE 1
-      BUILD_COMMAND make package/${BUILD_TARGETS}/compile ${JOBS} ${VERBOSE} 
+      BUILD_COMMAND make ${BUILD_TARGETS} ${JOBS} ${VERBOSE} 
       INSTALL_COMMAND cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/package_builder/bin/${TARGET}/packages 
         ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/
         COMMAND ${PROJECT_SOURCE_DIR}/ipkg-multi-index.sh  
@@ -139,9 +135,9 @@ function(packagebuild)
       INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/bin/packages/"
       PATCH_COMMAND ""
       UPDATE_COMMAND LC_ALL=C ./scripts/feeds update -a
-      CONFIGURE_COMMAND ./scripts/feeds install ${PACKAGES}
+      CONFIGURE_COMMAND ./scripts/feeds install ${PB_PACKAGES}
       BUILD_IN_SOURCE 1
-      BUILD_COMMAND make package/${BUILD_TARGETS}/compile ${JOBS} ${VERBOSE}
+      BUILD_COMMAND make ${BUILD_TARGETS} ${JOBS} ${VERBOSE}
       INSTALL_COMMAND cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/package_builder/bin/${TARGET}/packages 
         ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/
         COMMAND ${PROJECT_SOURCE_DIR}/ipkg-multi-index.sh  
