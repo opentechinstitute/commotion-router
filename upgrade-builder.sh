@@ -101,7 +101,7 @@ build() {
   BYTE_STRING=$(printf %08X $SIZE |awk 'BEGIN { FIELDWIDTHS="2 2 2 2" } { print "\\x"$1"\\x"$2"\\x"$3"\\x"$4 }')
   
   cd "$IMAGE_DIR"
-  for IMAGE in $(ls "$IMAGE_DIR"/*-{sysupgrade,factory}.bin); do
+  for IMAGE in $(ls "$IMAGE_DIR"/*-sysupgrade.bin); do
     # append tarball to image
     cat "$PACKAGE" >> "$IMAGE"
 
@@ -115,6 +115,10 @@ build() {
     echo `basename $IMAGE` | sed -n "s/\(^openwrt-\)\(.*\)\(\.bin$\)/mv "\\1\\2\\3" "commotion-${RELEASE}-\\2.bundle"/p" | sh
 
     [[ -n "$VERBOSE" ]] && echo "Image $IMAGE successfully converted into upgrade bundle"
+  done
+  for IMAGE in $(ls "$IMAGE_DIR"/*-factory.bin); do
+    # rename image
+    echo `basename $IMAGE` | sed -n "s/\(^openwrt-\)\(.*$\)/mv "\\1\\2" "commotion-${RELEASE}-\\2"/p" | sh
   done
 }
 
