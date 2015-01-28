@@ -2,6 +2,8 @@
 
 Commotion-Router
 ===============
+*This new, CMake-based build system only works for Barrier Breaker-based images, which are not yet fully functional. Use the 1.1 branch to use the old buildsystem for creation of Attitude Adjustment-based v1.1 images.*
+
 Commotion is an open source “device-as-infrastructure” communication platform that integrates users’ existing cell phones, Wi-Fi enabled computers, and other wireless-capable devices to create community- and metro-scale, peer-to-peer communications networks.
 
 Commotion software exists for multiple platforms; this repository contains the build system for the [OpenWRT](https://openwrt.org) router firmware distribution of the Commotion Wireless project. This repo builds the following other Commotion projects in order to create installation images for turning select wireless routers into Commotion nodes. It contains only the scripts and default files needed to download OpenWRT and add Commotion's packages to the OpenWRT build system. These scripts are written with [CMake](http://cmake.org) and wrap the [OpenWRT ImageBuilder](http://wiki.openwrt.org/doc/howto/obtain.firmware.generate) and [SDK] (http://wiki.openwrt.org/doc/howto/obtain.firmware.sdk). Those Commotion packages are defined in the packages directory of the Commotion Feed repo (https://github.com/opentechinstitute/commotion-feed.git). Package source code can be found in the repositories (PKG_SOURCE_URL) and branches (PKG_VERSION) specified in their respective Commotion Feed Makefiles.
