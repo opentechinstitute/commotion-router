@@ -1,0 +1,455 @@
+﻿#!/bin/ash
+
+source /lib/functions.sh 
+
+# PRESET VALUES
+SSID_MIN=1
+SSID_MAX=31
+KEY_MIN=8
+KEY_MAX=63
+CHANNEL_MIN=1
+CHANNEL_MAX=12
+HOSTNAME_MIN=2
+HOSTNAME_MAX=24
+
+# INPUT VALIDATOR
+validate() {
+
+    # check that user has not input empty string
+    if [ -z "$3" ]; then
+            echo "Invalid option."
+            return 1;
+    fi
+
+    INPUT_STRING="$1"
+    MIN_LENGTH="$2"
+    MAX_LENGTH="$3"
+    
+    length=${#INPUT_STRING}
+    if [ $length -lt $MIN_LENGTH -o $length -gt $MAX_LENGTH ]; then      
+        echo "ERROR: Length invalid. Value must be between $MIN_LENGTH and $MAX_LENGTH characters."                         
+        return 1;
+    fi                                                            
+                                                        
+    case $INPUT_STRING in                                                      
+        *[^a-zA-Z0-9-]* ) 
+            echo "ERROR: Cannot assign non-ASCII characters.";
+            return 1;;
+        * ) 
+            return 0;;
+    esac 
+    }
+
+# RESET FUNCTION (for saved configurations)
+clear_previous_configuration() {
+
+    config_cb() {
+        echo "running config_cb"
+        local TYPE="$1" 
+        local NAME="$2"
+        
+        # if type == iface, delete
+        if [ $TYPE == "wifi-iface" ] ; then
+        
+            # get ssid
+            SSID=$(uci get wireless.$NAME.ssid)
+            
+            # if this is a mesh interface, delete profile and network config
+            if [ $(uci get wireless.$NAME.mode) == "adhoc" ]; then
+                uci delete network.$SSID
+                commotion delete $SSID
+            fi
+            
+            uci delete wireless.$NAME
+        fi
+}
+
+config_load wireless
+uci commit
+config_reset
+}
+
+# RESET FUNCTION (for unsaved configurations)
+clear_values() {
+    unset SETUP_RUN
+    unset PASSWORD_SET
+    unset HOSTNAME
+    unset MESH_NAME
+    unset CHANNEL
+    unset MESH_PASSWORD
+    unset AP_NAME
+    unset AP_PASSWORD
+}
+
+# GET CONFIGURATION VALUES FROM USER
+get_config() {
+
+    # GET MESH SETTINGS
+    while true; do
+        echo -e "\n\nPlease enter mesh network name for radio$iterator: "
+        read MESH_NAME
+        validate $MESH_NAME $SSID_MIN $SSID_MAX
+        if [ $? == 0 ]; then
+            break;
+        fi
+    done
+
+    while true; do
+        echo -e "\n\nPlease select a valid channel: "
+        
+        read CHANNEL
+        
+        # if radio is 2.4 GHz
+        if [ "$FREQUENCY" == "2.4" ] && [ "$CHANNEL" -gt "$CHANNEL_MIN" ] && [ "$CHANNEL" -lt "$CHANNEL_MAX" ]; then
+            break;
+        else if [ "$FREQUENCY" == "2.4" ]; then
+            echo -e "ERROR: Channel must be between $CHANNEL_MIN and $CHANNEL_MAX";
+        fi
+        fi
+        
+        #if radio is 5 GHz
+        if [ "$FREQUENCY" == "5" ]; then
+        case $CHANNEL in
+        36|40|44|48|149|153|157|161|165 ) 
+            break;;
+        * ) echo -e "ERROR: Invalid channel. Valid options are: 36|40|44|48|149|153|157|161|165";;
+        esac
+        fi
+    done
+
+    echo -e "\nSet mesh network encryption? [y/n]"
+    
+    while true; do
+        read answer                                                
+        case $answer in                                            
+        [Yy]* ) 
+                while true; do
+                    echo -e "\nPlease choose an encryption password: ";  
+                    read -s MESH_PASSWORD;
+                    validate $MESH_PASSWORD $KEY_MIN $KEY_MAX;
+                    
+                    if [ $? == "0" ]; then
+                        echo "Repeat password: ";
+                        read -s MESH_CONFIRM;
+                    
+                    if [ "$MESH_PASSWORD" == "$MESH_CONFIRM" ]; then
+                        break;
+                    else 
+                        echo -e "Passwords do not match.";
+                    fi
+                    fi
+                done;
+                break;;
+        [Nn]* ) 
+                break;;                                          
+        * )     
+                echo "Please answer yes[y] or no[n]";;               
+        esac 
+    done
+
+    # GET ACCESS POINT SETTINGS
+    
+    echo -e "\n\nSet up an access point? [y/n]"
+    
+    while true; do
+        read answer                                                
+        case $answer in                                            
+            [Yy]* ) 
+                    while true; do
+                        echo -e "\nAccess point name: ";
+                        read AP_NAME;
+                        validate $AP_NAME $SSID_MIN $SSID_MAX;
+                        if [ $? == "0" ]; then
+                            break;
+                        fi
+                        done;
+                        break;;                                                                                        
+            [Nn]* ) 
+                    break;;
+            * ) 
+                    echo "Please answer yes[y] or no[n]";;               
+        esac 
+    done
+
+    if [ $AP_NAME ]; then
+        # access point encryption
+        echo -e "\n\nSet encryption for the access point? [y/n]"
+        
+        while true; do
+        read answer                                                
+        case $answer in                                            
+            [Yy]* ) 
+                    while true; do
+                        echo -e "\nPlease choose an encryption password: ";  
+                        read -s AP_PASSWORD;                                
+                        validate $AP_PASSWORD $KEY_MIN $KEY_MAX;
+                        
+                        if [ $? == "0" ]; then
+                        echo "Repeat password: ";
+                        read -s AP_CONFIRM;
+                        
+                        if [ "$AP_PASSWORD" == "$AP_CONFIRM" ]; then
+                            break;
+                        else
+                            echo -e "Passwords do not match.\n";
+                        fi
+                        fi
+                    done;
+                    break;;  
+            [Nn]* ) 
+                    break;;  
+            * ) 
+                    echo "Please answer yes[y] or no[n]";;               
+        esac 
+        done
+    fi
+
+        # DISPLAY PROPOSED CONFIGURATION
+        echo -e "\n\n
+        CONFIGURATION
+
+        NODE SETTINGS
+        Hostname:          "$HOSTNAME"
+
+
+        MESH SETTINGS
+        SSID:              "$MESH_NAME"
+        Channel:           "$CHANNEL""
+    
+    if [ $MESH_PASSWORD ]; then
+        echo -e "
+        Encryption:        yes"
+    else
+        echo -e "
+        Encryption:        no"
+    fi
+
+    if [ $AP_NAME ]; then
+        echo -e "\n
+        ACCESS POINT SETTINGS
+        SSID:              "$AP_NAME"
+        Channel:           "$CHANNEL""
+
+        if [ $AP_PASSWORD ]; then
+            echo -e "    
+        Encryption:        yes"
+        else
+            echo -e "    
+        Encryption:        no"
+        fi
+    fi
+
+    # save or reset configuration
+    while true; do
+        echo -e "\n\nKeep this configuration? [y/n]"
+        read answer
+        case $answer in                                            
+            [Yy]* ) 
+                    set_config;
+                    return 0;;                                                                                             
+            [Nn]* ) 
+                    echo "Reverting configuration settings."; 
+                    clear_values;
+                    return 1;;                                         
+            * )     echo "Please answer yes[y] or no[n]";;               
+        esac 
+    done
+}
+
+
+set_config() {
+    # SET MESH UCI VALUES
+
+    # wireless settings
+    MESH_CONFIG=`uci add wireless wifi-iface`
+    uci rename wireless."$MESH_CONFIG"=commotionMesh$iterator
+
+    uci set wireless.commotionMesh$iterator.mode=adhoc
+    uci set wireless.commotionMesh$iterator.device=radio$iterator
+    uci set wireless.commotionMesh$iterator.ssid="$MESH_NAME"
+    uci set wireless.commotionMesh$iterator.network="$MESH_NAME"
+    uci set wireless.radio$iterator.channel="$CHANNEL"
+    uci set wireless.radio$iterator.disabled=0
+
+    # network settings
+    uci set network."$MESH_NAME"=interface
+    uci set network."$MESH_NAME".class=mesh
+    uci set network."$MESH_NAME".profile="$MESH_NAME"
+    uci set network."$MESH_NAME".proto=commotion
+
+    # firewall settings
+    uci add_list firewall.@zone[1].network="commotionMesh$iterator"
+
+
+    # set Commotion profile settings
+    commotion new "$MESH_NAME"
+    commotion set "$MESH_NAME" ssid "$MESH_NAME"
+    commotion set "$MESH_NAME" channel "$CHANNEL"
+
+    #set encryption settings
+    if [ $MESH_PASSWORD ]; then
+        commotion set "$MESH_NAME" key "$MESH_PASSWORD"; 
+        uci set wireless.commotionMesh$iterator.encryption=psk2;
+        uci set wireless.commotionMesh$iterator.key="$MESH_PASSWORD";
+    else
+        commotion set "$MESH_NAME" encryption none
+        uci set wireless.commotionMesh$iterator.encryption=none
+    fi
+
+
+    # SET AP SETTINGS
+    if [ $AP_NAME ]; then
+        # set AP uci values
+        AP_CONFIG=`uci add wireless wifi-iface`
+        uci rename wireless."$AP_CONFIG"=commotionAP$iterator
+
+        uci set wireless.commotionAP$iterator.network=lan
+        uci set wireless.commotionAP$iterator.mode=ap
+        uci set wireless.commotionAP$iterator.ssid="$AP_NAME"
+        uci set wireless.commotionAP$iterator.device=radio$iterator
+        
+        # set AP encryption
+        if [ $AP_PASSWORD ]; then
+            uci set wireless.commotionAP$iterator.encryption=psk2;
+            uci set wireless.commotionAP$iterator.key="$AP_PASSWORD";
+        else
+            uci set wireless.commotionAP$iterator.encryption=none
+        fi
+    fi
+    
+    # mark changes in setup_wizard config file
+    uci set setup_wizard.settings.enabled=0
+    uci commit setup_wizard
+
+    # commit Commotion profile changes
+    commotion save "$MESH_NAME"
+
+    echo -e "\n\nNew settings applied."
+
+    # clear all values (precaution)
+    clear_values
+}
+
+save_config()
+{
+    # commit uci changes
+    uci commit wireless
+    uci commit network
+    uci commit system
+    uci commit firewall
+
+    echo -e "\n\nAll settings saved."
+
+    echo -e "\n\nRestarting networking.\n\n"
+
+    # restart networking
+    /etc/init.d/commotiond restart
+    /etc/init.d/network reload
+}
+
+
+# SCRIPT BEGINS HERE
+
+# DETERMINE NUMBER OF RADIOS
+NUM_RADIOS=`less /etc/config/wireless | grep -c "wifi-device"`
+
+# BEGIN USER INTERACTION
+echo -e "\n\nWelcome to the Setup Wizard.\n"
+
+# if password not set, require password set
+while [ `grep root /etc/shadow | cut -d ":" -f 2` == "x" ]; do
+    echo -e "\nPlease choose an administrator password: \n"
+    passwd
+    uci set setup_wizard.passwords.admin_pass=changed
+done
+
+if [ `uci get setup_wizard.settings.enabled` == 0 ]; then
+    echo -e "Setup Wizard has already been run."
+    while true; do
+    echo -e "\nSet new configuration? [y/n]"
+        read answer
+        case $answer in                                            
+            [Yy]* ) echo -e "Reverting previous configuration.";
+                    clear_previous_configuration;
+                    break;;                                                                                              
+            [Nn]* ) echo -e "Keeping settings. Closing Setup Wizard."; 
+                    exit 0;;                                          
+            * )     echo "Please answer yes[y] or no[n]";;               
+        esac 
+    done
+fi
+
+while true; do
+    echo -e "\n\nSet the hostname for this device? [y/n]"
+    read answer
+    case $answer in                                            
+        [Yy]* ) while true; do
+                echo "Enter new hostname: ";  
+                read HOSTNAME;                                
+                uci set system.@system[0].hostname="$HOSTNAME";
+                
+                validate $HOSTNAME $HOSTNAME_MIN $HOSTNAME_MAX;
+                if [ $? == 0 ]; then
+                    uci set system.@system[0].hostname="$HOSTNAME";
+                    break;
+                fi
+                done;
+                break;;    
+        [Nn]* ) break;;                                          
+        * ) echo "Please answer yes[y] or no[n]";;               
+    esac 
+done
+
+# if setup_wizard file does not exist, create it
+if [[ ! -f /etc/config/setup_wizard ]]; then
+    touch /etc/config/setup_wizard
+
+    # indicator for whether setup wizard has already run
+    SETUP_RUN=`uci add setup_wizard settings`
+    uci rename setup_wizard.$SETUP_RUN=settings
+    uci set setup_wizard.settings.enabled=1
+
+    # indicator for whether password has been set
+    PASSWORD_SET=`uci add setup_wizard uci`
+    uci rename setup_wizard.$PASSWORD_SET=passwords
+    uci set setup_wizard.passwords.admin_pass=false
+fi
+
+# CONFIGURE EACH RADIO FOR MESH AND AP SETTINGS
+iterator=0
+while [ $iterator -lt $NUM_RADIOS ]; do
+        # Get wireless protocol
+    PROTOCOL=$(uci get wireless.radio$iterator.hwmode)
+        
+    if [ "$PROTOCOL" == "11b" ] || [ "$PROTOCOL" == "11g" ] || [ "$PROTOCOL" == "11ng" ]; then
+        # protocol uses 2.4 GHz frequency range
+        FREQUENCY=2.4
+
+    else if [ "$PROTOCOL" == "11a" ] || [ "$PROTOCOL" == "11na" ]; then
+        # protocol uses 5 GHz frequency range
+        FREQUENCY=5
+    fi
+    fi
+    
+    # GET PERMISSION TO CONFIGURE DEVICE
+    echo -e "\n\nConfigure radio$iterator ($FREQUENCY GHz)? [y/n]"
+    while true; do
+        read answer                                                
+        case $answer in                                            
+        [Yy]* ) echo -e "\nConfiguring radio$iterator ($FREQUENCY GHz)";
+                get_config;
+                # if user rejects settings, rerun get_config
+                while [ $? -eq 1 ]; do                                                                                                                                
+                    get_config;                                                                                                                                                                                                                                                                                                                                  
+                done;
+                break;; 
+                                                                                        
+        [Nn]* ) break;;
+        * ) echo "Please answer yes[y] or no[n]";;               
+        esac 
+    done
+
+    iterator=$((iterator+1))
+done
+
+save_config
