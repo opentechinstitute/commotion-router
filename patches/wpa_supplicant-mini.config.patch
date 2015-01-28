@@ -1,7 +1,0 @@
---- a/package/hostapd/files/wpa_supplicant-mini.config	2013-11-05 11:58:49.594399787 -0500
-+++ b/package/hostapd/files/wpa_supplicant-mini.config	2013-11-05 12:00:15.866397481 -0500
-@@ -404,3 +404,4 @@
- #LIBS_c += -lbfd -liberty -lz
- 
- NEED_80211_COMMON=y
-+CONFIG_IBSS_RSN=y

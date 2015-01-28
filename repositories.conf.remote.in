@@ -1,0 +1,7 @@
+## Place your custom repositories here, they must match the architecture and version.
+# src/gz attitude_adjustment http://downloads.openwrt.org/attitude_adjustment/12.09/ar71xx/generic/packages
+# src custom file:///usr/src/openwrt/bin/ar71xx/packages
+
+## This is the local package repository, do not remove!
+src/gz ${COMMOTION_RELEASE} http://downloads.commotionwireless.net/router/${COMMOTION_VERSION}/${TARGET}/${SUBTARGET}/packages
+src imagebuilder file:packages

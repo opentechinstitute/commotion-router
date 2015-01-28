@@ -28,8 +28,8 @@ if [ "$ACTION" == "ifup" -a "$INTERFACE" == "lan" ]; then
 	
 	else 
 		logger -t commotion.hotplug.thisnode -s "No entry found. Creating UCI entry for '$ALIAS' alias"
-		uci set network.$ALIAS=alias
-		uci set network.$ALIAS.interface=lan
+		uci set network.$ALIAS=interface
+		uci set network.$ALIAS.iface=br-lan
 		uci set network.$ALIAS.proto=static
 		
 		uci set network.$ALIAS.ipaddr=$localip
@@ -39,7 +39,7 @@ if [ "$ACTION" == "ifup" -a "$INTERFACE" == "lan" ]; then
 		uci commit network
     /etc/init.d/network reload
 	fi	
-		#NOTE: this method of configuring aliases is deprecated in more recent versions of openwrt
+		#NOTE: this method of configuring aliases is only supported on barrier breaker, not attitude adjustment
 		
                                                                                      
 	kill -s HUP `pgrep dnsmasq`

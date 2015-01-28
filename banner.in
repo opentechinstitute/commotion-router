@@ -1,0 +1,18 @@
+==================================================================
+     _____       __  __ __  __      _______ _____       _   _     
+    / ____| ___ |  \/  |  \/  | ___|__   __|_   _| ___ | \ | |    
+   | |     / _ \| \  / | \  / |/ _ \  | |    | |  / _ \|  \| |    
+   | |    | (_) | |\/| | |\/| | (_) | | |    | | | (_) | . ` |    
+   | |___  \___/| |  | | |  | |\___/  | |   _| |_ \___/| |\  |    
+    \_____|     |_|  |_|_|  |_|       |_|  |_____|     |_| \_|    
+            C O M M O T I O N W I R E L E S S . N E T             
+                                                                  
+==================================================================
+  A FOSS community wireless mesh network firmware distribution.   
+                        Version ${COMMOTION_VERSION}
+==================================================================
+    Based on technology from the OpenWRT (http://openwrt.org),    
+ Freifunk (http://freifunk.net), Funkfeuer (http://funkfeuer.at), 
+  and Serval (http://servalproject.org) projects, and created by  
+   the Open Technology Institute (http://opentechinstitute.org).  
+==================================================================
