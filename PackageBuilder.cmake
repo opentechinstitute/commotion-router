@@ -132,7 +132,7 @@ function(packagebuild)
       URL_MD5 ${MD5SUM}
       PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
       DOWNLOAD_DIR "${DL_DIR}"
-      INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/bin/packages/"
+      INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages/"
       PATCH_COMMAND ""
       UPDATE_COMMAND LC_ALL=C ./scripts/feeds update -a
       CONFIGURE_COMMAND ./scripts/feeds install ${PB_PACKAGES}
