@@ -21,4 +21,5 @@ config dhcp
         option start '2'
         option limit '150'
         option leasetime '12h'
+        list dhcp_option '6,0.0.0.0'
         option ignore '0'
