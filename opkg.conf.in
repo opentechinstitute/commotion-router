@@ -1,5 +1,11 @@
-src/gz ${COMMOTION_RELEASE} http://downloads.commotionwireless.net/router/${COMMOTION_VERSION}/${TARGET}/${SUBTARGET}/packages)
-src/gz ${OPENWRT_RELEASE} http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages)
+src/gz ${COMMOTION_RELEASE} http://downloads.commotionwireless.net/router/${COMMOTION_VERSION}/${TARGET}/${SUBTARGET}/packages
+src/gz ${OPENWRT_RELEASE}_base http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/base
+src/gz ${OPENWRT_RELEASE}_luci http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/luci
+src/gz ${OPENWRT_RELEASE}_packages http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/packages
+src/gz ${OPENWRT_RELEASE}_routing http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/routing
+src/gz ${OPENWRT_RELEASE}_telephony http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/telephony
+src/gz ${OPENWRT_RELEASE}_management http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/management
+src/gz ${OPENWRT_RELEASE}_oldpackages http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/oldpackages
 dest root /
 dest ram /tmp
 lists_dir ext /var/opkg-lists

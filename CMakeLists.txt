@@ -95,9 +95,6 @@ macro(choose_config CONFIG_PATH)
   defined(TARGET "Error: Target not defined in configuration!")
   defined(SUBTARGET "Error: Subtarget not defined in configuration!")
   defined(PROFILE "Error: Profile not defined in configuration!")
-  if(IS_DIRECTORY "${CONFIG_PATH}/files")
-    file(COPY ${CONFIG_PATH}/files/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
-  endif()
 endmacro()
 
 ##################################################################################################
@@ -137,9 +134,19 @@ endif()
 
 #Call Imagebuilder
 if(BUILD_IMAGES)
+  #Remove existing files directory
+  if(IS_DIRECTORY ${FILES_DIR})
+    file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/files)
+  endif()
+
   #Copy default configuration files
   if(IS_DIRECTORY ${FILES_DIR})
     file(COPY ${FILES_DIR}/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
+  endif()
+
+  #Copy config-specific configuration files
+  if(IS_DIRECTORY ${CONFIGS_DIR}/${CONFIG}/files)
+    file(COPY ${CONFIGS_DIR}/${CONFIG}/files/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
   endif()
 
   #Write version identification files
