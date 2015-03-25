@@ -184,7 +184,7 @@ if(IS_DIRECTORY ${UPGRADES_DIR} AND EXISTS ${UPGRADES_DIR}/manifest)
   set(MAKE_BUNDLES ON CACHE BOOL "Turn built images into Commotion upgrade bundles")
   set(SIGN_UPGRADE OFF CACHE BOOL "Sign upgrade manifest with a Serval signing key")
   set(KEYRING "" CACHE FILEPATH "Serval keyring for signing upgrade manifest (optional)")
-  set(PUBLIC_KEY "" CACHE STRING "Public Serval SAS key used to sign upgrade manifest (required)")
+  set(PUBLIC_KEY "" CACHE STRING "Public Serval SID key used to sign upgrade manifest (required)")
   set(COMMOTIOND_SOCKET "/var/run/commotiond.sock" CACHE FILEPATH "Management socket of commotiond
     instance")
 
