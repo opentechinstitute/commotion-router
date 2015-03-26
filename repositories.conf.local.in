@@ -5,5 +5,4 @@
 ## This is the local package repository, do not remove!
 src ${COMMOTION_RELEASE} file://${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages/commotion
 src ${COMMOTION_RELEASE}-packages file://${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages/packages
-src ${COMMOTION_RELEASE}-routing file://${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages/routing
 src imagebuilder file:packages

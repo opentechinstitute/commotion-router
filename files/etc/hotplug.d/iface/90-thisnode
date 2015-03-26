@@ -9,15 +9,20 @@ if [ "$ACTION" == "ifup" -a "$INTERFACE" == "lan" ]; then
 	
 	ALIAS="thisnode"
 	localip="$(commotion_gen_ip 169.254.0.0 255.255.0.0)"
-	THISNODE=$localip" $ALIAS"
         
-        logger -t commotion.hotplug.thisnode -s "Checking for $ALIAS entry in /etc/hosts"
+        logger -t commotion.hotplug.thisnode -s "Checking for $ALIAS entry in /etc/config/dhcp"
         
-        if grep -Fq $ALIAS /etc/hosts; then                                                
-		logger -t commotion.hotplug.thisnode -s "Found $THISNODE in /etc/hosts"
+        if grep -Fq $ALIAS /etc/config/dhcp; then                                                
+		logger -t commotion.hotplug.thisnode -s "Found $ALIAS in /etc/config/dhcp"
         else
-		echo $THISNODE >> /etc/hosts                                                           
-                logger -t commotion.hotplug.thisnode -s "Adding $THISNODE to /etc/hosts"
+uci batch <<EOF
+	set dhcp.$ALIAS=domain
+	set dhcp.$ALIAS.name=$ALIAS
+	set dhcp.$ALIAS.ip=$localip
+	commit dhcp
+EOF
+		/etc/init.d/dnsmasq restart
+                logger -t commotion.hotplug.thisnode -s "Adding $ALIAS to /etc/config/dhcp"
 	fi 
 	
 		
@@ -28,19 +33,19 @@ if [ "$ACTION" == "ifup" -a "$INTERFACE" == "lan" ]; then
 	
 	else 
 		logger -t commotion.hotplug.thisnode -s "No entry found. Creating UCI entry for '$ALIAS' alias"
-		uci set network.$ALIAS=interface
-		uci set network.$ALIAS.ifname=br-lan
-		uci set network.$ALIAS.proto=static
-		
-		uci set network.$ALIAS.ipaddr=$localip
+
+uci batch <<EOF
+	set network.$ALIAS=interface
+	set network.$ALIAS.ifname=br-lan
+	set network.$ALIAS.proto=static
+	set network.$ALIAS.ipaddr=$localip
+	set network.$ALIAS.netmask=255.255.0.0
+	commit network
+EOF
+
 		logger -t commotion.hotplug.thisnode -s "Setting '$ALIAS' ip address to $localip"
-		uci set network.$ALIAS.netmask=255.255.0.0
-		
-		uci commit network
-    /etc/init.d/network reload
+    		/etc/init.d/network reload
 	fi	
 		#NOTE: this method of configuring aliases is only supported on barrier breaker, not attitude adjustment
 		
-                                                                                     
-	kill -s HUP `pgrep dnsmasq`
 fi
