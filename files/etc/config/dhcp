@@ -1,5 +1,4 @@
 config dnsmasq
-        option port '53530'
         option domainneeded '1'
         option boguspriv '1'
         option filterwin2k '0'
