@@ -1,4 +1,4 @@
-﻿#!/bin/ash
+﻿#!/bin/sh
 
 source /lib/functions.sh 
 
@@ -278,7 +278,7 @@ set_config() {
     uci set network."$MESH_NAME".proto=commotion
 
     # firewall settings
-    uci add_list firewall.@zone[1].network="commotionMesh$iterator"
+    uci add_list firewall.@zone[1].network="$MESH_NAME"
 
 
     # set Commotion profile settings
