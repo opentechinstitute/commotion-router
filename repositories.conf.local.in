@@ -5,4 +5,11 @@
 ## This is the local package repository, do not remove!
 src ${COMMOTION_RELEASE} file://${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages/commotion
 src ${COMMOTION_RELEASE}-packages file://${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages/packages
+src/gz ${OPENWRT_RELEASE}_base http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/base
+src/gz ${OPENWRT_RELEASE}_luci http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/luci
+src/gz ${OPENWRT_RELEASE}_packages http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/packages
+src/gz ${OPENWRT_RELEASE}_routing http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/routing
+src/gz ${OPENWRT_RELEASE}_telephony http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/telephony
+src/gz ${OPENWRT_RELEASE}_management http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/management
+src/gz ${OPENWRT_RELEASE}_oldpackages http://downloads.openwrt.org/${OPENWRT_RELEASE}/${OPENWRT_VERSION}/${TARGET}/${SUBTARGET}/packages/oldpackages
 src imagebuilder file:packages
