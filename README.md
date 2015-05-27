@@ -121,9 +121,29 @@ Select the options you want, then click "Configure" and then "Generate." After t
 
 Create your own build configurations
 ------------------------------------
-TODO
+Specific build configurations are contained within the 'configs' directory. To create a new configuration, just create a directory with the desired configuration name. For instance, the existence of the 'configs/ubnt' directory will cause 'ubnt' to show up in the list of available configurations in cmake-gui, and 'ubnt' is what you would provide to cmake on the commandline for the CONFIG option.
 
-Installation Instructions (Ubiquiti Devices):
+A valid configuration directory contains its own CMakeLists.txt file that defines, at minimum, the variables TARGET, SUBTARGET, and PROFILE. Below is the contents of a valid 'configs/ubnt/CMakeLists.txt':
+
+```
+SET(TARGET "ar71xx" PARENT_SCOPE)
+SET(SUBTARGET "generic" PARENT_SCOPE)
+SET(PROFILE "UBNT" PARENT_SCOPE)
+```
+
+This is CMake syntax for setting the variables TARGET, SUBTARGET, and PROFILE to 'ar71xx', 'generic', and 'UBNT' respectively. 'PARENT\_SCOPE' is a necessary CMake option for making sure this information is available to the buildsystem. To learn more about what TARGET, SUBTARGET, and PROFILE mean, and how to figure out which ones to pick, see the [OpenWRT ImageBuilder documentation.](http://wiki.openwrt.org/doc/howto/obtain.firmware.generate)
+
+Additionally, you may define a PACKAGES variable to add additional packages to this particular configuration. If you are adding more than one, it must be provided as a semicolon-delmited list. For instance, to add the packages 'foo' and 'bar':
+
+```
+SET(PACKAGES "foo;bar" PARENT_SCOPE)
+```
+
+You may remove packages instead by prepending the package name with a minus sign.
+
+Optionally, the configuration may provide a 'files' directory as well. For example, you might have a directory 'configs/ubnt/files' which contains a file 'configs/ubnt/files/etc/hosts'. That file would be copied to '/etc/hosts' in the built image; any file or directory is copied directly into the root filesystem of the router image as the last step. This is useful for providing custom configuration files, and any file in here overwrites any equivalent default configuration files provided by the Commotion buildsystem or any packages.
+
+Installation Instructions (Ubiquiti Devices): 
 ---------------------------------------------
 
 http://commotionwireless.net/docs/cck/installing-configuring/install-ubiquiti-router
