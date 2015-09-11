@@ -118,7 +118,9 @@ function(packagebuild)
       PATCH_COMMAND cp "${PB_FEEDS_CONF}" 
         "${CMAKE_CURRENT_BINARY_DIR}/src/package_builder/feeds.conf"
       UPDATE_COMMAND LC_ALL=C ./scripts/feeds update -a
-      CONFIGURE_COMMAND ./scripts/feeds install ${PB_PACKAGES}
+      CONFIGURE_COMMAND ./scripts/feeds uninstall ${PB_PACKAGES}
+        COMMAND ./scripts/feeds install -p commotion ${PB_PACKAGES}
+        COMMAND ${PROJECT_SOURCE_DIR}/clean-feed.sh ./feeds/commotion/packages 
       BUILD_IN_SOURCE 1
       BUILD_COMMAND make ${BUILD_TARGETS} ${JOBS} ${VERBOSE} 
       INSTALL_COMMAND cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/package_builder/bin/${TARGET}/packages 
@@ -135,9 +137,11 @@ function(packagebuild)
       INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages/"
       PATCH_COMMAND ""
       UPDATE_COMMAND LC_ALL=C ./scripts/feeds update -a
-      CONFIGURE_COMMAND ./scripts/feeds install ${PB_PACKAGES}
+      CONFIGURE_COMMAND ./scripts/feeds uninstall ${PB_PACKAGES}
+        COMMAND ./scripts/feeds install -p commotion ${PB_PACKAGES}
+        COMMAND ${PROJECT_SOURCE_DIR}/clean-feed.sh ./feeds/commotion/packages 
       BUILD_IN_SOURCE 1
-      BUILD_COMMAND make ${BUILD_TARGETS} ${JOBS} ${VERBOSE}
+      BUILD_COMMAND make ${BUILD_TARGETS} ${JOBS} ${VERBOSE} 
       INSTALL_COMMAND cp -rf ${CMAKE_CURRENT_BINARY_DIR}/src/package_builder/bin/${TARGET}/packages 
         ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/
         COMMAND ${PROJECT_SOURCE_DIR}/ipkg-multi-index.sh  
