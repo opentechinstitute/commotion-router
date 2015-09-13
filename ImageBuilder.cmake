@@ -126,6 +126,16 @@ function(imagebuild)
       INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f 
         -exec mv -f --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  
         {} \$<SEMICOLON>
+        COMMAND tar -cf ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
+          -C .. image_builder/
+        COMMAND ln -s ${IB_FILES} ./files
+        COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages -type f
+          -name *.ipk -exec ln -s {} ./dl \$<SEMICOLON>
+        COMMAND tar -rhf ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
+          -C .. image_builder/files
+        COMMAND tar -rhf ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
+          -C .. image_builder/dl
+        COMMAND bzip2 ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
     )
   else()
     ExternalProject_Add(image_builder
@@ -143,6 +153,16 @@ function(imagebuild)
       INSTALL_COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/src/image_builder/bin/${TARGET} -type f 
         -exec mv -f --target-directory ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/  
         {} \$<SEMICOLON>
+        COMMAND tar -cf ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
+          -C .. image_builder/
+        COMMAND ln -s ${IB_FILES} ./files
+        COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages -type f
+          -name *.ipk -exec ln -s {} ./dl \$<SEMICOLON>
+        COMMAND tar -rhf ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
+          -C .. image_builder/files
+        COMMAND tar -rhf ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
+          -C .. image_builder/dl
+        COMMAND bzip2 ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
     )
   endif()
 endfunction()  
