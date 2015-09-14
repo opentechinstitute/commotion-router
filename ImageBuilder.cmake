@@ -129,7 +129,7 @@ function(imagebuild)
         COMMAND tar -cf ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
           -C .. image_builder/
         COMMAND ln -s ${IB_FILES} ./files
-        COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages -type f
+        COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET} -type f
           -name *.ipk -exec ln -s {} ./dl \$<SEMICOLON>
         COMMAND tar -rhf ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
           -C .. image_builder/files
@@ -156,7 +156,7 @@ function(imagebuild)
         COMMAND tar -cf ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
           -C .. image_builder/
         COMMAND ln -s ${IB_FILES} ./files
-        COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/packages -type f
+        COMMAND "find" ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET} -type f
           -name *.ipk -exec ln -s {} ./dl \$<SEMICOLON>
         COMMAND tar -rhf ${CMAKE_CURRENT_BINARY_DIR}/bin/${TARGET}/${SUBTARGET}/image_builder.tar 
           -C .. image_builder/files
