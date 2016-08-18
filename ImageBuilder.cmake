@@ -25,7 +25,7 @@ cmake_minimum_required(VERSION 2.8)
 include(CMakeParseArguments)
 
 #Set download URL
-set(OPENWRT_URL "http://downloads.openwrt.org/") 
+set(OPENWRT_URL "https://downloads.openwrt.org/") 
 
 #Main function for downloading and running the OpenWRT Imagebuilder
 function(imagebuild)
@@ -61,7 +61,7 @@ function(imagebuild)
 
   #They changed the host architecture for ImageBuilder after 12.09
   if("${IB_VERSION}" VERSION_GREATER 12.09)
-    set(FILENAME "OpenWrt-ImageBuilder-${IB_TARGET}_${IB_SUBTARGET}-for-linux-x86_64.tar.bz2") 
+    set(FILENAME "OpenWrt-ImageBuilder-${IB_VERSION}-${IB_TARGET}-${IB_SUBTARGET}.Linux-x86_64.tar.bz2") 
   else()
     set(FILENAME "OpenWrt-ImageBuilder-${IB_TARGET}_${IB_SUBTARGET}-for-linux-i486.tar.bz2") 
   endif()

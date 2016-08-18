@@ -25,7 +25,7 @@ cmake_minimum_required(VERSION 2.8)
 include(CMakeParseArguments)
 
 #Set download URL
-set(OPENWRT_URL "http://downloads.openwrt.org/") 
+set(OPENWRT_URL "https://downloads.openwrt.org/") 
 
 #Main function for downloading and running the OpenWRT Imagebuilder
 function(packagebuild)
@@ -62,7 +62,7 @@ function(packagebuild)
   endif()
 
   #They changed the host architecture for the SDK after 12.09
-  set(FILENAME "OpenWrt-SDK-${PB_TARGET}-for-linux-x86_64-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2") 
+  set(FILENAME "OpenWrt-SDK-${PB_VERSION}-${PB_TARGET}-${PB_SUBTARGET}_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2") 
 
   #Download and grab md5sums
   if(NOT PB_SKIP_MD5)
